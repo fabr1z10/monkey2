@@ -14,7 +14,7 @@ find_package(yaml-cpp REQUIRED)
 find_package(Python COMPONENTS Interpreter Development)
 add_subdirectory(pybind11)
 
-file(GLOB MONKEY_SOURCE src/*.cpp src/primitives/*.cpp)
+file(GLOB MONKEY_SOURCE src/*.cpp src/primitives/*.cpp src/components/*.cpp)
 
 pybind11_add_module(monkey2 ${MONKEY_SOURCE})
 

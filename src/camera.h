@@ -14,6 +14,7 @@ public:
 	~Camera() =default;
 	void setPosition(glm::vec3 eye, glm::vec3 direction, glm::vec3 up = glm::vec3(0, 1, 0));
 	void move(glm::vec3);
+	void setFwd(glm::vec3);
 	//void setBounds(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax);
 
 	const glm::mat4& getViewMatrix() const;
@@ -21,6 +22,9 @@ public:
 
 	glm::vec4 getViewport() const;
 	glm::vec2 getPosition() const;
+
+	glm::vec3 getFwd() const;
+
 protected:
 	glm::vec3 _fwd;
 	glm::vec3 _up;

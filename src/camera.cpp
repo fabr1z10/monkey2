@@ -27,6 +27,14 @@ void Camera::setPosition(glm::vec3 eye, glm::vec3 dir, glm::vec3 up) {
 	_viewMatrix = glm::lookAt(_eye, _eye + dir, up);
 }
 
+void Camera::setFwd(glm::vec3 dir) {
+    _fwd = dir;
+    _viewMatrix = glm::lookAt(_eye, _eye+_fwd, _up);
+}
+
+glm::vec3 Camera::getFwd() const {
+    return _fwd;
+}
 
 
 

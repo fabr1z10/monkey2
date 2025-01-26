@@ -6,7 +6,9 @@
 #include "camera.h"
 #include "primitives/prim.h"
 #include "linemodel.h"
-
+#include "model.h"
+#include "components/keyboard.h"
+#include "components/camcontrol3d.h"
 
 namespace py = pybind11;
 
@@ -37,7 +39,17 @@ PYBIND11_MODULE(monkey2, m) {
 	py::class_<Node, std::shared_ptr<Node>>(m, "Node")
 		.def(py::init<>())
 		.def("setModel", &Node::setModel)
-		.def("add", &Node::add);
+		.def("add", &Node::add)
+		.def("addComponent", &Node::addComponent);
+
+	py::class_<Component, std::shared_ptr<Component>>(m, "C");
+
+	py::class_<Keyboard, Component, std::shared_ptr<Keyboard>>(m, "Keyboard")
+	    .def(py::init<>())
+	    .def("add", &Keyboard::addFunction);
+
+	py::class_<CamControl3D, Component, std::shared_ptr<CamControl3D>>(m, "CamControl3D")
+        .def(py::init<int, float, float>());
 
 	py::class_<OrthoCamera, Camera, std::shared_ptr<OrthoCamera>>(m, "CamOrtho")
 		.def(py::init<float, float, glm::vec4>(), py::arg("width"), py::arg("height"), py::arg("viewport") = glm::vec4(0.f));
@@ -52,9 +64,17 @@ PYBIND11_MODULE(monkey2, m) {
 	py::class_<Batch<primitives::Line>, IBatch, std::shared_ptr<Batch<primitives::Line>> >(m, "LineBatch")
 		.def(py::init<int, int>(), py::arg("size"), py::arg("cam"));
 
-	// base mode l- not instantiable
+    py::class_<Batch<primitives::Triangle>, IBatch, std::shared_ptr<Batch<primitives::Triangle>> >(m, "TriangleBatch")
+        .def(py::init<int, int>(), py::arg("size"), py::arg("cam"));
+
+    // base mode l- not instantiable
 	py::class_<IModel, std::shared_ptr<IModel>>(m, "Y2");
 
-	py::class_<LineModel, IModel, std::shared_ptr<LineModel>>(m, "LineModel")
+	py::class_<Model<primitives::Line>, IModel, std::shared_ptr<Model<primitives::Line>>>(m, "LineModel")
 		.def(py::init<const std::vector<float>&, glm::vec4>());
+
+    py::class_<Model<primitives::Triangle>, IModel, std::shared_ptr<Model<primitives::Triangle>>>(m, "TriangleModel")
+        .def(py::init<const std::vector<float>&, glm::vec4>());
+
+
 }

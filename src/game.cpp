@@ -217,12 +217,12 @@ void Game::WindowResizeCallback(GLFWwindow* win, int width, int height) {
 }
 
 void Game::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-//	for (auto& s : Game::instance().m_keyboardListeners) {
-//		auto retval = s->keyCallback(window, key, scancode, action, mods);
-//		if (retval == 1) {
-//			break;
-//		}
-//	}
+	for (auto& s : Game::instance()._keyboardListeners) {
+		auto retval = s->keyCallback(window, key, scancode, action, mods);
+		if (retval == 1) {
+			break;
+		}
+	}
 }
 
 void Game::mouse_button_callback(GLFWwindow* win, int button, int action, int mods) {
@@ -243,4 +243,12 @@ Shader * Game::getShader(int shaderId) {
 
 Room* Game::getRoom() {
 	return _room.get();
+}
+
+void Game::registerToKeyboardEvent(KeyboardListener * listener) {
+    _keyboardListeners.insert(listener);
+}
+
+void Game::unregisterToKeyboardEvent(KeyboardListener * listener) {
+    _keyboardListeners.erase(listener);
 }

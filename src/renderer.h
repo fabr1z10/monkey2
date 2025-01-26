@@ -38,7 +38,7 @@ public:
 		for (size_t i = 0; i < _nPrimitives; ++i) {
 			_primIds.push_back(_batch->getPrimitiveId());
 		}
-		_vertices = new typename MODEL::PRIMITIVE::Vertex*[_nPrimitives];
+		_vertices = new typename MODEL::Primitive::Vertex*[_nPrimitives];
 		for (const auto& i : _primIds) {
 			_vertices[i] = _batch->getPrimitive(_primIds[i]);
 		}

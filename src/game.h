@@ -1,7 +1,11 @@
+#pragma once
+
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "glm/glm.hpp"
 #include "room.h"
+#include "keylistener.h"
 #include <pybind11/pybind11.h>
 
 class Game {
@@ -29,6 +33,9 @@ public:
 	static void cursor_pos_callback(GLFWwindow*, double xpos, double ypos);
 	static void mouse_button_callback(GLFWwindow*, int, int, int);
 
+	void registerToKeyboardEvent(KeyboardListener*);
+    void unregisterToKeyboardEvent(KeyboardListener*);
+
 	glm::vec4 getWindowViewport() const;
 
 	Shader* getShader(int shaderId);
@@ -52,6 +59,7 @@ private:
 	std::shared_ptr<Room> _room;
 	bool _run;
 	std::unique_ptr<ShaderStore> _shaderStore;
+    std::unordered_set<KeyboardListener*> _keyboardListeners;
 
 };
 

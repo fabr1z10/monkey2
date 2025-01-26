@@ -3,7 +3,9 @@
 #include <vector>
 #include <memory>
 #include "glm/glm.hpp"
-#include "model.h"
+#include "component.h"
+
+class IModel;
 
 class IRenderer;
 
@@ -18,15 +20,19 @@ public:
 	void update(double);
 
 	const std::vector<std::shared_ptr<Node>>& getChildren() const;
+
 	glm::mat4 getWorldMatrix() const;
 
 	void setModel(std::shared_ptr<IModel>, int batchId);
+
+	void addComponent(std::shared_ptr<Component>);
 private:
 	std::vector<std::shared_ptr<Node>> _children;
 	glm::mat4 _modelMatrix;
 	glm::mat4 _worldMatrix;
 	std::shared_ptr<IRenderer> _renderer;
 	std::shared_ptr<IModel> _model;
+	std::vector<std::shared_ptr<Component>> _components;
 };
 
 inline const std::vector<std::shared_ptr<Node>> & Node::getChildren() const {
