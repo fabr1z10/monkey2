@@ -15,3 +15,11 @@ const std::string color_vs =
 const std::string color_fs =
 #include "color.fs"
 ;
+
+const std::string color_normal_vs =
+#include "colorlight.vs"
+;
+
+const std::string color_normal_fs =
+#include "colorlight.fs"
+;

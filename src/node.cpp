@@ -3,7 +3,7 @@
 #include "model.h"
 
 
-Node::Node() : _renderer(nullptr) {
+Node::Node() : _renderer(nullptr), _parent(nullptr) {
 	_modelMatrix = glm::mat4(1.f);
 	_worldMatrix = glm::mat4(1.f);
 }
@@ -18,7 +18,21 @@ void Node::start() {
 
 }
 
+void Node::setTransform(glm::mat4 m) {
+    _modelMatrix = m;
+    notifyMove();
+}
 
+void Node::notifyMove() {
+    if (_parent != nullptr) {
+        _worldMatrix = _parent->getWorldMatrix() * _modelMatrix;
+    } else {
+        _worldMatrix = _modelMatrix;
+    }
+    for (auto& child : _children) {
+        child->notifyMove();
+    }
+}
 
 void Node::update(double dt) {
     for (auto& c : _components) {
@@ -43,6 +57,7 @@ void Node::setModel(std::shared_ptr<IModel> model, int batchId) {
 
 void Node::add(std::shared_ptr<Node> node) {
 	_children.push_back(node);
+	node->_parent = this;
 }
 
 void Node::addComponent(std::shared_ptr<Component> c) {

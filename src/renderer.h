@@ -50,7 +50,7 @@ public:
 		for (size_t i = 0; i < _model->getPrimitiveCount(); ++i) {
 			_model->get(i).transform(_vertices[i], worldTransform);
 		}
-	}
+    	}
 protected:
 	int _batchId;
 	Batch<Primitive>* _batch;

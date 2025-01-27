@@ -3,6 +3,7 @@
 #include <list>
 #include "shader.h"
 #include "camera.h"
+#include "light.h"
 
 class IBatch {
 public:
@@ -12,6 +13,7 @@ public:
 
 	int getShaderType() const;
 
+	void addLight(std::shared_ptr<Light> light);
 	virtual void configure() = 0;
 	virtual void draw() = 0;
 
@@ -28,6 +30,7 @@ protected:
 	std::list<int> _deallocated;		// list of element id to recycle
 	int _shaderType;
 	Camera* _cam;
+	std::vector<std::shared_ptr<Light>> _lights;
 };
 
 inline int IBatch::getShaderType() const {

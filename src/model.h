@@ -23,11 +23,11 @@ class Model : public IModel {
 public:
     using Primitive = P;
 
-    Model(const std::vector<float>& data, glm::vec4 color) {
+    Model(const std::vector<float>& data) {
         M_Assert(data.size() % P::_floatsPerPrimitive == 0, "LineModel requires a vector whose size is multiple of 6.");
 
         for (size_t i = 0; i < data.size(); i += P::_floatsPerPrimitive) {
-            _prims.push_back(P(&data[i], color));
+            _prims.push_back(P(&data[i]));
         }
     }
 

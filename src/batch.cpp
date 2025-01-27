@@ -23,6 +23,10 @@ int IBatch::getPrimitiveId() {
 	return next;
 }
 
+void IBatch::addLight(std::shared_ptr<Light> light) {
+    _lights.push_back(light);
+}
+
 
 void IBatch::release(int id) {
 	_deallocated.push_back(id);
@@ -35,4 +39,8 @@ void IBatch::setupUniforms(Shader* s) {
 	int jointMatrixLoc = glGetUniformLocation(s->getProgId(), "pv_mat");
 	auto pvMatrix =  _cam->getProjectionMatrix() * _cam->getViewMatrix();
 	glUniformMatrix4fv(jointMatrixLoc, 1, GL_FALSE, glm::value_ptr(pvMatrix[0]));
+
+	for (auto& light : _lights) {
+	    light->setup(s);
+	}
 }

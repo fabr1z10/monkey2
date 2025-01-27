@@ -26,13 +26,17 @@ public:
 	void setModel(std::shared_ptr<IModel>, int batchId);
 
 	void addComponent(std::shared_ptr<Component>);
+
+	void setTransform(glm::mat4 t);
 private:
+    void notifyMove();
 	std::vector<std::shared_ptr<Node>> _children;
 	glm::mat4 _modelMatrix;
 	glm::mat4 _worldMatrix;
 	std::shared_ptr<IRenderer> _renderer;
 	std::shared_ptr<IModel> _model;
 	std::vector<std::shared_ptr<Component>> _components;
+	Node* _parent;
 };
 
 inline const std::vector<std::shared_ptr<Node>> & Node::getChildren() const {

@@ -127,6 +127,8 @@ void Shader::setFloat(const std::string &name, float value) const {
 
 ShaderStore::ShaderStore() {
 	_shaderBuilders[1] = [&] () { return std::make_shared<Shader>(1, color_vs, color_fs, "3f4f"); };
+    _shaderBuilders[2] = [&] () { return std::make_shared<Shader>(2, color_normal_vs, color_normal_fs, "3f4f3f"); };
+
 }
 
 Shader * ShaderStore::getShader(int id) {

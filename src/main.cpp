@@ -9,6 +9,7 @@
 #include "model.h"
 #include "components/keyboard.h"
 #include "components/camcontrol3d.h"
+#include "directionallight.h"
 
 namespace py = pybind11;
 
@@ -19,6 +20,8 @@ void test() {
 PYBIND11_MODULE(monkey2, m) {
 
 	m.def("test", &test);
+
+    m.def("fromHex", &fromHex, py::arg("color"));
 
 	m.def("game", &game, py::return_value_policy::reference, "Gets the engine");
 
@@ -39,6 +42,7 @@ PYBIND11_MODULE(monkey2, m) {
 	py::class_<Node, std::shared_ptr<Node>>(m, "Node")
 		.def(py::init<>())
 		.def("setModel", &Node::setModel)
+		.def("setTransform", &Node::setTransform)
 		.def("add", &Node::add)
 		.def("addComponent", &Node::addComponent);
 
@@ -59,7 +63,8 @@ PYBIND11_MODULE(monkey2, m) {
 
 	// batches
 	// base class - not instantiable
-	py::class_<IBatch, std::shared_ptr<IBatch>>(m, "Y");
+	py::class_<IBatch, std::shared_ptr<IBatch>>(m, "Y")
+	    .def("addLight", &IBatch::addLight);
 
 	py::class_<Batch<primitives::Line>, IBatch, std::shared_ptr<Batch<primitives::Line>> >(m, "LineBatch")
 		.def(py::init<int, int>(), py::arg("size"), py::arg("cam"));
@@ -67,14 +72,25 @@ PYBIND11_MODULE(monkey2, m) {
     py::class_<Batch<primitives::Triangle>, IBatch, std::shared_ptr<Batch<primitives::Triangle>> >(m, "TriangleBatch")
         .def(py::init<int, int>(), py::arg("size"), py::arg("cam"));
 
+    py::class_<Batch<primitives::TriangleNormal>, IBatch, std::shared_ptr<Batch<primitives::TriangleNormal>> >(m, "TriangleNormalBatch")
+        .def(py::init<int, int>(), py::arg("size"), py::arg("cam"));
+
     // base mode l- not instantiable
 	py::class_<IModel, std::shared_ptr<IModel>>(m, "Y2");
 
 	py::class_<Model<primitives::Line>, IModel, std::shared_ptr<Model<primitives::Line>>>(m, "LineModel")
-		.def(py::init<const std::vector<float>&, glm::vec4>());
+		.def(py::init<const std::vector<float>&>());
 
     py::class_<Model<primitives::Triangle>, IModel, std::shared_ptr<Model<primitives::Triangle>>>(m, "TriangleModel")
-        .def(py::init<const std::vector<float>&, glm::vec4>());
+        .def(py::init<const std::vector<float>&>());
 
+    py::class_<Model<primitives::TriangleNormal>, IModel, std::shared_ptr<Model<primitives::TriangleNormal>>>(m, "TriangleNormalModel")
+            .def(py::init<const std::vector<float>&>());
+
+    // base light - not instantiable
+    py::class_<Light, std::shared_ptr<Light>>(m, "__Light");
+
+    py::class_<DirectionalLight, Light, std::shared_ptr<DirectionalLight>>(m, "DirectionalLight")
+        .def(py::init<glm::vec3, glm::vec3, float>(), py::arg("direction"), py::arg("color"), py::arg("ambient"));
 
 }
