@@ -172,6 +172,10 @@ void Room::start() {
 		b->start();
 	}
 
+
+    for (size_t i = 0; i< _refBatch.size(); ++i) {
+        _refBatch[i]->configure();
+    }
 	std::list<Node*> li{_root.get()};
 
 	while (!li.empty()) {
@@ -187,7 +191,5 @@ void Room::start() {
 
 
 
-	for (size_t i = 0; i< _refBatch.size(); ++i) {
-		_refBatch[i]->configure();
-	}
+
 }

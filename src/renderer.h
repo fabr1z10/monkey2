@@ -39,8 +39,9 @@ public:
 			_primIds.push_back(_batch->getPrimitiveId());
 		}
 		_vertices = new typename MODEL::Primitive::Vertex*[_nPrimitives];
+		int j = 0;
 		for (const auto& i : _primIds) {
-			_vertices[i] = _batch->getPrimitive(_primIds[i]);
+			_vertices[j++] = _batch->getPrimitive(i);
 		}
 
 	}
@@ -50,7 +51,7 @@ public:
 		for (size_t i = 0; i < _model->getPrimitiveCount(); ++i) {
 			_model->get(i).transform(_vertices[i], worldTransform);
 		}
-    	}
+	}
 protected:
 	int _batchId;
 	Batch<Primitive>* _batch;

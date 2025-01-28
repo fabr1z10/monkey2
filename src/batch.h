@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <iostream>
 #include "shader.h"
 #include "camera.h"
 #include "light.h"
@@ -43,7 +44,7 @@ public:
 
 	using Vertex = typename PRIMITIVE::Vertex;
 
-	Batch(int size, int cam) : IBatch(size, cam) {
+	Batch(int size, int cam) : IBatch(size, cam), _vao(0), _vbo(0), _ebo(0) {
 		_vertexSize = sizeof(Vertex);
 		_verticesPerPrimitive = PRIMITIVE::_nVertices;
 		_indicesPerElement = _verticesPerPrimitive;
