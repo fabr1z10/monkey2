@@ -33,6 +33,7 @@ PYBIND11_MODULE(monkey2, m) {
 		.def(py::init<>())
 		.def("addCamera", &Room::addCamera)
 		.def("root", &Room::getRoot, py::return_value_policy::reference)
+		.def("setClearColor", &Room::setClearColor)
 		.def("addBatch", &Room::addBatch);
 
 	py::class_<Camera, std::shared_ptr<Camera>>(m, "camera")

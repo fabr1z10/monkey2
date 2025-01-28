@@ -5,7 +5,7 @@
 #include "glsl/glsl.h"
 #include "game.h"
 
-Room::Room() {
+Room::Room() : _clearColor(glm::vec3(0.f)) {
 	_root = std::make_shared<Node>();
 
 	_blitShader = std::make_shared<Shader>(0, blit_vs, blit_fs, "2f2f");
@@ -90,7 +90,7 @@ void Room::draw() {
 	// render on the framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, _fb);
 	glEnable(GL_DEPTH_TEST);
-	//glClearColor(0.f, 0.4f, 0.f, 1.f);
+	glClearColor(_clearColor.r, _clearColor.g, _clearColor.b, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	for (size_t i = 0; i< _shaders.size(); ++i) {
@@ -192,4 +192,9 @@ void Room::start() {
 
 
 
+}
+
+
+void Room::setClearColor(glm::vec3 color) {
+    _clearColor = color;
 }

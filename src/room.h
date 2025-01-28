@@ -27,6 +27,8 @@ public:
 	void start();
 
 	Camera* getCamera(int camId);
+
+	void setClearColor(glm::vec3);
 private:
 	std::shared_ptr<Node> _root;
 	std::vector<Shader*> _shaders;
@@ -37,4 +39,5 @@ private:
 	// frambuffer stuff
 	GLuint _fb, _color, _depth;
 	unsigned int _quadVAO, _quadVBO;
+	glm::vec3 _clearColor;
 };

@@ -29,6 +29,9 @@ void Node::notifyMove() {
     } else {
         _worldMatrix = _modelMatrix;
     }
+    if (_renderer) {
+        _renderer->update();
+    }
     for (auto& child : _children) {
         child->notifyMove();
     }
@@ -39,9 +42,9 @@ void Node::update(double dt) {
         c->update(dt);
     }
 	// node update is not recursive!
-	if (_renderer != nullptr) {
-		_renderer->update();
-	}
+//	if (_renderer != nullptr) {
+//		_renderer->update();
+//	}
 }
 
 glm::mat4 Node::getWorldMatrix() const {
@@ -53,11 +56,13 @@ void Node::setModel(std::shared_ptr<IModel> model, int batchId) {
 	_renderer = model->getRenderer(batchId);
 	_renderer->setNode(this);
 
+
 }
 
 void Node::add(std::shared_ptr<Node> node) {
 	_children.push_back(node);
 	node->_parent = this;
+	node->notifyMove();
 }
 
 void Node::addComponent(std::shared_ptr<Component> c) {

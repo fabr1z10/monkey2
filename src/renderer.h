@@ -8,12 +8,15 @@
 
 class IRenderer {
 public:
+    IRenderer() : _node(nullptr), _started(false) {}
 	void setNode(Node*);
 	virtual void update() = 0;
 	virtual void start() = 0;
 protected:
 	Node* _node;
+    bool _started;
 };
+
 
 inline void IRenderer::setNode(Node* node) {
 	_node= node;
@@ -43,14 +46,18 @@ public:
 		for (const auto& i : _primIds) {
 			_vertices[j++] = _batch->getPrimitive(i);
 		}
-
+		_started = true;
+        update();
 	}
 
 	void update() {
-		auto worldTransform = _node->getWorldMatrix();
-		for (size_t i = 0; i < _model->getPrimitiveCount(); ++i) {
-			_model->get(i).transform(_vertices[i], worldTransform);
-		}
+        if (!_started) {
+            return;
+        }
+	    auto worldTransform = _node->getWorldMatrix();
+        for (size_t i = 0; i < _model->getPrimitiveCount(); ++i) {
+            _model->get(i).transform(_vertices[i], worldTransform);
+        }
 	}
 protected:
 	int _batchId;
@@ -59,6 +66,7 @@ protected:
 	std::vector<int> _primIds;
 	Vertex** _vertices;
 	MODEL* _model;
+
 };
 
 

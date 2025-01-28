@@ -37,6 +37,7 @@ private:
 	std::shared_ptr<IModel> _model;
 	std::vector<std::shared_ptr<Component>> _components;
 	Node* _parent;
+
 };
 
 inline const std::vector<std::shared_ptr<Node>> & Node::getChildren() const {
