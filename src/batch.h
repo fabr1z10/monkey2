@@ -10,7 +10,7 @@ class IBatch {
 public:
 	IBatch(int size, int camId);
 
-	void setupUniforms(Shader* s);
+	virtual void setupUniforms(Shader* s);
 
 	int getShaderType() const;
 
@@ -47,7 +47,7 @@ public:
 	Batch(int size, int cam) : IBatch(size, cam), _vao(0), _vbo(0), _ebo(0) {
 		_vertexSize = sizeof(Vertex);
 		_verticesPerPrimitive = PRIMITIVE::_nVertices;
-		_indicesPerElement = _verticesPerPrimitive;
+		_indicesPerElement = PRIMITIVE::_nIndices;
 		_data.resize(_size * PRIMITIVE::_nVertices);
 		_shaderType = PRIMITIVE::_shaderType;
 		_prim = PRIMITIVE::_glPrim;
@@ -78,9 +78,10 @@ public:
 		std::vector<unsigned> indices;
 
 		for (size_t i = 0; i < _size; ++i) {
-			for (size_t j = 0; j < _verticesPerPrimitive; ++j) {
-				indices.push_back(_verticesPerPrimitive * i + j);
-			}
+		    int offset = i * _indicesPerElement;
+		    for (size_t j = 0; j < _indicesPerElement; j++) {
+		        indices.push_back(offset + PRIMITIVE::_indices[j]);
+		    }
 		}
 
 		glGenBuffers(1, &_ebo);
@@ -144,3 +145,5 @@ protected:
 
 
 };
+
+

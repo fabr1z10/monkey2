@@ -10,6 +10,8 @@
 #include "components/keyboard.h"
 #include "components/camcontrol3d.h"
 #include "directionallight.h"
+#include "quadbatch.h"
+#include "sprite.h"
 
 namespace py = pybind11;
 
@@ -76,6 +78,11 @@ PYBIND11_MODULE(monkey2, m) {
     py::class_<Batch<primitives::TriangleNormal>, IBatch, std::shared_ptr<Batch<primitives::TriangleNormal>> >(m, "TriangleNormalBatch")
         .def(py::init<int, int>(), py::arg("size"), py::arg("cam"));
 
+    py::class_<QuadBatch, IBatch, std::shared_ptr<QuadBatch>>(m, "QuadBatch")
+        .def(py::init<int, int, int, int, int>(), py::arg("size"), py::arg("cam"),
+             py::arg("texWidth"), py::arg("texHeight"), py::arg("maxTextures"))
+        .def("addTexture", &QuadBatch::addTexture);
+
     // base mode l- not instantiable
 	py::class_<IModel, std::shared_ptr<IModel>>(m, "Y2");
 
@@ -86,7 +93,15 @@ PYBIND11_MODULE(monkey2, m) {
         .def(py::init<const std::vector<float>&>());
 
     py::class_<Model<primitives::TriangleNormal>, IModel, std::shared_ptr<Model<primitives::TriangleNormal>>>(m, "TriangleNormalModel")
-            .def(py::init<const std::vector<float>&>());
+        .def(py::init<const std::vector<float>&>());
+
+    py::class_<Model<primitives::Quad>, IModel, std::shared_ptr<Model<primitives::Quad>>>(m, "QuadModel")
+        .def(py::init<const std::vector<float>&>());
+
+    py::class_<Sprite, Model<primitives::Quad>, std::shared_ptr<Sprite>>(m, "Sprite")
+        .def(py::init<const std::vector<float>&>())
+        .def("add", &Sprite::add)
+        .def_property("defaultAnimation", &Sprite::getDefaultAnimation, &Sprite::setDefaultAnimation);
 
     // base light - not instantiable
     py::class_<Light, std::shared_ptr<Light>>(m, "__Light");

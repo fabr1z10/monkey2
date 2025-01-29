@@ -23,3 +23,11 @@ const std::string color_normal_vs =
 const std::string color_normal_fs =
 #include "colorlight.fs"
 ;
+
+const std::string tex_vs =
+#include "tex.vs"
+;
+
+const std::string tex_fs =
+#include "tex.fs"
+;

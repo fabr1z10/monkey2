@@ -61,6 +61,17 @@ void Game::initGL() {
 	// so the dimensions we will get will be in pixels and NOT screen coordinates!
 	glfwSetFramebufferSizeCallback(window, Game::WindowResizeCallback);
 
+    const GLubyte* version = glGetString(GL_VERSION);
+    const GLubyte* renderer = glGetString(GL_RENDERER);
+    const GLubyte* vendor = glGetString(GL_VENDOR);
+
+    std::cout << "OpenGL Version: " << version << std::endl;
+    std::cout << "GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+    std::cout << "Renderer: " << renderer << std::endl;
+    std::cout << "Vendor: " << vendor << std::endl;
+    GLint maxTextureArrayLayers;
+    glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &maxTextureArrayLayers);
+    std::cout << "Max texture array layers: " << maxTextureArrayLayers << std::endl;
 	// Initialize GLEW
 	if (glewInit() != GLEW_OK) {
 		fprintf(stderr, "Failed to initialize GLEW\n");
@@ -68,7 +79,13 @@ void Game::initGL() {
 		glfwTerminate();
 		exit(1);
 	}
-
+    // Get extensions
+//    GLint numExtensions = 0;
+//    glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+//    std::cout << "#ext: " << numExtensions << "\n";
+//    for (int i = 0; i < numExtensions; i++) {
+//        std::cout << glGetStringi(GL_EXTENSIONS, i) << std::endl;  // Correct way for OpenGL 3.0+
+//    }
 	// Ensure we can capture the escape key being pressed below
 	//glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 	Game::WindowResizeCallback(window, _windowSize[0], _windowSize[1]);

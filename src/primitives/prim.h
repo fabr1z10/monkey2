@@ -19,9 +19,13 @@ namespace primitives {
 
 		static constexpr int _nVertices = 2;
 
+		static constexpr int _nIndices = 2;
+
 		static constexpr int _shaderType = 1;
 
 		static constexpr int _floatsPerPrimitive = 10;       // 3 coordinates per point + 4 color
+
+		static constexpr int _indices[2] = {0, 1};
 
 		using Vertex = VertexColor;
 
@@ -45,9 +49,13 @@ namespace primitives {
 
 	    static constexpr int _nVertices = 3;
 
+	    static constexpr int _nIndices = 3;
+
 	    static constexpr int _shaderType = 1;
 
         static constexpr int _floatsPerPrimitive = 13;
+
+        static constexpr int _indices[3] = {0, 1, 2};
 
 	    using Vertex = VertexColor;
 
@@ -70,12 +78,46 @@ namespace primitives {
 
         static constexpr int _nVertices = 3;
 
+        static constexpr int _nIndices = 3;
+
         static constexpr int _shaderType = 2;
 
         static constexpr int _floatsPerPrimitive = 13;
+
+        static constexpr int _indices[3] = {0, 1, 2};
 
         using Vertex = VertexColorNormal;
 
         void transform(VertexColorNormal*, const glm::mat4& t) const;
     };
+
+    class Quad {
+    public:
+        glm::vec4 texCoord;
+        glm::vec2 anchor;
+        glm::vec2 size;
+        int index;
+
+        Quad(const float*);
+
+        static constexpr GLenum _glPrim = GL_TRIANGLES;
+
+        static constexpr int _nVertices = 4;
+
+        static constexpr int _nIndices = 6;
+
+        static constexpr int _shaderType = 3;
+
+        // 4 texture coordinates, 2 anchor point, and texture index
+        static constexpr int _floatsPerPrimitive = 7;
+
+        static constexpr int _indices[6] = {0, 1, 2, 0, 2, 3};
+
+        using Vertex = VertexTexture;
+
+        void transform(VertexTexture*, const glm::mat4& t) const;
+
+        void clear(VertexTexture*);
+    };
+
 }

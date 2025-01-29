@@ -37,3 +37,28 @@ struct VertexColorNormal {
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (const void *) offsetof(VertexColorNormal, normal));
     }
 };
+
+struct VertexTexture {
+public:
+    glm::vec3 position;
+    glm::vec2 texCoord;
+    // Each quad (sprite) needs to know which texture to use, so we add an integer texIndex to the vertex attributes:
+    int texIndex;
+
+    static void setupVertices() {
+
+        auto stride = sizeof(VertexTexture);
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, 0);
+
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (const void *) offsetof(VertexTexture, texCoord));
+
+        glEnableVertexAttribArray(2);
+        glVertexAttribIPointer(2, 1, GL_INT, stride, (const void *) offsetof(VertexTexture, texIndex));
+
+
+
+    }
+};
