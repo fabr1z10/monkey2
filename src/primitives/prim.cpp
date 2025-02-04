@@ -26,6 +26,9 @@ TriangleNormal::TriangleNormal(const float * data) {
 
 }
 
+Quad::Quad(glm::vec4 texCoords, glm::vec2 anchor, glm::vec2 size, int texIndex)
+    : texCoord(texCoords), anchor(anchor), size(size), index(texIndex) {}
+
 Quad::Quad(const float * data) {
     this->index = static_cast<int>(data[6]);
     this->texCoord = glm::vec4(data[0], data[1], data[2], data[3]);
@@ -74,9 +77,8 @@ void TriangleNormal::transform(VertexColorNormal * v, const glm::mat4 &t) const 
 }
 
 void Quad::transform(VertexTexture * v, const glm::mat4 &t) const {
-    auto bottomLeft = glm::vec3(t * glm::vec4(anchor, 0.f, 1.f));
-    bottomLeft.x = -bottomLeft.x;
-    bottomLeft.y = -bottomLeft.y;
+    auto bottomLeft = glm::vec3(t * glm::vec4(-anchor, 0.f, 1.f));
+
     v->position = bottomLeft;
     v->texCoord = glm::vec2(texCoord[0], texCoord[1] + texCoord[3]);
     v->texIndex = index;
@@ -102,3 +104,4 @@ void Quad::clear(VertexTexture * v) {
     (v+3)->texIndex = -1;
 
 }
+

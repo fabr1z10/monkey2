@@ -60,8 +60,22 @@ class ShaderStore {
 public:
 	ShaderStore();
 	Shader* getShader(int);
+    bool hasShader(int) const;
 private:
 	std::unordered_map<int, std::shared_ptr<Shader>> _shaders;
 	std::unordered_map<int, std::function<std::shared_ptr<Shader>()>> _shaderBuilders;
 
+};
+
+inline bool ShaderStore::hasShader(int id) const {
+    return _shaders.count(id) > 0;
+}
+
+class ShaderVAO : public Shader {
+public:
+    ShaderVAO(int id, const std::string& vertexCode, const std::string& fragmentCode, const std::string& vertexFormat);
+    void use() override;
+
+private:
+    GLuint  _vao;
 };

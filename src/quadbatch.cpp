@@ -41,7 +41,7 @@ void QuadBatch::setupUniforms(Shader *s) {
     glBindTexture(GL_TEXTURE_2D_ARRAY, _textureArray);
     GLint boundTex = 0;
     glGetIntegerv(GL_TEXTURE_BINDING_2D_ARRAY, &boundTex);
-    std::cout << "Bound texture array ID: " << boundTex << " (should be " << _textureArray << ")" << std::endl;
+    //std::cout << "Bound texture array ID: " << boundTex << " (should be " << _textureArray << ")" << std::endl;
     // Set the uniform to use texture unit 0 (where we bound the texture array)
     GLuint texLocation = glGetUniformLocation(s->getProgId(), "textureArray");
     glUniform1i(texLocation, 0);

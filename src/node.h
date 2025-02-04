@@ -28,6 +28,8 @@ public:
 	void addComponent(std::shared_ptr<Component>);
 
 	void setTransform(glm::mat4 t);
+
+    IRenderer* getRenderer();
 private:
     void notifyMove();
 	std::vector<std::shared_ptr<Node>> _children;
@@ -42,4 +44,8 @@ private:
 
 inline const std::vector<std::shared_ptr<Node>> & Node::getChildren() const {
 	return _children;
+}
+
+inline IRenderer *Node::getRenderer() {
+    return _renderer.get();
 }

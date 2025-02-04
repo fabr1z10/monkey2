@@ -78,7 +78,7 @@ public:
 		std::vector<unsigned> indices;
 
 		for (size_t i = 0; i < _size; ++i) {
-		    int offset = i * _indicesPerElement;
+		    int offset = i * _verticesPerPrimitive;
 		    for (size_t j = 0; j < _indicesPerElement; j++) {
 		        indices.push_back(offset + PRIMITIVE::_indices[j]);
 		    }

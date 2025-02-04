@@ -91,12 +91,17 @@ namespace primitives {
         void transform(VertexColorNormal*, const glm::mat4& t) const;
     };
 
+
+
+
     class Quad {
     public:
         glm::vec4 texCoord;
         glm::vec2 anchor;
         glm::vec2 size;
         int index;
+
+        Quad(glm::vec4 texCoords, glm::vec2 anchor, glm::vec2 size, int);
 
         Quad(const float*);
 

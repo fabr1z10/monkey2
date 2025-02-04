@@ -23,6 +23,8 @@ class Model : public IModel {
 public:
     using Primitive = P;
 
+    Model() : IModel() {}
+
     Model(const std::vector<float>& data) {
         M_Assert(data.size() % P::_floatsPerPrimitive == 0, "LineModel requires a vector whose size is multiple of 6.");
 
@@ -43,7 +45,7 @@ public:
         return _prims.size();
     }
 
-private:
+protected:
     std::vector<P> _prims;
 
 

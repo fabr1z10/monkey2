@@ -61,4 +61,15 @@ public:
 
 
     }
+
+
+
+};
+
+struct VertexSkeletal {
+public:
+    glm::vec3 position;
+    glm::vec2 texture;
+    // Each quad (sprite) needs to know which texture to use, so we add an integer texIndex to the vertex attributes:
+    glm::vec3 weights;
 };

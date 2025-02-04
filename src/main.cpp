@@ -12,6 +12,9 @@
 #include "directionallight.h"
 #include "quadbatch.h"
 #include "sprite.h"
+#include "tilemap.h"
+#include "skeletal/mesh.h"
+#include "skeletal/skeletalmodel.h"
 
 namespace py = pybind11;
 
@@ -29,16 +32,19 @@ PYBIND11_MODULE(monkey2, m) {
 
 	py::class_<Game>(m, "Game")
 		.def("start", &Game::start)
-		.def("run", &Game::run);
+		.def("run", &Game::run)
+        .def("makeCurrent", &Game::makeCurrent);
 
-	py::class_<Room, std::shared_ptr<Room>>(m, "Room")
+
+    py::class_<Room, std::shared_ptr<Room>>(m, "Room")
 		.def(py::init<>())
 		.def("addCamera", &Room::addCamera)
 		.def("root", &Room::getRoot, py::return_value_policy::reference)
 		.def("setClearColor", &Room::setClearColor)
 		.def("addBatch", &Room::addBatch);
 
-	py::class_<Camera, std::shared_ptr<Camera>>(m, "camera")
+
+    py::class_<Camera, std::shared_ptr<Camera>>(m, "camera")
 		.def("setPosition", &Camera::setPosition)
 		.def("move", &Camera::move);
 
@@ -103,10 +109,32 @@ PYBIND11_MODULE(monkey2, m) {
         .def("add", &Sprite::add)
         .def_property("defaultAnimation", &Sprite::getDefaultAnimation, &Sprite::setDefaultAnimation);
 
+    py::class_<TileMap, Model<primitives::Quad>, std::shared_ptr<TileMap>>(m, "TileMap")
+        .def(py::init<int, int, glm::ivec2>())
+        .def("addFrame", &TileMap::addFrame);
+
     // base light - not instantiable
     py::class_<Light, std::shared_ptr<Light>>(m, "__Light");
 
     py::class_<DirectionalLight, Light, std::shared_ptr<DirectionalLight>>(m, "DirectionalLight")
         .def(py::init<glm::vec3, glm::vec3, float>(), py::arg("direction"), py::arg("color"), py::arg("ambient"));
 
+    // ------------ skeletal
+    py::class_<Mesh, std::shared_ptr<Mesh>>(m, "Mesh")
+        .def(py::init<const std::vector<float>&, const std::vector<unsigned>&, const std::string&>());
+
+    py::class_<SkeletalModel, IModel, std::shared_ptr<SkeletalModel>>(m, "SkeletalModel")
+        .def(py::init<>())
+        .def("addJoint", &SkeletalModel::addJoint)
+        .def("setMesh", &SkeletalModel::setMesh)
+        .def("setDefaultAnimation", &SkeletalModel::setDefaultAnimation)
+        .def("addAnimation", &SkeletalModel::addAnimation);
+
+    py::class_<KeyFrame, std::shared_ptr<KeyFrame>>(m, "KeyFrame")
+        .def(py::init<float>())
+        .def("addJoint", &KeyFrame::addJointInfo);
+
+    py::class_<SkeletalAnimation, std::shared_ptr<SkeletalAnimation>>(m, "SkeletalAnimation")
+        .def(py::init<>())
+        .def("addKeyFrame", &SkeletalAnimation::addKeyFrame);
 }

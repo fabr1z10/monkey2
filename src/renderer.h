@@ -10,11 +10,16 @@ class IRenderer {
 public:
     IRenderer() : _node(nullptr), _started(false) {}
 	void setNode(Node*);
-	virtual void update() = 0;
+	virtual void update() {
+    }
 	virtual void start() = 0;
+    virtual void updateGeometry () = 0;
+
+    virtual void draw(Shader*) {}
 protected:
 	Node* _node;
     bool _started;
+    bool _dirty;
 };
 
 
@@ -47,18 +52,18 @@ public:
 			_vertices[j++] = _batch->getPrimitive(i);
 		}
 		_started = true;
-        update();
+        // 1st call to updategeometry
+        updateGeometry();
 	}
 
-	void update() {
-        if (!_started) {
-            return;
-        }
-	    auto worldTransform = _node->getWorldMatrix();
+
+
+    void updateGeometry() override {
+        auto worldTransform = _node->getWorldMatrix();
         for (size_t i = 0; i < _model->getPrimitiveCount(); ++i) {
             _model->get(i).transform(_vertices[i], worldTransform);
         }
-	}
+    }
 protected:
 	int _batchId;
 	Batch<Primitive>* _batch;

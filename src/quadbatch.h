@@ -22,6 +22,10 @@ public:
     void setupUniforms(Shader* s) override;
 
     void addTexture(const std::string& filename);
+
+    float getTextureWidth() const;
+
+    float getTextureHeight() const;
 private:
     GLuint _textureArray;
     float _texWidth;
@@ -29,3 +33,11 @@ private:
     int _maxTextures;
     int _texCount;
 };
+
+inline float QuadBatch::getTextureWidth() const {
+    return _texWidth;
+}
+
+inline float QuadBatch::getTextureHeight() const {
+    return _texHeight;
+}

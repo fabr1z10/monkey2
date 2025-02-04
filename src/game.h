@@ -39,8 +39,11 @@ public:
 	glm::vec4 getWindowViewport() const;
 
 	Shader* getShader(int shaderId);
+    bool hasShader(int);
 
 	Room* getRoom();
+
+    void makeCurrent(std::shared_ptr<Room>);
 private:
 	void loadRoom();
 	void initGL();
@@ -77,4 +80,11 @@ inline double Game::getDeviceAspectRatio() const {
 
 inline glm::vec4 Game::getWindowViewport() const {
 	return _windowViewport;
+}
+
+inline bool Game::hasShader(int id) {
+    return _shaderStore->hasShader(id);
+}
+inline void Game::makeCurrent(std::shared_ptr<Room> room) {
+    _room = room;
 }

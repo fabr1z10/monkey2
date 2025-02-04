@@ -42,9 +42,9 @@ void Node::update(double dt) {
         c->update(dt);
     }
 	// node update is not recursive!
-//	if (_renderer != nullptr) {
-//		_renderer->update();
-//	}
+    if (_renderer != nullptr) {
+        _renderer->update();
+    }
 }
 
 glm::mat4 Node::getWorldMatrix() const {

@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "glsl/glsl.h"
 #include "game.h"
+#include "renderer.h"
 
 Room::Room() : _clearColor(glm::vec3(0.f)) {
 	_root = std::make_shared<Node>();
@@ -60,6 +61,8 @@ Room::Room() : _clearColor(glm::vec3(0.f)) {
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
 }
 
 void Room::addCamera(std::shared_ptr<Camera> cam) {
@@ -93,12 +96,30 @@ void Room::draw() {
 	glClearColor(_clearColor.r, _clearColor.g, _clearColor.b, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    auto deviceSize = Game::instance().getDeviceSize();
 	for (size_t i = 0; i< _shaders.size(); ++i) {
 		_shaders[i]->use();
+        glViewport(0,0,deviceSize.x, deviceSize.y);
 		for (const auto& b : _batches[i]) {
 			b->setupUniforms(_shaders[i]);
 			b->draw();
 		}
+
+        // disable this if batch only mode
+        std::list<Node*> li{_root.get()};
+
+        while (!li.empty()) {
+            auto current = li.front();
+            li.pop_front();
+            auto* r = current->getRenderer();
+            if (r != nullptr) r->draw(_shaders[i]);
+
+            std::transform(current->getChildren().begin(), current->getChildren().end(), std::back_inserter(li),
+                           [](const std::shared_ptr<Node>& ptr) { return ptr.get(); });
+
+        }
+
+
 
 
 	}
@@ -198,3 +219,4 @@ void Room::start() {
 void Room::setClearColor(glm::vec3 color) {
     _clearColor = color;
 }
+

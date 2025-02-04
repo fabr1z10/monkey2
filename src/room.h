@@ -29,6 +29,8 @@ public:
 	Camera* getCamera(int camId);
 
 	void setClearColor(glm::vec3);
+
+    void addShader(Shader*);
 private:
 	std::shared_ptr<Node> _root;
 	std::vector<Shader*> _shaders;
@@ -41,3 +43,8 @@ private:
 	unsigned int _quadVAO, _quadVBO;
 	glm::vec3 _clearColor;
 };
+
+inline void Room::addShader(Shader * shader) {
+    _shaders.push_back(shader);
+    _batches.push_back({});
+}

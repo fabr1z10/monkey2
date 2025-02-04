@@ -15,6 +15,14 @@ std::unordered_map<char, std::pair<GLenum, size_t>> Shader::_types {
 	{'d', {GL_DOUBLE, sizeof(GLdouble)}}
 };
 
+ShaderVAO::ShaderVAO(int id, const std::string &vertexCode, const std::string &fragmentCode,
+                     const std::string &vertexFormat) : Shader(id, vertexCode, fragmentCode, vertexFormat) {
+    glGenVertexArrays(1, &_vao);
+    glBindVertexArray(_vao);
+
+    setupVertices();
+
+}
 
 Shader::Shader(int id, const std::string& vertexCode, const std::string& fragmentCode,
 			   const std::string& vertexFormat) : _id(id), _stride(0), _flags(0u) {
@@ -104,6 +112,11 @@ void Shader::use() {
 	glUseProgram(_programId);
 }
 
+
+void ShaderVAO::use() {
+    Shader::use();
+    //glBindVertexArray(_vao);
+}
 void Shader::setupVertices() {
 	GLuint i{0};
 	unsigned long ptr{0};
@@ -129,6 +142,7 @@ ShaderStore::ShaderStore() {
 	_shaderBuilders[1] = [&] () { return std::make_shared<Shader>(1, color_vs, color_fs, "3f4f"); };
     _shaderBuilders[2] = [&] () { return std::make_shared<Shader>(2, color_normal_vs, color_normal_fs, "3f4f3f"); };
     _shaderBuilders[3] = [&] () { return std::make_shared<Shader>(3, tex_vs, tex_fs, "3f2f1i"); };
+    _shaderBuilders[70] = [&] () { return std::make_shared<ShaderVAO>(70, skeletal_vs, skeletal_fs, "3f2f3f"); };
 
 }
 
