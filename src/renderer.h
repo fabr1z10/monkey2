@@ -13,9 +13,12 @@ public:
 	virtual void update() {
     }
 	virtual void start() = 0;
+
     virtual void updateGeometry () = 0;
 
     virtual void draw(Shader*) {}
+
+    virtual void setAnimation(const std::string&) {}
 protected:
 	Node* _node;
     bool _started;

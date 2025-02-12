@@ -103,7 +103,11 @@ namespace primitives {
 
         Quad(glm::vec4 texCoords, glm::vec2 anchor, glm::vec2 size, int);
 
-        Quad(const float*);
+        /* Constructs a quad from raw data - requires the inverse
+         * of the size of the texture
+         */
+        Quad(const float*, float invw, float invh);
+        Quad(const float*, float invw, float invh, int texId);
 
         static constexpr GLenum _glPrim = GL_TRIANGLES;
 

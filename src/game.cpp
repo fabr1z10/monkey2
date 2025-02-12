@@ -3,7 +3,9 @@
 #include "pyhelper.h"
 #include "util.h"
 #include <iostream>
+#include <filesystem>
 
+namespace fs = std::filesystem;
 namespace py = pybind11;
 
 GLFWwindow* window;
@@ -27,9 +29,17 @@ void Game::start() {
 	_windowSize = py_get<glm::ivec2>(_settings, "window_size", _deviceSize);
 	_enableMouse = py_get<bool>(_settings, "enable_mouse", false);
 	_deviceAspectRatio = static_cast<double>(_deviceSize[0]) / _deviceSize[1];
+    //fs::path fl = _mainModule.attr("__file__").cast<std::string>();
 
+    _cwd = getPythonScriptDirectory();
+    // auto pippo = py::module_::import("__main__").attr("__file__").cast<std::string>();
+    std::cout << " -- cwd: " << _cwd << "\n";
 	std::cout << " -- device size: " << _deviceSize << std::endl;
-
+    // If provided, call init function. Here you can initialize assets, or any
+    // thing you need for the game.
+    if (pybind11::hasattr(_source, "init")) {
+        _source.attr("init")();
+    }
 	initGL();
 }
 
@@ -199,8 +209,9 @@ void Game::WindowResizeCallback(GLFWwindow* win, int width, int height) {
 	if (height == 0) {
 		height = 1;
 	}
+    auto& game = Game::instance();
+    game._screenHeight = height;
 	float winAspectRatio = static_cast<float>(width) / height;
-	auto& game = Game::instance();
 	game._windowSize = glm::ivec2(width, height);
 	auto deviceSize = game.getDeviceSize();
 	auto dar = game.getDeviceAspectRatio();
@@ -243,15 +254,15 @@ void Game::key_callback(GLFWwindow* window, int key, int scancode, int action, i
 }
 
 void Game::mouse_button_callback(GLFWwindow* win, int button, int action, int mods) {
-//	for (auto &listener : Engine::instance().m_mouseListeners) {
-//		listener->mouseButtonCallback(win, button, action, mods);
-//	}
+    for (auto &listener : Game::instance()._mouseListeners) {
+        listener->mouseButtonCallback(win, button, action, mods);
+    }
 }
 
 void Game::cursor_pos_callback(GLFWwindow * win, double xpos, double ypos) {
-//	for (auto &listener : Engine::instance().m_mouseListeners) {
-//		listener->cursorPosCallback(win, xpos, ypos);
-//	}
+    for (auto &listener : Game::instance()._mouseListeners) {
+        listener->cursorPosCallback(win, xpos, ypos);
+    }
 }
 
 Shader * Game::getShader(int shaderId) {
@@ -268,4 +279,28 @@ void Game::registerToKeyboardEvent(KeyboardListener * listener) {
 
 void Game::unregisterToKeyboardEvent(KeyboardListener * listener) {
     _keyboardListeners.erase(listener);
+}
+
+
+void Game::registerToMouseEvent(MouseListener* listener) {
+    _mouseListeners.insert(listener);
+}
+
+void Game::unregisterToMouseEvent(MouseListener * listener) {
+    _mouseListeners.erase(listener);
+
+}
+
+
+glm::vec2 Game::getDeviceCoordinates(glm::vec2 s) {
+    float devx = (s.x - _windowViewport.x) * _deviceSize.x / _windowViewport[2];
+    float devy = (_screenHeight - s.y - _windowViewport.y) * _deviceSize.y / _windowViewport[3];
+    return {devx, devy};
+}
+
+std::string Game::getPythonScriptDirectory() {
+    auto mainModule = py::module_::import("__main__");
+    fs::path fl = mainModule.attr("__file__").cast<std::string>();
+    auto cwd = fl.parent_path();
+    return cwd;
 }

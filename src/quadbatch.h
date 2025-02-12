@@ -21,17 +21,20 @@ public:
 
     void setupUniforms(Shader* s) override;
 
-    void addTexture(const std::string& filename);
+    int addTexture(const std::string& filename);
 
     float getTextureWidth() const;
 
     float getTextureHeight() const;
+
+    glm::vec2 getTextureSize() const;
 private:
     GLuint _textureArray;
     float _texWidth;
     float _texHeight;
     int _maxTextures;
     int _texCount;
+    std::unordered_map<std::string, int> _texId;
 };
 
 inline float QuadBatch::getTextureWidth() const {
@@ -40,4 +43,8 @@ inline float QuadBatch::getTextureWidth() const {
 
 inline float QuadBatch::getTextureHeight() const {
     return _texHeight;
+}
+
+inline glm::vec2 QuadBatch::getTextureSize() const {
+    return {_texWidth, _texHeight};
 }

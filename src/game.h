@@ -6,6 +6,7 @@
 #include "glm/glm.hpp"
 #include "room.h"
 #include "keylistener.h"
+#include "mouselistener.h"
 #include <pybind11/pybind11.h>
 
 class Game {
@@ -35,6 +36,8 @@ public:
 
 	void registerToKeyboardEvent(KeyboardListener*);
     void unregisterToKeyboardEvent(KeyboardListener*);
+    void registerToMouseEvent(MouseListener*);
+    void unregisterToMouseEvent(MouseListener*);
 
 	glm::vec4 getWindowViewport() const;
 
@@ -43,8 +46,16 @@ public:
 
 	Room* getRoom();
 
+    // transforms screen coordinate into device coordinates
+    glm::vec2 getDeviceCoordinates(glm::vec2);
+
     void makeCurrent(std::shared_ptr<Room>);
+
+    bool started() const;
+
+    std::string getWorkingDirectory() const;
 private:
+    std::string getPythonScriptDirectory();
 	void loadRoom();
 	void initGL();
 	pybind11::module_ _settings;
@@ -63,7 +74,9 @@ private:
 	bool _run;
 	std::unique_ptr<ShaderStore> _shaderStore;
     std::unordered_set<KeyboardListener*> _keyboardListeners;
-
+    std::unordered_set<MouseListener*> _mouseListeners;
+    float _screenHeight;
+    std::string _cwd;
 };
 
 inline glm::ivec2 Game::getDeviceSize() const {
@@ -87,4 +100,12 @@ inline bool Game::hasShader(int id) {
 }
 inline void Game::makeCurrent(std::shared_ptr<Room> room) {
     _room = room;
+}
+
+inline bool Game::started() const {
+    return _run;
+}
+
+inline std::string Game::getWorkingDirectory() const {
+    return _cwd;
 }

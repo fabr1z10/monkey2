@@ -11,10 +11,22 @@
 #include "components/camcontrol3d.h"
 #include "directionallight.h"
 #include "quadbatch.h"
+#include "script.h"
+#include "scheduler.h"
 #include "sprite.h"
 #include "tilemap.h"
+
 #include "skeletal/mesh.h"
 #include "skeletal/skeletalmodel.h"
+
+#include "adventure/walkarea.h"
+#include "adventure/mousecontroller.h"
+#include "components/follow.h"
+
+#include "actions/walk.h"
+#include "components/depthscale.h"
+
+using namespace adventure;
 
 namespace py = pybind11;
 
@@ -23,6 +35,9 @@ void test() {
 }
 
 PYBIND11_MODULE(monkey2, m) {
+
+    py::module_ mAdv = m.def_submodule("adventure");
+    py::module_ mAct = m.def_submodule("actions");
 
 	m.def("test", &test);
 
@@ -41,7 +56,9 @@ PYBIND11_MODULE(monkey2, m) {
 		.def("addCamera", &Room::addCamera)
 		.def("root", &Room::getRoot, py::return_value_policy::reference)
 		.def("setClearColor", &Room::setClearColor)
-		.def("addBatch", &Room::addBatch);
+        .def ("setStartUpFunction", &Room::setStartUpFunction)
+		.def("addBatch", &Room::addBatch)
+        .def_property("collisionEngine", &Room::getCollisionEngine, &Room::setCollisionEngine);
 
 
     py::class_<Camera, std::shared_ptr<Camera>>(m, "camera")
@@ -50,16 +67,26 @@ PYBIND11_MODULE(monkey2, m) {
 
 	py::class_<Node, std::shared_ptr<Node>>(m, "Node")
 		.def(py::init<>())
-		.def("setModel", &Node::setModel)
+		.def("setModel", &Node::setModel, py::arg("model"), py::arg("batch") = -1)
 		.def("setTransform", &Node::setTransform)
 		.def("add", &Node::add)
-		.def("addComponent", &Node::addComponent);
+		.def("addComponent", &Node::addComponent)
+        .def("getPosition", &Node::getWorldPosition)
+        .def("setPosition", &Node::setPosition);
 
 	py::class_<Component, std::shared_ptr<Component>>(m, "C");
 
 	py::class_<Keyboard, Component, std::shared_ptr<Keyboard>>(m, "Keyboard")
 	    .def(py::init<>())
 	    .def("add", &Keyboard::addFunction);
+
+    py::class_<Follow, Component, std::shared_ptr<Follow>>(m, "Follow")
+        .def(py::init<int>(), py::arg("camId"));
+
+    py::class_<DepthScale, Component, std::shared_ptr<DepthScale>>(m, "DepthScale")
+        .def(py::init<float, float>(), py::arg("y0"), py::arg("y1"));
+
+    py::class_<MouseListener, std::shared_ptr<MouseListener>>(m, "_MouseListener");
 
 	py::class_<CamControl3D, Component, std::shared_ptr<CamControl3D>>(m, "CamControl3D")
         .def(py::init<int, float, float>());
@@ -101,11 +128,12 @@ PYBIND11_MODULE(monkey2, m) {
     py::class_<Model<primitives::TriangleNormal>, IModel, std::shared_ptr<Model<primitives::TriangleNormal>>>(m, "TriangleNormalModel")
         .def(py::init<const std::vector<float>&>());
 
-    py::class_<Model<primitives::Quad>, IModel, std::shared_ptr<Model<primitives::Quad>>>(m, "QuadModel")
-        .def(py::init<const std::vector<float>&>());
+    py::class_<Model<primitives::Quad>, IModel, std::shared_ptr<Model<primitives::Quad>>>(m, "QuadModel");
+        //.def(py::init<const std::vector<float>&>());
 
     py::class_<Sprite, Model<primitives::Quad>, std::shared_ptr<Sprite>>(m, "Sprite")
-        .def(py::init<const std::vector<float>&>())
+        .def(py::init<const std::vector<float>&, int>())
+        .def(py::init<const std::vector<float>&, int, int>(), py::arg("data"), py::arg("batchId"), py::arg("texId"))
         .def("add", &Sprite::add)
         .def_property("defaultAnimation", &Sprite::getDefaultAnimation, &Sprite::setDefaultAnimation);
 
@@ -137,4 +165,34 @@ PYBIND11_MODULE(monkey2, m) {
     py::class_<SkeletalAnimation, std::shared_ptr<SkeletalAnimation>>(m, "SkeletalAnimation")
         .def(py::init<>())
         .def("addKeyFrame", &SkeletalAnimation::addKeyFrame);
+
+    py::class_<Action, std::shared_ptr<Action>>(m, "_Action");
+
+    py::class_<Script, std::shared_ptr<Script>>(m, "Script")
+        .def(py::init<const std::string&>(), py::arg("id") ="")
+        .def("addAction", &Script::addAction)
+        .def("addEdge", &Script::addEdge);
+
+    py::class_<Scheduler, Node, std::shared_ptr<Scheduler>>(m, "Scheduler")
+        .def(py::init<>());
+
+    py::class_<CollisionEngine, std::shared_ptr<CollisionEngine>>(m, "CollisionEngine")
+        .def(py::init<>());
+    /* Adventure
+     */
+
+    py::class_<WalkArea, Node, std::shared_ptr<WalkArea>>(mAdv, "WalkArea")
+        .def(py::init<const std::vector<float>&, int, glm::vec4>(),
+                py::arg("poly"), py::arg("batch") = -1, py::arg("color"))
+        .def("addHole", &WalkArea::addHole);
+
+    py::class_<MouseController, Node, MouseListener, std::shared_ptr<MouseController>>(mAdv, "MouseController")
+        .def(py::init<int, WalkArea*, Node*, Scheduler*, float>());
+
+    /*
+     * Actions
+     */
+    py::class_<actions::WalkTo, Action, std::shared_ptr<actions::WalkTo>>(mAct, "Walk")
+        .def(py::init<Node*, WalkArea*, glm::vec2, float>(), py::arg("node"), py::arg("walkarea"),
+             py::arg("position"), py::arg("speed"));
 }

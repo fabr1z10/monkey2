@@ -2,6 +2,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include "error.h"
+#include "game.h"
 
 
 void QuadBatch::configure() {
@@ -10,11 +11,17 @@ void QuadBatch::configure() {
 
 }
 
-void QuadBatch::addTexture(const std::string &filePath) {
+int QuadBatch::addTexture(const std::string &filePath) {
+    auto it = _texId.find(filePath);
+    if (it != _texId.end()) {
+        return it->second;
+    }
+
     int width, height, nrChannels;
-    unsigned char* data = stbi_load(filePath.c_str(), &width, &height, &nrChannels, 0);
+    auto assetFile = Game::instance().getWorkingDirectory() + "/assets/" + filePath;
+    unsigned char* data = stbi_load(assetFile.c_str(), &width, &height, &nrChannels, 0);
     if (!data) {
-        GLIB_FAIL("Failed to load texture " + filePath);
+        GLIB_FAIL("Failed to load texture " + assetFile);
     }
     std::cout << " -- loaded " << filePath << " (" << width << ", " << height << ", " << nrChannels << ")\n";
     // Make sure the texture fits the array size (image should match the array dimensions)
@@ -27,9 +34,9 @@ void QuadBatch::addTexture(const std::string &filePath) {
     glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, _texCount, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
     stbi_image_free(data);
-
+    _texId[filePath] = _texCount;
     // Increment the texture count
-    ++_texCount;
+    return _texCount++;
 }
 
 void QuadBatch::setupUniforms(Shader *s) {

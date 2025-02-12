@@ -11,7 +11,7 @@ namespace py = pybind11;
 class Camera {
 public:
 	Camera(glm::vec4 viewport = glm::vec4(0.f));
-	~Camera() =default;
+	virtual ~Camera() =default;
 	void setPosition(glm::vec3 eye, glm::vec3 direction, glm::vec3 up = glm::vec3(0, 1, 0));
 	void move(glm::vec3);
 	void setFwd(glm::vec3);
@@ -61,6 +61,10 @@ class OrthoCamera : public Camera {
 public:
 	OrthoCamera(float width, float height, glm::vec4 viewport = glm::vec4(0.f));
 	glm::vec2 getSize() const;
+
+    /* Transform device coordinates into world coordinates
+     */
+    [[nodiscard]] glm::vec2 getWorldCoordinates(glm::vec2) const;
 private:
 	float _orthoWidth;
 	float _orthoHeight;

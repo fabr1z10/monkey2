@@ -189,6 +189,10 @@ Camera* Room::getCamera(int id) {
 }
 
 void Room::start() {
+    if (_startUpFunction) {
+        _startUpFunction();
+    }
+
 	for (const auto& b : _refBatch) {
 		b->start();
 	}
@@ -220,3 +224,10 @@ void Room::setClearColor(glm::vec3 color) {
     _clearColor = color;
 }
 
+void Room::setCollisionEngine(std::shared_ptr<CollisionEngine> e) {
+    _collisionEngine = e;
+}
+
+CollisionEngine* Room::getCollisionEngine() {
+    return _collisionEngine.get();
+}

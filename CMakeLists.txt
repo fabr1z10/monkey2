@@ -24,7 +24,8 @@ add_subdirectory(pybind11)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-file(GLOB MONKEY_SOURCE src/*.cpp src/primitives/*.cpp src/components/*.cpp src/skeletal/*.cpp)
+file(GLOB MONKEY_SOURCE src/*.cpp src/primitives/*.cpp src/components/*.cpp src/skeletal/*.cpp
+    src/adventure/*.cpp src/actions/*.cpp src/shapes/*.cpp)
 
 pybind11_add_module(monkey2 ${MONKEY_SOURCE})
 

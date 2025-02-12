@@ -5,6 +5,7 @@
 #include "shader.h"
 #include "camera.h"
 #include "batch.h"
+#include "collisionengine.h"
 
 class Room {
 public:
@@ -31,6 +32,12 @@ public:
 	void setClearColor(glm::vec3);
 
     void addShader(Shader*);
+
+    void setStartUpFunction(pybind11::function);
+
+    void setCollisionEngine(std::shared_ptr<CollisionEngine>);
+
+    CollisionEngine* getCollisionEngine();
 private:
 	std::shared_ptr<Node> _root;
 	std::vector<Shader*> _shaders;
@@ -42,9 +49,15 @@ private:
 	GLuint _fb, _color, _depth;
 	unsigned int _quadVAO, _quadVBO;
 	glm::vec3 _clearColor;
+    pybind11::function _startUpFunction;
+    std::shared_ptr<CollisionEngine> _collisionEngine;
 };
 
 inline void Room::addShader(Shader * shader) {
     _shaders.push_back(shader);
     _batches.push_back({});
+}
+
+inline void Room::setStartUpFunction(pybind11::function f) {
+    _startUpFunction = f;
 }
