@@ -20,6 +20,7 @@ namespace adventure {
 
         bool isPointInWalkArea(glm::vec2);
     private:
+        void addEdge(int i, int j);
         void addPoly(const std::vector<float>&);
         void processPolygon(const std::vector<glm::vec2>&, std::vector<float>& debugModel);
 
@@ -44,7 +45,7 @@ namespace adventure {
 
         std::unordered_map<int, int> _vertexToPolygonNode;
 
-        std::unordered_map<size_t, std::unordered_set<size_t>> _visibilityEdges;
+        std::unordered_map<size_t, std::unordered_map<size_t, float>> _visibilityEdges;
         int _batchId;
         glm::vec4 _color;
         std::vector<std::pair<int, int>> _polyInfo;

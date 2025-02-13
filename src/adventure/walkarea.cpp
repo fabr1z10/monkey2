@@ -118,7 +118,7 @@ void WalkArea::recalculatePoints() {
     for (const auto& e : _visibilityEdges) {
         std::cerr << e.first << ": ";
         for (const auto& m : e.second) {
-            std::cerr << m << ", ";
+            std::cerr << m.first << "(" << m.second << ")" << ", ";
 
         }
         std::cerr << "\n";
@@ -134,14 +134,21 @@ int WalkArea::getPolygonNodeIndex(int vertexId) const {
     return it->second;
 }
 
+
+void WalkArea::addEdge(int i, int j) {
+    auto length = glm::length(_vertices[i] - _vertices[j]);
+    _visibilityEdges[i][j] = length;
+    _visibilityEdges[j][i] = length;
+
+}
+
 void WalkArea::addVisibilityEdges(int i, int j) {
     // requesting if vertex_i connects to vertex_j
     auto ni = getPolygonNodeIndex(i);
     auto nj = getPolygonNodeIndex(j);
     if (_nodeWalls.count({ni, nj}) > 0) {
         // in this case nodes are visible
-        _visibilityEdges[i].insert(j);
-        _visibilityEdges[j].insert(i);
+        addEdge(i, j);
         return;
     }
     bool hitsWall = false;
@@ -163,8 +170,7 @@ void WalkArea::addVisibilityEdges(int i, int j) {
         // want to insert diagonal!
         glm::vec2 midPoint = 0.5f * (_vertices[i] + _vertices[j]);
         if (isPointInWalkArea(midPoint)) {
-            _visibilityEdges[i].insert(j);
-            _visibilityEdges[j].insert(i);
+            addEdge(i, j);
         }
     }
 }
@@ -193,8 +199,10 @@ void WalkArea::pushNode(glm::vec2 node) {
 void WalkArea::popNode() {
     auto n = _vertices.size()-1;
     _vertexToPolygonNode.erase(n);
-    for (const auto& e : _visibilityEdges[n]) {
-        _visibilityEdges[e].erase(n);
+    for (auto& e : _visibilityEdges) {
+        // remove edge a->n for a in all vertices
+        e.second.erase(n);
+        //_visibilityEdges[e].erase(n);
     }
     _visibilityEdges.erase(n);
     _vertices.pop_back();
@@ -236,12 +244,12 @@ std::vector<glm::vec2> WalkArea::dijkstraShortestPath(glm::vec2 start, glm::vec2
             if (cost > dist[u]) continue; // Skip outdated entries
 
             for (auto v : _visibilityEdges[u]) {
-                float newCost = dist[u] + 1;
+                float newCost = dist[u] + v.second;
 
-                if (newCost < dist[v]) {
-                    dist[v] = newCost;
-                    prev[v] = u;
-                    pq.push({newCost, v});
+                if (newCost < dist[v.first]) {
+                    dist[v.first] = newCost;
+                    prev[v.first] = u;
+                    pq.push({newCost, v.first});
                 }
             }
         }
