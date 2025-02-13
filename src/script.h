@@ -49,8 +49,8 @@ private:
     // nodes
     std::vector<std::shared_ptr<Action>> _actions;
     // edges
-    std::vector<std::vector<size_t>> _next;
-    std::vector<std::vector<size_t>> _previous;
+    std::vector<std::vector<int>> _next;
+    std::vector<std::vector<int>> _previous;
 
 };
 

@@ -43,7 +43,7 @@ public:
 
 
 	// at initialization, renderer will request the required number of primitives from the batch
-	void start() {
+    void start() override {
 		_batch = dynamic_cast<Batch<Primitive>*>(Game::instance().getRoom()->getBatch(_batchId));
 
 		for (size_t i = 0; i < _nPrimitives; ++i) {

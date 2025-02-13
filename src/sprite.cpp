@@ -25,11 +25,13 @@ void Sprite::add(const std::string &animation, int frame, int quad, int ticks) {
 }
 
 const Sprite::QuadInfo& Sprite::getQuad(const std::string &anim, int frame) const {
-    auto it = _animationQuads.find({anim, frame});
-    if (it == _animationQuads.end()) {
-        return {-1, 0};
-    }
-    return it->second;
+
+    return _animationQuads.at({anim,frame});
+    // auto it = _animationQuads.find({anim, frame});
+    // if (it == _animationQuads.end()) {
+    //     return {-1, 0};
+    // }
+    // return it->second;
 }
 
 std::shared_ptr<IRenderer> Sprite::getRenderer(int) {

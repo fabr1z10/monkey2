@@ -21,6 +21,7 @@ void WalkArea::addPoly(const std::vector<float> & data) {
     auto np = data.size() / 2;
     for (size_t i = 0; i < np; ++i) {
         _nodeWalls.insert({offset+i, offset+(i+1) % np});
+        _nodeWalls.insert({offset+(i+1) % np, offset+i});
     }
     // add poly info (for each polygon: start index and number of points)
     _polyInfo.push_back({offset, np});
@@ -108,19 +109,19 @@ void WalkArea::recalculatePoints() {
         }
     }
 
-    std::cout << " -- vertices:\n";
+    std::cerr << " -- vertices:\n";
     for (const auto& v : _vertices) {
-        std::cout << v << "\n";
+        std::cerr << v << "\n";
 
     }
-    std::cout << " -- edges:\n";
+    std::cerr << " -- edges:\n";
     for (const auto& e : _visibilityEdges) {
-        std::cout << e.first << ": ";
+        std::cerr << e.first << ": ";
         for (const auto& m : e.second) {
-            std::cout << m << ", ";
+            std::cerr << m << ", ";
 
         }
-        std::cout << "\n";
+        std::cerr << "\n";
     }
 
 }

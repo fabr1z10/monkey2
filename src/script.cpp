@@ -35,7 +35,7 @@ void Script::addEdge(size_t i , size_t j) {
 }
 
 size_t Script::addAction(const std::shared_ptr<Action>& a, int after) {
-    auto id = _actions.size();
+    int id = _actions.size();
     _actions.push_back(a);
     _next.emplace_back();
     if (after == -1) {
