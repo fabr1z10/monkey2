@@ -21,12 +21,17 @@
 
 #include "adventure/walkarea.h"
 #include "adventure/mousecontroller.h"
+#include "adventure/obstacle.h"
 #include "components/follow.h"
 
 #include "actions/walk.h"
 #include "components/depthscale.h"
 
+#include "shapes/line.h"
+
+
 using namespace adventure;
+using namespace shapes;
 
 namespace py = pybind11;
 
@@ -38,12 +43,18 @@ PYBIND11_MODULE(monkey2, m) {
 
     py::module_ mAdv = m.def_submodule("adventure");
     py::module_ mAct = m.def_submodule("actions");
+    py::module_ mSha = m.def_submodule("shapes");
 
 	m.def("test", &test);
 
     m.def("fromHex", &fromHex, py::arg("color"));
 
 	m.def("game", &game, py::return_value_policy::reference, "Gets the engine");
+
+    py::class_<Shape, std::shared_ptr<Shape>>(m, "Shape");
+
+    py::class_<Line, Shape, std::shared_ptr<Line>>(mSha, "Line")
+        .def(py::init<glm::vec2, glm::vec2>(), py::arg("a"), py::arg("b"));
 
 	py::class_<Game>(m, "Game")
 		.def("start", &Game::start)
@@ -85,6 +96,9 @@ PYBIND11_MODULE(monkey2, m) {
 
     py::class_<DepthScale, Component, std::shared_ptr<DepthScale>>(m, "DepthScale")
         .def(py::init<float, float>(), py::arg("y0"), py::arg("y1"));
+
+    py::class_<Collider, Component, std::shared_ptr<Collider>>(m, "Collider")
+        .def(py::init<std::shared_ptr<Shape>>(), py::arg("shape"));
 
     py::class_<MouseListener, std::shared_ptr<MouseListener>>(m, "_MouseListener");
 
@@ -184,11 +198,14 @@ PYBIND11_MODULE(monkey2, m) {
     py::class_<WalkArea, Node, std::shared_ptr<WalkArea>>(mAdv, "WalkArea")
         .def(py::init<const std::vector<float>&, int, glm::vec4>(),
                 py::arg("poly"), py::arg("batch") = -1, py::arg("color"))
-        .def("addHole", &WalkArea::addHole);
+        .def("addHole", &WalkArea::addHole)
+        .def("addLine", &WalkArea::addLine);
 
     py::class_<MouseController, Node, MouseListener, std::shared_ptr<MouseController>>(mAdv, "MouseController")
         .def(py::init<int, WalkArea*, Node*, Scheduler*, float>());
 
+    py::class_<Obstacle, Node, std::shared_ptr<Obstacle>>(mAdv, "Obstacle")
+        .def(py::init<const std::string&, int, int, int, int, float>());
     /*
      * Actions
      */

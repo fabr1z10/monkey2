@@ -9,33 +9,39 @@
 
 using namespace adventure;
 
-void WalkArea::addPoly(const std::vector<float> & data) {
-    M_Assert(data.size() >= 6 && data.size() % 2 == 0, "To specify a polygon, provide an even number of coordinates (provide at least 3 points).");
+
+// this is for area
+void WalkArea::addPoly(const std::vector<float> & data, PolyType type) {
+    M_Assert(data.size() >= (type == PolyType::AREA ? 6 : 4) && data.size() % 2 == 0, "To specify a polygon, provide an even number of coordinates (provide at least 3 points).");
     size_t offset = _polygon.size();
     std::vector<glm::vec2> p;
     for (size_t i = 0; i < data.size(); i += 2) {
         p.emplace_back(data[i], data[i+1]);
     }
-    M_Assert(signedArea(p) > 0, "Polygon in walkarea must be specified in ccw order.");
+    if (type == PolyType::AREA) {
+        M_Assert(signedArea(p) > 0, "Polygon in walkarea must be specified in ccw order.");
+    }
     _polygon.insert(_polygon.end(), p.begin(), p.end());
     auto np = data.size() / 2;
-    for (size_t i = 0; i < np; ++i) {
-        _nodeWalls.insert({offset+i, offset+(i+1) % np});
-        _nodeWalls.insert({offset+(i+1) % np, offset+i});
-    }
+
     // add poly info (for each polygon: start index and number of points)
-    _polyInfo.push_back({offset, np});
+    _polyInfo.push_back(PolyInfo(offset, np, type));
 
 }
 
 
 WalkArea::WalkArea(const std::vector<float> & data, int batchId, glm::vec4 color) : Node(), _batchId(batchId), _color(color) {
-    addPoly(data);
+    addPoly(data, PolyType::AREA);
+}
+
+void WalkArea::addLine(const std::vector<float>& data) {
+    addPoly(data, PolyType::LINE);
+
 }
 
 void WalkArea::addHole(const std::vector<float> & data) {
 
-    addPoly(data);
+    addPoly(data, PolyType::AREA);
 }
 
 void WalkArea::start() {
@@ -45,26 +51,7 @@ void WalkArea::start() {
 }
 
 void WalkArea::processPolygon(const std::vector<glm::vec2> & data, std::vector<float>& debugModelData) {
-    size_t n = data.size();
-    // here we need to find vertices -- i.e nodes in the graph
-    // these will be concave poly nodes and convex hole points
-    for (size_t k = 0; k < _polyInfo.size(); ++k) {
-        auto l = _polyInfo[k].second;
-        auto s = _polyInfo[k].first;
-        for (size_t i = 0; i < l; ++i) {
-            auto Pc = _polygon[s+i];
-            auto Pp = _polygon[s+(i-1)%l];
-            auto Pn = _polygon[s+(i+1)%l];
-            auto cross = cross2D(Pc - Pp, Pn - Pc);
-            if (k > 0) cross *= -1.f;
-            if (cross < 0) {
-                _vertexToPolygonNode[_vertices.size()] = s+i;
-                _vertices.push_back(Pc);
-            }
-            auto f = {Pc.x, Pc.y, 0.f, Pn.x, Pn.y, 0.f, _color.r, _color.g, _color.b, _color.a};
-            debugModelData.insert(debugModelData.end(), f.begin(), f.end());
-        }
-    }
+
 }
 
 void WalkArea::recalculatePoints() {
@@ -77,26 +64,55 @@ void WalkArea::recalculatePoints() {
     //_nodeWalls.insert({0, n-1});
     //_walls.emplace_back(_polygon.front(), _polygon.back());
     int offset = 0;
-    processPolygon(_polygon, debugModelData);
-//    offset += _polygon.size();
-//    for (const auto& hole : _holes) {
-//        processPolygon(hole, debugModelData, true, offset);
-//        offset += hole.size();
-//    }
-//    for (size_t i = 0 ; i < n; ++i) {
-//        auto P1 = _polygon[i];
-//        auto P0 = _polygon[(i-1+n) % n];
-//        auto P2 = _polygon[(i+1) % n];
-//        auto cross = cross2D(P1 - P0, P2 - P1);
-//        if (cross < 0) {
-//            _vertexToPolygonNode[_vertices.size()] = i;
-//            _vertices.push_back(P1);
-//        }
-//        auto f = {P1.x, P1.y, 0.f, P2.x, P2.y, 0.f, _color.r, _color.g, _color.b, _color.a};
-//        debugModelData.insert(debugModelData.end(), f.begin(), f.end());
-//        _walls.emplace_back(P1, P2);
-//        _nodeWalls.insert({i, (i+1) % n});
-//    }
+    //processPolygon(_polygon, debugModelData);
+
+    // here we need to find vertices -- i.e nodes in the graph
+    // these will be concave poly nodes and convex hole points
+    _nodeWalls.clear();
+    _vertices.clear();
+    int k = 0;
+    for (const auto& p : _polyInfo) {
+        if (p.active) {
+            auto s = p.offset;
+            auto l = p.length;
+            if (p.type == PolyType::AREA) {
+                for (size_t i = 0; i < l; ++i) {
+                    auto iCurr = s + i;
+                    auto iPrev = s + (i-1) % l;
+                    auto iNext = s + (i+1) % l;
+                    auto Pc = _polygon[iCurr];
+                    auto Pp = _polygon[iPrev];
+                    auto Pn = _polygon[iNext];
+                    auto cross = cross2D(Pc - Pp, Pn - Pc);
+                    if (k > 0) cross *= -1.f;
+                    if (cross < 0) {
+                        _vertexToPolygonNode[_vertices.size()] = s+i;
+                        _vertices.push_back(Pc);
+                    }
+                    auto f = {Pc.x, Pc.y, 0.f, Pn.x, Pn.y, 0.f, _color.r, _color.g, _color.b, _color.a};
+                    debugModelData.insert(debugModelData.end(), f.begin(), f.end());
+                    _nodeWalls.insert({iCurr, iNext});
+                    _nodeWalls.insert({iNext, iCurr});
+                }
+            } else {
+                _vertexToPolygonNode[_vertices.size()] = s;
+                _vertices.push_back(_polygon[s]);
+                _vertexToPolygonNode[_vertices.size()] = s + l - 1;
+                _vertices.push_back(_polygon[s + l - 1]);
+                for (size_t i = 0; i < l-1; ++i) {
+                    auto Pc = _polygon[s+i];
+                    auto Pn = _polygon[s+i+1];
+                    auto f = {Pc.x, Pc.y, 0.f, Pn.x, Pn.y, 0.f, _color.r, _color.g, _color.b, _color.a};
+                    debugModelData.insert(debugModelData.end(), f.begin(), f.end());
+                    _nodeWalls.insert({s+i, s+i+1});
+                    _nodeWalls.insert({s+i+1, s+i});
+
+                }
+            }
+        }
+        k++;
+    }
+
     if (_batchId != -1) {
         auto model = std::make_shared<Model<primitives::Line>>(debugModelData);
         setModel(model, _batchId);
@@ -211,9 +227,11 @@ void WalkArea::popNode() {
 bool WalkArea::isPointInWalkArea(glm::vec2 P) {
     int i {0};
     for (const auto& p : _polyInfo) {
-        auto inside = pnpoly(_polygon, P, p.first, p.second);
-        if ((i == 0 && !inside) || (i > 0 && inside)) {
-            return false;
+        if (p.type == PolyType::AREA) {
+            auto inside = pnpoly(_polygon, P, p.offset, p.length);
+            if ((i == 0 && !inside) || (i > 0 && inside)) {
+                return false;
+            }
         }
         i++;
     }

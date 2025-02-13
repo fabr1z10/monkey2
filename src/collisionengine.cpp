@@ -21,7 +21,7 @@ std::vector<Collider*> CollisionEngine::raycastY(glm::vec2 origin, int direction
         // origin in local coordinates
         glm::vec2 Ol = m * glm::vec4(origin, 0.f, 1.f);
 
-        if (c->getShape()->raycastY(origin, direction)) {
+        if (c->getShape()->raycastY(Ol, direction)) {
             out.push_back(c);
         }
     }

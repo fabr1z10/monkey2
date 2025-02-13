@@ -7,6 +7,9 @@ void Collider::start() {
     engine->addCollider(this);
 }
 
+Collider::Collider(std::shared_ptr<Shape> shape) : Component(), _shape(shape) {}
+
+
 Collider::~Collider() {
     auto* engine = Game::instance().getRoom()->getCollisionEngine();
     engine->rmCollider(this);
