@@ -15,9 +15,9 @@ namespace adventure {
     public:
         WalkArea(const std::vector<float> &, int batchId = -1, glm::vec4 color = glm::vec4(1.f));
 
-        void addHole(const std::vector<float>&);
+        void addHole(const std::vector<float>&, Node* ref = nullptr);
 
-        void addLine(const std::vector<float>&);
+        void addLine(const std::vector<float>&, Node* ref = nullptr);
 
         void recalculatePoints();
 
@@ -28,15 +28,16 @@ namespace adventure {
         bool isPointInWalkArea(glm::vec2);
     private:
         struct PolyInfo {
-            PolyInfo(size_t offset, size_t length, PolyType type)
-                : offset(offset), length(length), type(type), active(true) {}
+            PolyInfo(size_t offset, size_t length, PolyType type, Node* ref)
+                : offset(offset), length(length), type(type), active(true), ref(ref) {}
             size_t offset;
             size_t length;
             PolyType type;
+            Node* ref;
             bool active;
         };
         void addEdge(int i, int j);
-        void addPoly(const std::vector<float>&, PolyType);
+        void addPoly(const std::vector<float>&, PolyType, Node*);
         void processPolygon(const std::vector<glm::vec2>&, std::vector<float>& debugModel);
 
         void pushNode(glm::vec2);
@@ -47,6 +48,8 @@ namespace adventure {
 
         int getPolygonNodeIndex(int) const;
         // geometry of walkarea
+        std::vector<glm::vec2> _localPolygon;
+
         std::vector<glm::vec2> _polygon;
 
         //std::vector<std::vector<glm::vec2>> _holes;

@@ -198,8 +198,8 @@ PYBIND11_MODULE(monkey2, m) {
     py::class_<WalkArea, Node, std::shared_ptr<WalkArea>>(mAdv, "WalkArea")
         .def(py::init<const std::vector<float>&, int, glm::vec4>(),
                 py::arg("poly"), py::arg("batch") = -1, py::arg("color"))
-        .def("addHole", &WalkArea::addHole)
-        .def("addLine", &WalkArea::addLine);
+        .def("addHole", &WalkArea::addHole, py::arg("points"), py::arg("node")=nullptr)
+        .def("addLine", &WalkArea::addLine, py::arg("points"), py::arg("node")=nullptr);
 
     py::class_<MouseController, Node, MouseListener, std::shared_ptr<MouseController>>(mAdv, "MouseController")
         .def(py::init<int, WalkArea*, Node*, Scheduler*, float>());

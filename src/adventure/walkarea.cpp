@@ -11,9 +11,9 @@ using namespace adventure;
 
 
 // this is for area
-void WalkArea::addPoly(const std::vector<float> & data, PolyType type) {
+void WalkArea::addPoly(const std::vector<float> & data, PolyType type, Node* ref) {
     M_Assert(data.size() >= (type == PolyType::AREA ? 6 : 4) && data.size() % 2 == 0, "To specify a polygon, provide an even number of coordinates (provide at least 3 points).");
-    size_t offset = _polygon.size();
+    size_t offset = _localPolygon.size();
     std::vector<glm::vec2> p;
     for (size_t i = 0; i < data.size(); i += 2) {
         p.emplace_back(data[i], data[i+1]);
@@ -21,31 +21,32 @@ void WalkArea::addPoly(const std::vector<float> & data, PolyType type) {
     if (type == PolyType::AREA) {
         M_Assert(signedArea(p) > 0, "Polygon in walkarea must be specified in ccw order.");
     }
-    _polygon.insert(_polygon.end(), p.begin(), p.end());
+    _localPolygon.insert(_localPolygon.end(), p.begin(), p.end());
     auto np = data.size() / 2;
 
     // add poly info (for each polygon: start index and number of points)
-    _polyInfo.push_back(PolyInfo(offset, np, type));
+    _polyInfo.push_back(PolyInfo(offset, np, type, ref));
 
 }
 
 
 WalkArea::WalkArea(const std::vector<float> & data, int batchId, glm::vec4 color) : Node(), _batchId(batchId), _color(color) {
-    addPoly(data, PolyType::AREA);
+    addPoly(data, PolyType::AREA, nullptr);
 }
 
-void WalkArea::addLine(const std::vector<float>& data) {
-    addPoly(data, PolyType::LINE);
+void WalkArea::addLine(const std::vector<float>& data, Node* ref) {
+    addPoly(data, PolyType::LINE, ref);
 
 }
 
-void WalkArea::addHole(const std::vector<float> & data) {
+void WalkArea::addHole(const std::vector<float> & data, Node* ref) {
 
-    addPoly(data, PolyType::AREA);
+    addPoly(data, PolyType::AREA, ref);
 }
 
 void WalkArea::start() {
     Node::start();
+    _polygon.reserve(_localPolygon.size());
     recalculatePoints();
 
 }
@@ -75,6 +76,14 @@ void WalkArea::recalculatePoints() {
         if (p.active) {
             auto s = p.offset;
             auto l = p.length;
+            glm::vec2 offset;
+            if (p.ref != nullptr) {
+                offset = p.ref->getWorldPosition();
+            }
+            // trasnform poly points in world coords
+            for (size_t i = 0; i < l; ++i) {
+                _polygon[s+i] = offset + _localPolygon[s+i];
+            }
             if (p.type == PolyType::AREA) {
                 for (size_t i = 0; i < l; ++i) {
                     auto iCurr = s + i;
