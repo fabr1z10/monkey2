@@ -4,7 +4,9 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
-IBatch::IBatch(int size, int camId) : _size(size), _camId(camId), _nPrimitive(0) {
+int IBatch::_gId = 0;
+
+IBatch::IBatch(int size, int camId) : _size(size), _camId(camId), _nPrimitive(0), _id(IBatch::_gId++) {
 }
 
 void IBatch::start() {

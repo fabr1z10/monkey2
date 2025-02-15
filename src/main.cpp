@@ -3,6 +3,7 @@
 #include <iostream>
 #include "functions.h"
 #include "room.h"
+#include "text.h"
 #include "camera.h"
 #include "primitives/prim.h"
 #include "linemodel.h"
@@ -28,7 +29,7 @@
 #include "components/depthscale.h"
 
 #include "shapes/line.h"
-
+#include "shapes/polygon.h"
 
 using namespace adventure;
 using namespace shapes;
@@ -49,6 +50,10 @@ PYBIND11_MODULE(monkey2, m) {
 
     m.def("fromHex", &fromHex, py::arg("color"));
 
+    m.def("loadAsset", &loadAsset, py::arg("id"), py::arg("filename"));
+
+    m.def("getModel", &getModel, py::arg("id"), py::return_value_policy::reference);
+
 	m.def("game", &game, py::return_value_policy::reference, "Gets the engine");
 
     py::class_<Shape, std::shared_ptr<Shape>>(m, "Shape");
@@ -56,7 +61,14 @@ PYBIND11_MODULE(monkey2, m) {
     py::class_<Line, Shape, std::shared_ptr<Line>>(mSha, "Line")
         .def(py::init<glm::vec2, glm::vec2>(), py::arg("a"), py::arg("b"));
 
-	py::class_<Game>(m, "Game")
+    py::class_<PolyLine, Shape, std::shared_ptr<PolyLine>>(mSha, "PolyLine")
+        .def(py::init<const std::vector<float>&>(), py::arg("points"));
+
+    py::class_<Polygon, Shape, std::shared_ptr<Polygon>>(mSha, "Polygon")
+        .def(py::init<const std::vector<float>&>(), py::arg("points"));
+
+
+    py::class_<Game>(m, "Game")
 		.def("start", &Game::start)
 		.def("run", &Game::run)
         .def("makeCurrent", &Game::makeCurrent);
@@ -126,8 +138,7 @@ PYBIND11_MODULE(monkey2, m) {
         .def(py::init<int, int>(), py::arg("size"), py::arg("cam"));
 
     py::class_<QuadBatch, IBatch, std::shared_ptr<QuadBatch>>(m, "QuadBatch")
-        .def(py::init<int, int, int, int, int>(), py::arg("size"), py::arg("cam"),
-             py::arg("texWidth"), py::arg("texHeight"), py::arg("maxTextures"))
+        .def(py::init<int, int, int>(), py::arg("size"), py::arg("cam"), py::arg("maxTextures"))
         .def("addTexture", &QuadBatch::addTexture);
 
     // base mode l- not instantiable
@@ -144,6 +155,9 @@ PYBIND11_MODULE(monkey2, m) {
 
     py::class_<Model<primitives::Quad>, IModel, std::shared_ptr<Model<primitives::Quad>>>(m, "QuadModel");
         //.def(py::init<const std::vector<float>&>());
+
+    py::class_<Quad, Model<primitives::Quad>, std::shared_ptr<Quad>>(m, "Quad")
+        .def(py::init<const std::vector<float>&, int, int>());
 
     py::class_<Sprite, Model<primitives::Quad>, std::shared_ptr<Sprite>>(m, "Sprite")
         .def(py::init<const std::vector<float>&, int>())
@@ -194,6 +208,8 @@ PYBIND11_MODULE(monkey2, m) {
         .def(py::init<>());
     /* Adventure
      */
+    py::class_<Text, Node, std::shared_ptr<Text>>(m, "Text")
+        .def(py::init<const std::string&, const std::string&>());
 
     py::class_<WalkArea, Node, std::shared_ptr<WalkArea>>(mAdv, "WalkArea")
         .def(py::init<const std::vector<float>&, int, glm::vec4>(),

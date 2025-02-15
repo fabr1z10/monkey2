@@ -24,7 +24,11 @@ public:
 
 	virtual void release(int id);
 	void start();
+
+    int getId() const;
 protected:
+    // this is the batch unique id
+    int _id;
 	int _size;
 	int _camId;
 	int _nPrimitive;					// next element to be allocated
@@ -32,7 +36,13 @@ protected:
 	int _shaderType;
 	Camera* _cam;
 	std::vector<std::shared_ptr<Light>> _lights;
+    static int _gId;
 };
+
+
+inline int IBatch::getId() const {
+    return _id;
+}
 
 inline int IBatch::getShaderType() const {
 	return _shaderType;

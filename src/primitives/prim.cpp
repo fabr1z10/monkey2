@@ -29,6 +29,13 @@ TriangleNormal::TriangleNormal(const float * data) {
 Quad::Quad(glm::vec4 texCoords, glm::vec2 anchor, glm::vec2 size, int texIndex)
     : texCoord(texCoords), anchor(anchor), size(size), index(texIndex) {}
 
+Quad::Quad(const float* data) {
+    this->texCoord = glm::vec4(data[0], data[1], data[2], data[3]);
+    this->anchor = glm::vec2(data[4], data[5]);
+    this->size = glm::vec2(data[6], data[7]);
+    this->index = (int)data[8];
+}
+
 Quad::Quad(const float * data, float invw, float invh) {
     this->index = static_cast<int>(data[6]);
     this->texCoord = glm::vec4(data[0] * invw, data[1] * invh, data[2] * invw, data[3] * invh);

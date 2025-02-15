@@ -3,6 +3,19 @@
 #include "model.h"
 #include "primitives/prim.h"
 #include "renderer.h"
+#include "tex.h"
+#include "quadbatch.h"
+#include <yaml-cpp/yaml.h>
+
+class Quad : public Model<primitives::Quad> {
+public:
+    Quad(const std::vector<float>& data, int batchId, int texId);
+
+    std::shared_ptr<IRenderer> getRenderer(int batchId = -1) override;
+private:
+    int _batchId;
+};
+
 
 
 class Sprite : public Model<primitives::Quad> {
@@ -12,6 +25,7 @@ public:
         int id;
         int ticks;
     };
+    Sprite(const YAML::Node& node, QuadBatch* batch, int texId);
 
     Sprite(const std::vector<float>& data, int batchId, int texId);
 

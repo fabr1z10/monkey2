@@ -5,6 +5,8 @@
 #include "glsl/glsl.h"
 #include "game.h"
 #include "renderer.h"
+#include "assetmanager.h"
+
 
 Room::Room() : _clearColor(glm::vec3(0.f)) {
 	_root = std::make_shared<Node>();
@@ -143,7 +145,7 @@ void Room::draw() {
 
 void Room::addBatch(std::shared_ptr<IBatch> b) {
 	auto shaderType = b->getShaderType();
-	_refBatch.push_back(b.get());
+    _refBatch[b->getId()] = b.get();
 
 	// check if we already have this shader - otherwise add it!
 	int j = -1;
@@ -181,7 +183,7 @@ std::shared_ptr<Node> Room::getRoot() {
 }
 
 IBatch* Room::getBatch(int id) {
-	return _refBatch[id];
+    return _refBatch.at(id);
 }
 
 Camera* Room::getCamera(int id) {
@@ -193,14 +195,18 @@ void Room::start() {
         _startUpFunction();
     }
 
+    AssetManager::instance().startUp();
+
+
 	for (const auto& b : _refBatch) {
-		b->start();
+        b.second->start();
+        b.second->configure();
 	}
 
 
-    for (size_t i = 0; i< _refBatch.size(); ++i) {
-        _refBatch[i]->configure();
-    }
+    //for (size_t i = 0; i< _refBatch.size(); ++i) {
+    //    _refBatch[i]->configure();
+    //}
 	std::list<Node*> li{_root.get()};
 
 	while (!li.empty()) {

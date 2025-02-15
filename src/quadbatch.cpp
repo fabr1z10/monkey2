@@ -12,6 +12,10 @@ void QuadBatch::configure() {
 }
 
 int QuadBatch::addTexture(const std::string &filePath) {
+
+
+
+
     auto it = _texId.find(filePath);
     if (it != _texId.end()) {
         return it->second;
@@ -23,6 +27,23 @@ int QuadBatch::addTexture(const std::string &filePath) {
     if (!data) {
         GLIB_FAIL("Failed to load texture " + assetFile);
     }
+    if (_texCount == 0) {
+        _texWidth = width;
+        _texHeight = height;
+        // if this is the 1st texture, generate gl stuff
+        glGenTextures(1, &_textureArray);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, _textureArray);
+
+        glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, _texWidth, _texHeight, _maxTextures);
+
+        // Set texture parameters
+        glTexParameteri (GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri (GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameterf (GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameterf (GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    }
+
+
     std::cout << " -- loaded " << filePath << " (" << width << ", " << height << ", " << nrChannels << ")\n";
     // Make sure the texture fits the array size (image should match the array dimensions)
     if (width != _texWidth || height != _texHeight) {

@@ -1,13 +1,38 @@
 #include "sprite.h"
 #include "quadbatch.h"
+#include "../error.h"
 
 Sprite::Sprite(const std::vector<float> &data, int batchId) : Model<primitives::Quad>(), _batchId(batchId) {
     auto textureSize  = dynamic_cast<QuadBatch*>(Game::instance().getRoom()->getBatch(batchId))->getTextureSize();
     float invw = 1.f / textureSize[0];
     float invh = 1.f / textureSize[1];
-    for (size_t i = 0; i < data.size(); i += primitives::Quad::_floatsPerPrimitive) {
+    for (size_t i = 0; i < data.size(); i += 7) {
         _prims.emplace_back(&data[i], invw, invh);
     }
+}
+
+Sprite::Sprite(const YAML::Node &node, QuadBatch *batch, int texId)
+{
+    _batchId = batch->getId();
+    auto data = node["data"].as<std::vector<float>>();
+    float invw = 1.f / batch->getTextureWidth();
+    float invh = 1.f / batch->getTextureHeight();
+    for (size_t i = 0; i < data.size(); i += 6) {
+        _prims.emplace_back(&data[i], invw, invh, texId);
+    }
+
+    auto anim = node["animations"];
+    auto ticks = node["ticks"].as<int>(20);
+    for (auto an = anim.begin(); an != anim.end(); ++an) {
+        auto animId = an->first.as<std::string>();
+        if (_defaultAnimation.empty()) _defaultAnimation=animId;
+        auto quads = an->second.as<std::vector<int>>();
+        for (auto i = 0; i <quads.size(); ++i) {
+            _animationQuads[{animId, i}] = QuadInfo{quads[i], ticks};
+        }
+        _animationFrameCount[animId] = quads.size();
+    }
+
 }
 
 Sprite::Sprite(const std::vector<float> &data, int batchId, int textureId) : Model<primitives::Quad>(), _batchId(batchId) {
@@ -73,5 +98,19 @@ void SpriteRenderer::setAnimation(const std::string & anim) {
         _animation = anim;
         _frame = 0;
     }
+
+}
+
+Quad::Quad(const std::vector<float> &data, int batchId, int texId) : Model<primitives::Quad>(), _batchId(batchId) {
+    M_Assert(data.size() == 6, "Quad requires 6 float - x, y, w, h, anchor x, anchor y");
+    auto textureSize  = dynamic_cast<QuadBatch*>(Game::instance().getRoom()->getBatch(batchId))->getTextureSize();
+    float invw = 1.f / textureSize[0];
+    float invh = 1.f / textureSize[1];
+    _prims.emplace_back(&data[0], invw, invh, texId);
+}
+
+std::shared_ptr<IRenderer> Quad::getRenderer(int)
+{
+    return std::make_shared<Renderer<Quad>>(this, _batchId);
 
 }

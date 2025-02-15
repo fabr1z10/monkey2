@@ -1,4 +1,5 @@
 #include "functions.h"
+#include "assetmanager.h"
 
 Game& game() {
 	auto& g = Game::instance();
@@ -11,4 +12,14 @@ glm::vec4 fromHex(const std::string& str) {
     unsigned int b = std::stoul(str.substr(5, 2), nullptr, 16);
     return glm::vec4(r / 255.f, g / 255.f, b / 255.f, 1.f);
 
+}
+
+void loadAsset(const std::string& id, const std::string& file) {
+    auto wd = Game::instance().getWorkingDirectory();
+    AssetManager::instance().loadAssetFile(id, wd + "/assets/" + file);
+}
+
+
+std::shared_ptr<IModel> getModel(const std::string& id) {
+    return AssetManager::instance().getModel(id);
 }

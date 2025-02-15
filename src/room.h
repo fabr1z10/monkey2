@@ -43,7 +43,7 @@ private:
 	std::vector<Shader*> _shaders;
 	std::vector<std::vector<std::shared_ptr<IBatch>>> _batches;
 	std::vector<std::shared_ptr<Camera>> _cameras;
-	std::vector<IBatch*> _refBatch;
+    std::unordered_map<int, IBatch*> _refBatch;
 	std::shared_ptr<Shader> _blitShader;
 	// frambuffer stuff
 	GLuint _fb, _color, _depth;

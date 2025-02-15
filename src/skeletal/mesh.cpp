@@ -1,10 +1,10 @@
 #include "mesh.h"
 #include "../shader.h"
-#include "../tex.h"
+#include "../assetmanager.h"
 #include "../primitives/vertex.h"
 
 Mesh::Mesh(const std::vector<float> &points, const std::vector<unsigned int> &indices, const std::string& texture) {
-    _texId = Tex::getTexture(texture);
+    _texId = AssetManager::instance().getTextureId(texture);
     generateBuffers(points, indices);
 }
 

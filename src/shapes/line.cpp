@@ -1,4 +1,5 @@
 #include "line.h"
+#include "../error.h"
 
 using namespace shapes;
 
@@ -30,4 +31,33 @@ bool Line::raycastY(glm::vec2 origin, int dir) const {
     } else {
         return (yl < origin.y);
     }
+}
+PolyLine::PolyLine(const std::vector<float> &data) {
+
+    M_Assert(data.size() % 2 == 0, "Polyline needs an even number of floats (2 per point)");
+
+    for (size_t i = 0; i< data.size(); i+=2) {
+        _x.push_back(data[i]);
+        _y.push_back(data[i+1]);
+    }
+}
+
+bool PolyLine::raycastY(glm::vec2 origin, int dir) const
+{
+    if (origin.x < _x.front() || origin.x > _x.back()) {
+        return false;
+    }
+
+    for (size_t i = 1; i < _x.size(); ++i) {
+        if (origin.x <= _x[i]) {
+            // point is between x_{i-1} and x_i
+            float yp = _y[i-1] + (_y[i] - _y[i-1]) * (origin.x - _x[i-1]) / (_x[i] - _x[i-1]);
+            if (dir == 1) {
+                return yp > origin.y;
+            }
+            return yp < origin.y;
+        }
+    }
+
+    return false;
 }

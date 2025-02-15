@@ -62,6 +62,9 @@ public:
 
 
     void updateGeometry() override {
+        if (!_started) {
+            return;
+        }
         auto worldTransform = _node->getWorldMatrix();
         for (size_t i = 0; i < _model->getPrimitiveCount(); ++i) {
             _model->get(i).transform(_vertices[i], worldTransform);

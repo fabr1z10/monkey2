@@ -106,6 +106,7 @@ namespace primitives {
         /* Constructs a quad from raw data - requires the inverse
          * of the size of the texture
          */
+        Quad(const float*);
         Quad(const float*, float invw, float invh);
         Quad(const float*, float invw, float invh, int texId);
 
@@ -118,7 +119,7 @@ namespace primitives {
         static constexpr int _shaderType = 3;
 
         // 4 texture coordinates, 2 anchor point, and texture index
-        static constexpr int _floatsPerPrimitive = 7;
+        static constexpr int _floatsPerPrimitive = 9;
 
         static constexpr int _indices[6] = {0, 1, 2, 0, 2, 3};
 

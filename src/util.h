@@ -11,3 +11,4 @@ std::ostream& operator<<(std::ostream& os, const glm::vec3& vec) ;
 
 
 std::ostream& operator<<(std::ostream& os, const glm::vec4& vec) ;
+std::u32string getString32(const std::string&);

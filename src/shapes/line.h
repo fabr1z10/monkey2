@@ -1,8 +1,7 @@
 #pragma once
 
 #include "../shape.h"
-
-#include "glm/glm.hpp"
+#include <vector>
 
 namespace shapes {
 
@@ -15,5 +14,16 @@ namespace shapes {
     private:
         float x0, x1;
         float y0, y1;
+    };
+
+    class PolyLine : public Shape {
+    public:
+        PolyLine(const std::vector<float>& data);
+
+        bool raycastY(glm::vec2 origin, int dir) const override;
+    private:
+
+        std::vector<float> _x;
+        std::vector<float> _y;
     };
 }
