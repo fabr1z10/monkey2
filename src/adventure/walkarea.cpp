@@ -239,6 +239,7 @@ bool WalkArea::isPointInWalkArea(glm::vec2 P) {
         if (p.type == PolyType::AREA) {
             auto inside = pnpoly(_polygon, P, p.offset, p.length);
             if ((i == 0 && !inside) || (i > 0 && inside)) {
+                // automatically compute closest point
                 return false;
             }
         }
@@ -247,11 +248,53 @@ bool WalkArea::isPointInWalkArea(glm::vec2 P) {
     return true;
 }
 
+glm::vec2 WalkArea::getClosestPoint(glm::vec2 P)
+{
+    int i {0};
+    for (const auto& p : _polyInfo) {
+        if (p.type == PolyType::AREA) {
+            auto inside = pnpoly(_polygon, P, p.offset, p.length);
+            if ((i == 0 && !inside) || (i > 0 && inside)) {
+                // loop through all edges
+                glm::vec2 best;
+                float dbest = std::numeric_limits<float>::infinity();
+                for (int i = 0; i < p.length; ++i) {
+                    int j = (i + 1) % p.length;
+                    glm::vec2 A = _polygon[p.offset+i];
+                    glm::vec2 B = _polygon[p.offset+j];
+                    float t = glm::dot(P - A, B - A) / glm::dot(B-A, B-A);
+                    glm::vec2 Q = (t < 0) ? A : (t > 1 ? B : A + t*(B-A));
+                    float d2 = glm::dot(P-Q, P-Q);
+                    if (d2 < dbest) {
+                        dbest = d2;
+                        best = Q;
+                    }
+                }
+                return P+ (best-P)*1.01f;
+            }
+        }
+        i++;
+    }
+    return P;
+
+
+
+
+}
+
 std::vector<glm::vec2> WalkArea::dijkstraShortestPath(glm::vec2 start, glm::vec2 goal) {
 
-    auto isStartInWalkArea = isPointInWalkArea(start);
-    auto isEndInWalkArea = isPointInWalkArea(goal);
-    if (isStartInWalkArea && isEndInWalkArea) {
+
+    start = getClosestPoint(start);
+    goal = getClosestPoint(goal);
+    // auto isStartInWalkArea = isPointInWalkArea(start);
+    // auto isEndInWalkArea = isPointInWalkArea(goal);
+    // if (!isStartInWalkArea) {
+    //     // move to closest point
+
+    // }
+
+    //if (isStartInWalkArea && isEndInWalkArea) {
 
         // add start and goal to the graph
         pushNode(start);
@@ -291,7 +334,7 @@ std::vector<glm::vec2> WalkArea::dijkstraShortestPath(glm::vec2 start, glm::vec2
         popNode();
         return path;
 
-    }
+    //}
     return {};
 
 

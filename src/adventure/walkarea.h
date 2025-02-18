@@ -26,6 +26,8 @@ namespace adventure {
         std::vector<glm::vec2> dijkstraShortestPath(glm::vec2 start, glm::vec2 goal);
 
         bool isPointInWalkArea(glm::vec2);
+
+        glm::vec2 getClosestPoint(glm::vec2);
     private:
         struct PolyInfo {
             PolyInfo(size_t offset, size_t length, PolyType type, Node* ref)
