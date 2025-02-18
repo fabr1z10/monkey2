@@ -13,7 +13,7 @@
 
 class AssetBank {
 public:
-    AssetBank(const YAML::Node&);
+    AssetBank(const YAML::Node&, int camId);
     void loadTexture(int id, const std::string& path);
     //Tex* getTexture(int id);
     std::shared_ptr<IModel> getModel(const std::string& id);
@@ -21,6 +21,7 @@ public:
     int getBatchId() const;
     void startUp();
 private:
+    int _camId;
     std::unordered_map<int, int> _textures;
     std::unordered_map<std::string, std::shared_ptr<Font>> _fonts;
 
@@ -48,7 +49,7 @@ public:
         // Instantiated on first use.
         return instance;
     }
-    void loadAssetFile(const std::string& id, const std::string& file);
+    void loadAssetFile(const std::string& id, const std::string& file,int cam);
 
     GLuint getTextureId(const std::string& id);
 

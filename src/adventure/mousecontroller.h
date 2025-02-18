@@ -20,14 +20,21 @@ namespace adventure {
 
         void mouseButtonCallback(GLFWwindow *, int, int, int) override;
 
+        void setCursor(Node*, const std::vector<std::string>& seq);
     private:
         bool screenCoordsToWorldCoords(glm::vec2 screenCoords, glm::vec2& worldCoords) const;
         WalkArea *_walkarea;
         Node* _player;
+        Node* _cursor;
         Scheduler* _scheduler;
         int _camId;
         OrthoCamera *_cam;
         glm::vec4 _camViewport;
         float _speed;
+        std::vector<std::string> _cursorSequence;
+        int _cursorType;
     };
+
+
 }
+

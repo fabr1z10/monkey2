@@ -4,13 +4,14 @@
 #include "walkarea.h"
 #include "../util.h"
 #include "../actions/walk.h"
+#include "../renderer.h"
 
 using namespace adventure;
 
 extern GLFWwindow * window;
 
 MouseController::MouseController(int camId, WalkArea* walkarea, Node* player, Scheduler* scheduler, float speed) :
-    Node(), MouseListener(), _camId(camId), _walkarea(walkarea), _player(player), _scheduler(scheduler), _speed(speed) {
+    Node(), MouseListener(), _camId(camId), _walkarea(walkarea), _player(player), _scheduler(scheduler), _speed(speed), _cursor(nullptr) {
 }
 
 void MouseController::start() {
@@ -19,6 +20,15 @@ void MouseController::start() {
 }
 
 void MouseController::cursorPosCallback(GLFWwindow*, double x, double y) {
+
+    // first get device coordinates
+    if (_cursor != nullptr) {
+        auto devCoords = Game::instance().getDeviceCoordinates({x, y});
+        std::cout << "pipa:" << devCoords << "\n";
+        _cursor->setPosition(glm::vec3(devCoords, 0.f));
+
+    }
+
 
     glm::vec2 worldCoords;
     if (screenCoordsToWorldCoords({x, y}, worldCoords)) {
@@ -50,6 +60,13 @@ void MouseController::mouseButtonCallback(GLFWwindow*, int button, int action, i
      * The pathfinding algo is then run to determine the path to the
      * target point.
      */
+    if (button == GLFW_MOUSE_BUTTON_RIGHT && action==GLFW_PRESS && _cursor != nullptr) {
+        _cursorType++;
+        if (_cursorType >= _cursorSequence.size()) {
+            _cursorType = 0;
+        }
+        _cursor->getRenderer()->setAnimation(_cursorSequence[_cursorType]);
+    }
 
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
         double xpos, ypos;
@@ -86,4 +103,10 @@ void MouseController::mouseButtonCallback(GLFWwindow*, int button, int action, i
         }
     }
 
+}
+
+void MouseController::setCursor(Node* node, const std::vector<std::string>& seq) {
+    _cursor = node;
+    _cursorSequence = seq;
+    _cursorType = 0;
 }

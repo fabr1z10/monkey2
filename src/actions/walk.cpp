@@ -4,7 +4,7 @@
 using namespace actions;
 
 WalkTo::WalkTo(Node *node, adventure::WalkArea * walkArea, glm::vec2 position, float speed) : Action(),
-_node(node), _walkArea(walkArea), _targetPosition(position), _speed(speed) {
+    _node(node), _walkArea(walkArea), _targetPosition(position), _speed(speed) {
 }
 
 void WalkTo::start() {

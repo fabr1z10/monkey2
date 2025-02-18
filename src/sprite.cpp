@@ -23,14 +23,24 @@ Sprite::Sprite(const YAML::Node &node, QuadBatch *batch, int texId)
 
     auto anim = node["animations"];
     auto ticks = node["ticks"].as<int>(20);
+    std::string validAnimation;
     for (auto an = anim.begin(); an != anim.end(); ++an) {
         auto animId = an->first.as<std::string>();
         if (_defaultAnimation.empty()) _defaultAnimation=animId;
-        auto quads = an->second.as<std::vector<int>>();
-        for (auto i = 0; i <quads.size(); ++i) {
-            _animationQuads[{animId, i}] = QuadInfo{quads[i], ticks};
+        auto quads = an->second.as<std::vector<int>>(std::vector<int>());
+        if (quads.empty()) {
+            // this is an alias of previous anim
+            _alias[animId] = validAnimation;
+            _animationFrameCount[animId] = _animationFrameCount.at(validAnimation);
+        } else {
+            validAnimation = animId;
+            for (auto i = 0; i <quads.size(); ++i) {
+                _animationQuads[{animId, i}] = QuadInfo{quads[i], ticks};
+            }
+            _animationFrameCount[animId] = quads.size();
         }
-        _animationFrameCount[animId] = quads.size();
+
+
     }
 
 }
@@ -50,8 +60,10 @@ void Sprite::add(const std::string &animation, int frame, int quad, int ticks) {
 }
 
 const Sprite::QuadInfo& Sprite::getQuad(const std::string &anim, int frame) const {
-
-    return _animationQuads.at({anim,frame});
+    auto it = _alias.find(anim);
+    std::string a = (it == _alias.end()) ? anim : it->second;
+    M_Assert(_animationFrameCount.count(a) > 0, ("Unknown animation: " + anim).c_str());
+    return _animationQuads.at({a,frame});
     // auto it = _animationQuads.find({anim, frame});
     // if (it == _animationQuads.end()) {
     //     return {-1, 0};

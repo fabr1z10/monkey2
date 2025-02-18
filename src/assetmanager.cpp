@@ -15,11 +15,11 @@ void AssetManager::startUp()
     }
 }
 
-void AssetManager::loadAssetFile(const std::string& id, const std::string& file) {
+void AssetManager::loadAssetFile(const std::string& id, const std::string& file, int cam) {
     auto assetPath = Game::instance().getWorkingDirectory() + "/assets/";
     std::cout << " -- Loading asset file: " << file << "\n";
     auto f = YAML::LoadFile(file);
-    auto b = std::make_shared<AssetBank>(f);
+    auto b = std::make_shared<AssetBank>(f, cam);
     _banks[id] = b;
 
 }
@@ -50,7 +50,7 @@ std::shared_ptr<Font> AssetManager::getFont(const std::string & id)
     return p.first->getFont(p.second);
 }
 
-AssetBank::AssetBank(const YAML::Node & f)
+AssetBank::AssetBank(const YAML::Node & f, int camId) : _camId(camId)
 {
     auto assetPath = Game::instance().getWorkingDirectory() + "/assets/";
 
@@ -90,7 +90,7 @@ void AssetBank::loadTexture(int id, const std::string &path)
 {
     // if this is 1st texture, atuomatically create the batch!
     if (_textures.empty()) {
-        _batch = std::make_shared<QuadBatch>(10000, 0, 16);
+        _batch = std::make_shared<QuadBatch>(10000, _camId, 16);
 
     } else {
         // makesure tex have same size

@@ -48,9 +48,12 @@ PYBIND11_MODULE(monkey2, m) {
 
 	m.def("test", &test);
 
+    // gets node with given id
+    m.def("getNode", &getNode, py::arg("id"), py::return_value_policy::reference);
+
     m.def("fromHex", &fromHex, py::arg("color"));
 
-    m.def("loadAsset", &loadAsset, py::arg("id"), py::arg("filename"));
+    m.def("loadAsset", &loadAsset, py::arg("id"), py::arg("filename"), py::arg("cam"));
 
     m.def("getModel", &getModel, py::arg("id"), py::return_value_policy::reference);
 
@@ -90,6 +93,7 @@ PYBIND11_MODULE(monkey2, m) {
 
 	py::class_<Node, std::shared_ptr<Node>>(m, "Node")
 		.def(py::init<>())
+        .def_property_readonly("id", &Node::id)
 		.def("setModel", &Node::setModel, py::arg("model"), py::arg("batch") = -1)
 		.def("setTransform", &Node::setTransform)
 		.def("add", &Node::add)
@@ -202,7 +206,8 @@ PYBIND11_MODULE(monkey2, m) {
         .def("addEdge", &Script::addEdge);
 
     py::class_<Scheduler, Node, std::shared_ptr<Scheduler>>(m, "Scheduler")
-        .def(py::init<>());
+        .def(py::init<>())
+        .def("add", &Scheduler::add);
 
     py::class_<CollisionEngine, std::shared_ptr<CollisionEngine>>(m, "CollisionEngine")
         .def(py::init<>());
@@ -218,7 +223,8 @@ PYBIND11_MODULE(monkey2, m) {
         .def("addLine", &WalkArea::addLine, py::arg("points"), py::arg("node")=nullptr);
 
     py::class_<MouseController, Node, MouseListener, std::shared_ptr<MouseController>>(mAdv, "MouseController")
-        .def(py::init<int, WalkArea*, Node*, Scheduler*, float>());
+        .def(py::init<int, WalkArea*, Node*, Scheduler*, float>())
+        .def("setCursor", &MouseController::setCursor);
 
     py::class_<Obstacle, Node, std::shared_ptr<Obstacle>>(mAdv, "Obstacle")
         .def(py::init<const std::string&, int, int, int, int, float>());

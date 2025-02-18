@@ -15,6 +15,8 @@ public:
 
     virtual ~Node();
 
+    int id() const;
+
 	void add(std::shared_ptr<Node>);
 
 	virtual void start();
@@ -41,6 +43,7 @@ public:
 
     IRenderer* getRenderer();
 
+    static Node* getNode(int);
 private:
     void notifyMove();
 	std::vector<std::shared_ptr<Node>> _children;
@@ -62,4 +65,10 @@ inline const std::vector<std::shared_ptr<Node>> & Node::getChildren() const {
 
 inline IRenderer *Node::getRenderer() {
     return _renderer.get();
+}
+
+
+inline int Node::id() const {
+
+    return  _id;
 }

@@ -50,6 +50,7 @@ private:
     std::unordered_map<std::pair<std::string, int>, QuadInfo> _animationQuads;
     std::unordered_map<std::string, int> _animationFrameCount;
     std::string _defaultAnimation;
+    std::unordered_map<std::string, std::string> _alias;
     int _batchId;
 };
 

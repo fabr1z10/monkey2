@@ -99,3 +99,7 @@ void Node::flipHorizontal(bool value) {
     _modelMatrix[0][0] = fabs(_modelMatrix[0][0]) * (value ? -1.0f : 1.0f);
     notifyMove();
 }
+
+Node* Node::getNode(int id) {
+    return Node::_nodes.at(id);
+}
