@@ -237,3 +237,11 @@ void Room::setCollisionEngine(std::shared_ptr<CollisionEngine> e) {
 CollisionEngine* Room::getCollisionEngine() {
     return _collisionEngine.get();
 }
+
+void Room::setHotSpotManager(Node* e) {
+    _hotSpotManager = e;
+}
+
+Node* Room::getHotSpotManager() {
+    return _hotSpotManager;
+}

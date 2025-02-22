@@ -9,6 +9,21 @@ void Scheduler::update(double dt) {
         _terminationBuffer.clear();
     }
 
+    auto addedScripts = std::vector<std::shared_ptr<Script>>();
+    for (auto& s : _scriptBuffer) {
+        // problem . in start this might generate another script!
+        //s->start();
+        _scripts.push_back(s);
+        _scriptMap[s->id()] = std::prev(_scripts.end());
+        addedScripts.push_back(s);
+    }
+    _scriptBuffer.clear();
+    for (auto& s : addedScripts) {
+        s->start();
+    }
+
+
+
     // run all scripts
     for (auto it = _scripts.begin(); it != _scripts.end();) {
         (*it)->update(dt);
@@ -22,12 +37,7 @@ void Scheduler::update(double dt) {
         }
     }
 
-    for (auto& s : _scriptBuffer) {
-        s->start();
-        _scripts.push_back(s);
-        _scriptMap[s->id()] = std::prev(_scripts.end());
-    }
-    _scriptBuffer.clear();
+
 }
 
 void Scheduler::add(std::shared_ptr<Script> s) {

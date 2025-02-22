@@ -16,6 +16,7 @@ MoveTo::MoveTo(Node* node, glm::vec2 position, float speed) : Action(), _node(no
 
 
 void MoveTo::start() {
+    Action::start();
     auto pos = glm::vec2(_node->getWorldPosition());
 
     _direction = glm::normalize(_targetPosition - pos);

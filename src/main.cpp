@@ -26,7 +26,10 @@
 #include "components/follow.h"
 
 #include "actions/walk.h"
+#include "actions/delay.h"
+#include "actions/callfunc.h"
 #include "components/depthscale.h"
+#include "components/hotspot.h"
 
 #include "shapes/line.h"
 #include "shapes/polygon.h"
@@ -84,7 +87,8 @@ PYBIND11_MODULE(monkey2, m) {
 		.def("setClearColor", &Room::setClearColor)
         .def ("setStartUpFunction", &Room::setStartUpFunction)
 		.def("addBatch", &Room::addBatch)
-        .def_property("collisionEngine", &Room::getCollisionEngine, &Room::setCollisionEngine);
+        .def_property("collisionEngine", &Room::getCollisionEngine, &Room::setCollisionEngine)
+        .def_property("hotSpotManager", &Room::getHotSpotManager, &Room::setHotSpotManager);
 
 
     py::class_<Camera, std::shared_ptr<Camera>>(m, "camera")
@@ -115,6 +119,12 @@ PYBIND11_MODULE(monkey2, m) {
 
     py::class_<Collider, Component, std::shared_ptr<Collider>>(m, "Collider")
         .def(py::init<std::shared_ptr<Shape>>(), py::arg("shape"));
+
+    py::class_<HotSpot, Component, std::shared_ptr<HotSpot>>(m, "HotSpot")
+        .def(py::init<std::shared_ptr<Shape>, int>(), py::arg("shape"), py::arg("priority"))
+        .def("setOnEnter", &HotSpot::setOnEnter)
+        .def("setOnLeave", &HotSpot::setOnLeave)
+        .def("setOnClick", &HotSpot::setOnClick);
 
     py::class_<MouseListener, std::shared_ptr<MouseListener>>(m, "_MouseListener");
 
@@ -202,6 +212,7 @@ PYBIND11_MODULE(monkey2, m) {
 
     py::class_<Script, std::shared_ptr<Script>>(m, "Script")
         .def(py::init<const std::string&>(), py::arg("id") ="")
+        .def("setLoop", &Script::setLoop)
         .def("addAction", &Script::addAction)
         .def("addEdge", &Script::addEdge);
 
@@ -211,6 +222,7 @@ PYBIND11_MODULE(monkey2, m) {
 
     py::class_<CollisionEngine, std::shared_ptr<CollisionEngine>>(m, "CollisionEngine")
         .def(py::init<>());
+
     /* Adventure
      */
     py::class_<Text, Node, std::shared_ptr<Text>>(m, "Text")
@@ -234,4 +246,11 @@ PYBIND11_MODULE(monkey2, m) {
     py::class_<actions::WalkTo, Action, std::shared_ptr<actions::WalkTo>>(mAct, "Walk")
         .def(py::init<Node*, WalkArea*, glm::vec2, float>(), py::arg("node"), py::arg("walkarea"),
              py::arg("position"), py::arg("speed"));
+
+    py::class_<actions::Delay, Action, std::shared_ptr<actions::Delay>>(mAct, "Delay")
+        .def(py::init<float>(), py::arg("time"));
+
+    py::class_<actions::CallFunc, Action, std::shared_ptr<actions::CallFunc>>(mAct, "CallFunc")
+        .def(py::init<pybind11::function>(), py::arg("callback"));
+
 }

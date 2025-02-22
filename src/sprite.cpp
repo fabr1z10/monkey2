@@ -113,6 +113,17 @@ void SpriteRenderer::setAnimation(const std::string & anim) {
 
 }
 
+Quad::Quad(const YAML::Node &node, QuadBatch *batch, int texId)
+{
+    _batchId = batch->getId();
+    auto data = node["data"].as<std::vector<float>>();
+    M_Assert(data.size() == 6, "Quad requires 6 float - x, y, w, h, anchor x, anchor y");
+
+    float invw = 1.f / batch->getTextureWidth();
+    float invh = 1.f / batch->getTextureHeight();
+    _prims.emplace_back(&data[0], invw, invh, texId);
+}
+
 Quad::Quad(const std::vector<float> &data, int batchId, int texId) : Model<primitives::Quad>(), _batchId(batchId) {
     M_Assert(data.size() == 6, "Quad requires 6 float - x, y, w, h, anchor x, anchor y");
     auto textureSize  = dynamic_cast<QuadBatch*>(Game::instance().getRoom()->getBatch(batchId))->getTextureSize();

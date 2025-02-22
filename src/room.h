@@ -7,6 +7,7 @@
 #include "batch.h"
 #include "collisionengine.h"
 
+
 class Room {
 public:
 	Room();
@@ -38,6 +39,10 @@ public:
     void setCollisionEngine(std::shared_ptr<CollisionEngine>);
 
     CollisionEngine* getCollisionEngine();
+
+    void setHotSpotManager(Node*);
+
+    Node* getHotSpotManager();
 private:
 	std::shared_ptr<Node> _root;
 	std::vector<Shader*> _shaders;
@@ -51,6 +56,8 @@ private:
 	glm::vec3 _clearColor;
     pybind11::function _startUpFunction;
     std::shared_ptr<CollisionEngine> _collisionEngine;
+    Node* _hotSpotManager;
+
 };
 
 inline void Room::addShader(Shader * shader) {

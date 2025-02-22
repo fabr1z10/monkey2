@@ -57,6 +57,7 @@ AssetBank::AssetBank(const YAML::Node & f, int camId) : _camId(camId)
     auto node = f["textures"];
     auto fonts = f["fonts"];
     auto sprites = f["sprites"];
+    auto quads = f["quads"];
 
     for (auto c = node.begin(); c!= node.end(); ++c) {
         auto id = c->first.as<int>();
@@ -82,6 +83,12 @@ AssetBank::AssetBank(const YAML::Node & f, int camId) : _camId(camId)
         std::cout << " -- loading sprite: " << spriteId << "\n";
         auto sprite = std::make_shared<Sprite>(s->second, _batch.get(), _textures.at(texId));
         _models[spriteId] = sprite;
+    }
+
+    for (auto q = quads.begin(); q != quads.end(); q++) {
+        auto quadId = q->first.as<std::string>();
+        auto texId = q->second["tex"].as<int>();
+        _models[quadId] = std::make_shared<Quad>(q->second, _batch.get(), _textures.at(texId));
     }
 
 }

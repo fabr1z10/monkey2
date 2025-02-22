@@ -11,7 +11,8 @@ class Action {
 public:
     Action() : _completed(false) {}
 
-    virtual void start() = 0;
+    virtual void start();
+
     virtual void run(double) = 0;
 
     bool isCompleted() const;
@@ -28,6 +29,8 @@ class Script {
 public:
     Script(const std::string& id = std::string());
 
+    void setLoop();
+
     bool done() const;
 
     size_t addAction(const std::shared_ptr<Action>&, int = -1);
@@ -42,6 +45,7 @@ public:
 
     void update(double);
 private:
+    bool _loop;
     std::string _id;
     static long _scriptId;
     std::list<int> _current;

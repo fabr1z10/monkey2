@@ -24,14 +24,15 @@ void MouseController::cursorPosCallback(GLFWwindow*, double x, double y) {
     // first get device coordinates
     if (_cursor != nullptr) {
         auto devCoords = Game::instance().getDeviceCoordinates({x, y});
-        std::cout << "pipa:" << devCoords << "\n";
-        _cursor->setPosition(glm::vec3(devCoords, 0.f));
+        //std::cout << "pipa:" << devCoords << "\n";
+        _cursor->setPosition(glm::vec3(devCoords, 10.f));
 
     }
 
 
     glm::vec2 worldCoords;
     if (screenCoordsToWorldCoords({x, y}, worldCoords)) {
+        // check hotspot
 
     }
 }
@@ -43,6 +44,7 @@ bool MouseController::screenCoordsToWorldCoords(glm::vec2 screenCoords, glm::vec
                         devCoords.y >= _camViewport.y && devCoords.y <= _camViewport.y + _camViewport[3];
     if (isInViewport) {
         worldCoords = _cam->getWorldCoordinates(devCoords);
+        std::cout << "ora in: " << worldCoords << "\n";
         return true;
     }
     return false;
@@ -109,4 +111,14 @@ void MouseController::setCursor(Node* node, const std::vector<std::string>& seq)
     _cursor = node;
     _cursorSequence = seq;
     _cursorType = 0;
+}
+
+
+void MouseController::add(HotSpot * hs)
+{
+    _hotSpots[hs->getPriority()].insert(hs);
+}
+
+void MouseController::remove(HotSpot* hs) {
+    _hotSpots[hs->getPriority()].erase(hs);
 }

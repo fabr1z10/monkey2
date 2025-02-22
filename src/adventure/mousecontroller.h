@@ -3,7 +3,7 @@
 #include "../node.h"
 #include "../camera.h"
 #include "../mouselistener.h"
-
+#include "../components/hotspot.h"
 #include "../scheduler.h"
 
 
@@ -21,6 +21,10 @@ namespace adventure {
         void mouseButtonCallback(GLFWwindow *, int, int, int) override;
 
         void setCursor(Node*, const std::vector<std::string>& seq);
+
+        void add(HotSpot*);
+
+        void remove(HotSpot*);
     private:
         bool screenCoordsToWorldCoords(glm::vec2 screenCoords, glm::vec2& worldCoords) const;
         WalkArea *_walkarea;
@@ -33,6 +37,8 @@ namespace adventure {
         float _speed;
         std::vector<std::string> _cursorSequence;
         int _cursorType;
+        std::unordered_map<int, std::unordered_set<HotSpot*>> _hotSpots;
+
     };
 
 

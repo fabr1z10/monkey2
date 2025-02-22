@@ -8,6 +8,7 @@ WalkTo::WalkTo(Node *node, adventure::WalkArea * walkArea, glm::vec2 position, f
 }
 
 void WalkTo::start() {
+    Action::start();
     glm::vec2 pos = _node->getWorldPosition();
     if (glm::length(pos - _targetPosition) < 0.01) {
         _completed = true;

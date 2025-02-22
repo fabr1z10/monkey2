@@ -9,6 +9,8 @@
 
 class Quad : public Model<primitives::Quad> {
 public:
+    Quad(const YAML::Node& node, QuadBatch* batch, int texId);
+
     Quad(const std::vector<float>& data, int batchId, int texId);
 
     std::shared_ptr<IRenderer> getRenderer(int batchId = -1) override;
