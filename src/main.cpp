@@ -62,7 +62,12 @@ PYBIND11_MODULE(monkey2, m) {
 
 	m.def("game", &game, py::return_value_policy::reference, "Gets the engine");
 
-    py::class_<Shape, std::shared_ptr<Shape>>(m, "Shape");
+	mSha.def("fromImage", &shapeFromImage);
+
+
+
+    py::class_<Shape, std::shared_ptr<Shape>>(m, "Shape")
+		.def("toModel", &Shape::makeModel);
 
     py::class_<Line, Shape, std::shared_ptr<Line>>(mSha, "Line")
         .def(py::init<glm::vec2, glm::vec2>(), py::arg("a"), py::arg("b"));

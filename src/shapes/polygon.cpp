@@ -1,6 +1,6 @@
 #include "polygon.h"
 #include "../error.h"
-
+#include "../model.h"
 
 using namespace shapes;
 
@@ -48,3 +48,17 @@ bool Polygon::raycastY(glm::vec2 origin, int dir) const
     return false;
 }
 
+std::shared_ptr<IModel> Polygon::makeModel(glm::vec4 color) {
+
+	std::vector<float> data;
+	auto n = _points.size();
+	for (auto i = 0 ; i < n; ++i) {
+		int j = (i + 1) % n;
+		data.insert(data.end(), {
+			_points[i].x, _points[i].y, 0.f,
+			_points[j].x, _points[j].y, 0.f,
+			color.r, color.g, color.b, color.a});
+	}
+	auto model = std::make_shared<Model<primitives::Line>>(data);
+	return model;
+}

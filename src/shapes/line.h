@@ -3,6 +3,7 @@
 #include "../shape.h"
 #include <vector>
 
+
 namespace shapes {
 
     class Line : public Shape {
@@ -10,6 +11,8 @@ namespace shapes {
         Line(glm::vec2 A, glm::vec2 B);
 
         bool raycastY(glm::vec2 origin, int dir) const override;
+
+		std::shared_ptr<IModel> makeModel(glm::vec4 color) override;
 
     private:
         float x0, x1;
@@ -21,7 +24,10 @@ namespace shapes {
         PolyLine(const std::vector<float>& data);
 
         bool raycastY(glm::vec2 origin, int dir) const override;
-    private:
+
+		std::shared_ptr<IModel> makeModel(glm::vec4 color) override;
+
+	private:
 
         std::vector<float> _x;
         std::vector<float> _y;

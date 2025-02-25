@@ -21,14 +21,20 @@ void AssetManager::loadAssetFile(const std::string& id, const std::string& file,
     auto f = YAML::LoadFile(file);
     auto b = std::make_shared<AssetBank>(f, cam);
     _banks[id] = b;
-
 }
+
+
+
 
 GLuint AssetManager::getTextureId(const std::string &id)
 {
     return 0;
 }
 
+
+std::string AssetManager::getTexturePath(const std::string &assetBank, int id) {
+	return _banks.at(assetBank)->getTexturePath(id);
+}
 std::pair<AssetBank*, std::string> AssetManager::getBank(const std::string& id) {
     auto n = id.find('/');
     auto bankId = id.substr(0, n);
@@ -64,6 +70,8 @@ AssetBank::AssetBank(const YAML::Node & f, int camId) : _camId(camId)
         auto filepath = c->second.as<std::string>();
         std::cout << id << " - " << filepath << std::endl;
         loadTexture(id, filepath);
+		// let's store here the filepath .
+
 
     }
 
@@ -104,7 +112,7 @@ void AssetBank::loadTexture(int id, const std::string &path)
     }
     int shaderTexId = _batch->addTexture(path);
     _textures[id] = shaderTexId;
-
+	_texPath[id] = path;
 }
 
 void AssetBank::startUp()

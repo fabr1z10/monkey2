@@ -10,6 +10,9 @@ public:
     Polygon(const std::vector<float>& data);
 
     bool raycastY(glm::vec2 origin, int dir) const override;
+
+	std::shared_ptr<IModel> makeModel(glm::vec4 color) override;
+
 private:
 
     std::vector<glm::vec2> _points;

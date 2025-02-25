@@ -44,7 +44,7 @@ bool MouseController::screenCoordsToWorldCoords(glm::vec2 screenCoords, glm::vec
                         devCoords.y >= _camViewport.y && devCoords.y <= _camViewport.y + _camViewport[3];
     if (isInViewport) {
         worldCoords = _cam->getWorldCoordinates(devCoords);
-        std::cout << "ora in: " << worldCoords << "\n";
+        //std::cout << "ora in: " << worldCoords << "\n";
         return true;
     }
     return false;

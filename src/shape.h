@@ -1,6 +1,9 @@
 #pragma once
 
 #include "glm/glm.hpp"
+#include <memory>
+
+class IModel;
 
 class Shape {
 public:
@@ -8,5 +11,7 @@ public:
 
     virtual bool raycastY(glm::vec2 origin, int dir) const = 0;
 
+	// generate a line model
+	virtual std::shared_ptr<IModel> makeModel(glm::vec4 color) = 0;
 
 };

@@ -1,6 +1,11 @@
 #include "functions.h"
 #include "assetmanager.h"
 #include "node.h"
+#include "stb_image.h"
+#include "shapes/polygon.h"
+#include "util.h"
+#include "shapes/polyapprox.h"
+
 
 Game& game() {
 	auto& g = Game::instance();
@@ -28,3 +33,19 @@ std::shared_ptr<IModel> getModel(const std::string& id) {
 Node* getNode(int id) {
     return Node::getNode(id);
 }
+
+std::shared_ptr<Shape> shapeFromImage(const std::string& assetBank, int texId, glm::ivec4 coords, int n) {
+
+	auto filePath = AssetManager::instance().getTexturePath(assetBank, texId);
+	//filePath = Game::instance().getWorkingDirectory() + "/assets/" + filePath;
+	auto points = PolyApproximation::approximatePoly(filePath, coords, n);
+
+	std::vector<float> data;
+	for (auto& p : points) {
+		data.push_back(p.x);
+		data.push_back(p.y);
+	}
+	return std::make_shared<shapes::Polygon>(data);
+
+}
+
