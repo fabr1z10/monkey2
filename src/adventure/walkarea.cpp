@@ -46,7 +46,7 @@ void WalkArea::addHole(const std::vector<float> & data, Node* ref) {
 
 void WalkArea::start() {
     Node::start();
-    _polygon.reserve(_localPolygon.size());
+    _polygon.resize(_localPolygon.size());
     recalculatePoints();
 
 }
@@ -64,7 +64,7 @@ void WalkArea::recalculatePoints() {
 
     //_nodeWalls.insert({0, n-1});
     //_walls.emplace_back(_polygon.front(), _polygon.back());
-    int offset = 0;
+
     //processPolygon(_polygon, debugModelData);
 
     // here we need to find vertices -- i.e nodes in the graph
@@ -76,7 +76,7 @@ void WalkArea::recalculatePoints() {
         if (p.active) {
             auto s = p.offset;
             auto l = p.length;
-            glm::vec2 offset;
+            glm::vec2 offset(0.f);
             if (p.ref != nullptr) {
                 offset = p.ref->getWorldPosition();
             }
@@ -139,7 +139,7 @@ void WalkArea::recalculatePoints() {
         std::cerr << v << "\n";
 
     }
-    std::cerr << " -- edges:\n";
+	    std::cerr << " -- edges:\n";
     for (const auto& e : _visibilityEdges) {
         std::cerr << e.first << ": ";
         for (const auto& m : e.second) {

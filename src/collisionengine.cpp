@@ -1,5 +1,11 @@
 #include "collisionengine.h"
 #include "node.h"
+#include <iostream>
+
+
+//CollisionEngine::~CollisionEngine() {
+//
+//}
 
 void CollisionEngine::addCollider(Collider * c) {
     _colliders.insert(c);

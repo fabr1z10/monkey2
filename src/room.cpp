@@ -190,6 +190,12 @@ Camera* Room::getCamera(int id) {
 	return _cameras[id].get();
 }
 
+void Room::end() {
+	_root = nullptr;
+
+}
+
+
 void Room::start() {
     if (_startUpFunction) {
         _startUpFunction();

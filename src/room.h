@@ -28,6 +28,8 @@ public:
 
 	void start();
 
+	void end();
+
 	Camera* getCamera(int camId);
 
 	void setClearColor(glm::vec3);

@@ -183,6 +183,7 @@ void Game::run() {
 
 		} // Check if the ESC key was pressed or the window was closed
 		while (_run && !_shutdown);
+		_room->end();
 		//_room->end();
 		//m_allNodes.clear();
 		//_allPyObjects.clear();
