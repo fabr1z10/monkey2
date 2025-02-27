@@ -11,7 +11,8 @@ using namespace adventure;
 extern GLFWwindow * window;
 
 MouseController::MouseController(int camId, WalkArea* walkarea, Node* player, Scheduler* scheduler, float speed) :
-    Node(), MouseListener(), _camId(camId), _walkarea(walkarea), _player(player), _scheduler(scheduler), _speed(speed), _cursor(nullptr) {
+    Node(), MouseListener(), _camId(camId), _walkarea(walkarea), _player(player), _scheduler(scheduler), _speed(speed), _cursor(nullptr), _previous(nullptr) {
+
 }
 
 void MouseController::start() {
@@ -24,6 +25,9 @@ void MouseController::cursorPosCallback(GLFWwindow*, double x, double y) {
     // first get device coordinates
     if (_cursor != nullptr) {
         auto devCoords = Game::instance().getDeviceCoordinates({x, y});
+
+
+
         //std::cout << "pipa:" << devCoords << "\n";
         _cursor->setPosition(glm::vec3(devCoords, 10.f));
 
@@ -33,7 +37,32 @@ void MouseController::cursorPosCallback(GLFWwindow*, double x, double y) {
     glm::vec2 worldCoords;
     if (screenCoordsToWorldCoords({x, y}, worldCoords)) {
         // check hotspot
-
+		bool handled=false;
+		for (const auto&[priority, s] : _hotSpots) {
+			for (const auto& h : s) {
+				if (h->isInside(worldCoords)) {
+					// if I'm here --> we can break and handle the enter
+					if (_previous != h) {
+						if (_previous != nullptr) {
+							if (_onLeave) {
+								_onLeave(_previous->getNode());
+							}
+						}
+						if (_onEnter) {
+							_onEnter(h->getNode());
+						}
+						_previous = h;
+					}
+					handled=true;
+					break;
+				}
+			}
+			if (handled) break;
+		}
+		if (!handled && _previous != nullptr && _onLeave) {
+			_onLeave(_previous->getNode());
+			_previous = nullptr;
+		}
     }
 }
 
@@ -44,6 +73,7 @@ bool MouseController::screenCoordsToWorldCoords(glm::vec2 screenCoords, glm::vec
                         devCoords.y >= _camViewport.y && devCoords.y <= _camViewport.y + _camViewport[3];
     if (isInViewport) {
         worldCoords = _cam->getWorldCoordinates(devCoords);
+
         //std::cout << "ora in: " << worldCoords << "\n";
         return true;
     }
@@ -121,4 +151,20 @@ void MouseController::add(HotSpot * hs)
 
 void MouseController::remove(HotSpot* hs) {
     _hotSpots[hs->getPriority()].erase(hs);
+}
+
+
+void MouseController::setOnEnter(pybind11::function f)
+{
+	_onEnter = f;
+}
+
+void MouseController::setOnLeave(pybind11::function f)
+{
+	_onLeave = f;
+}
+
+void MouseController::setOnClick(pybind11::function f)
+{
+	_onClick = f;
 }

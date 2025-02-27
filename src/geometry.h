@@ -3,6 +3,8 @@
 #include "glm/glm.hpp"
 #include <vector>
 
+extern const float EPSILON; // Declaration
+
 
 // Compute signed area to determine polygon orientation
 double signedArea(const std::vector<glm::vec2>& polygon);

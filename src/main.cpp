@@ -241,7 +241,10 @@ PYBIND11_MODULE(monkey2, m) {
 
     py::class_<MouseController, Node, MouseListener, std::shared_ptr<MouseController>>(mAdv, "MouseController")
         .def(py::init<int, WalkArea*, Node*, Scheduler*, float>())
-        .def("setCursor", &MouseController::setCursor);
+        .def("setCursor", &MouseController::setCursor)
+		.def("setOnEnter", &MouseController::setOnEnter)
+		.def("setOnLeave", &MouseController::setOnLeave)
+		.def("setOnClick", &MouseController::setOnClick);
 
     py::class_<Obstacle, Node, std::shared_ptr<Obstacle>>(mAdv, "Obstacle")
         .def(py::init<const std::string&, int, int, int, int, float>());

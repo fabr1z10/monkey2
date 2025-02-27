@@ -1,6 +1,7 @@
 #include "hotspot.h"
 #include "../game.h"
 #include "../adventure/mousecontroller.h"
+#include "../util.h"
 // a hotspot is an area with mouse interaction
 // you can define events for:
 // mouse entering the area, mouse leaving area, mouse clicking
@@ -38,4 +39,7 @@ void HotSpot::setOnClick(pybind11::function f)
     _onClick = f;
 }
 
-
+bool HotSpot::isInside(glm::vec2 worldCoords) {
+	auto local = glm::vec2(glm::inverse(m_node->getWorldMatrix()) * glm::vec4(worldCoords, 0.f, 1.f));
+	return _shape->isInside(local);
+}

@@ -1,10 +1,11 @@
 #include "line.h"
 #include "../error.h"
 #include "../model.h"
+#include "../geometry.h"
 
 using namespace shapes;
 
-Line::Line(glm::vec2 A, glm::vec2 B) : Shape() {
+Line::Line(glm::vec2 A, glm::vec2 B) : Shape(), _A(A), _B(B) {
     if (A.x < B.x) {
         x0 = A.x;
         x1 = B.x;
@@ -20,6 +21,19 @@ Line::Line(glm::vec2 A, glm::vec2 B) : Shape() {
         y1 = A.y;
     }
 }
+
+
+bool Line::isInside(glm::vec2 P) {
+	double crossProduct = cross2D(_B - _A, P - _A);
+	if (std::fabs(crossProduct) > EPSILON) return false; // Not collinear
+
+	if (P.x + EPSILON < x0 || P.x - EPSILON > x1 ||
+		P.y + EPSILON < y0 || P.y - EPSILON > y1)
+		return false;
+
+	return true;
+}
+
 
 bool Line::raycastY(glm::vec2 origin, int dir) const {
     if (origin.x < x0 || origin.x > x1) {
@@ -83,4 +97,22 @@ std::shared_ptr<IModel> PolyLine::makeModel(glm::vec4 color) {
 	}
 	auto model = std::make_shared<Model<primitives::Line>>(data);
 	return model;
+}
+
+bool PolyLine::isInside(glm::vec2 P) {
+	glm::vec2 A(_x[0], _y[0]);
+	for (auto i = 0; i < _x.size()-1; ++i) {
+		glm::vec2 B(_x[i+1], _y[i+1]);
+		auto crossProduct = cross2D(B - A, P - A);
+		if (std::fabs(crossProduct) > EPSILON) continue;
+		float x0 = std::min(A.x, B.x);
+		float x1 = std::max(A.x, B.x);
+		float y0 = std::min(A.y, B.y);
+		float y1 = std::max(A.y, B.y);
+		if (P.x + EPSILON > x0 || P.x - EPSILON < x1 ||
+			P.y + EPSILON > y0 || P.y - EPSILON < y1)
+			return true;
+		A = B;
+	}
+	return false;
 }

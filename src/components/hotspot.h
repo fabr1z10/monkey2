@@ -12,6 +12,7 @@ public:
 
     void start() override;
 
+	bool isInside(glm::vec2);
 
     virtual ~HotSpot();
 

@@ -14,9 +14,13 @@ namespace shapes {
 
 		std::shared_ptr<IModel> makeModel(glm::vec4 color) override;
 
-    private:
+		bool isInside(glm::vec2) override;
+
+	private:
         float x0, x1;
         float y0, y1;
+		glm::vec2 _A;
+		glm::vec2 _B;
     };
 
     class PolyLine : public Shape {
@@ -26,6 +30,8 @@ namespace shapes {
         bool raycastY(glm::vec2 origin, int dir) const override;
 
 		std::shared_ptr<IModel> makeModel(glm::vec4 color) override;
+
+		bool isInside(glm::vec2) override;
 
 	private:
 

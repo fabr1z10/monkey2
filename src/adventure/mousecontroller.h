@@ -5,6 +5,7 @@
 #include "../mouselistener.h"
 #include "../components/hotspot.h"
 #include "../scheduler.h"
+#include <map>
 
 
 namespace adventure {
@@ -25,6 +26,12 @@ namespace adventure {
         void add(HotSpot*);
 
         void remove(HotSpot*);
+
+		void setOnEnter(pybind11::function f);
+
+		void setOnLeave(pybind11::function f);
+
+		void setOnClick(pybind11::function f);
     private:
         bool screenCoordsToWorldCoords(glm::vec2 screenCoords, glm::vec2& worldCoords) const;
         WalkArea *_walkarea;
@@ -37,8 +44,11 @@ namespace adventure {
         float _speed;
         std::vector<std::string> _cursorSequence;
         int _cursorType;
-        std::unordered_map<int, std::unordered_set<HotSpot*>> _hotSpots;
-
+        std::map<int, std::unordered_set<HotSpot*>> _hotSpots;
+		HotSpot* _previous;
+		pybind11::function _onEnter;
+		pybind11::function _onLeave;
+		pybind11::function _onClick;
     };
 
 

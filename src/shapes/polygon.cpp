@@ -1,6 +1,7 @@
 #include "polygon.h"
 #include "../error.h"
 #include "../model.h"
+#include "../geometry.h"
 
 using namespace shapes;
 
@@ -61,4 +62,8 @@ std::shared_ptr<IModel> Polygon::makeModel(glm::vec4 color) {
 	}
 	auto model = std::make_shared<Model<primitives::Line>>(data);
 	return model;
+}
+
+bool Polygon::isInside(glm::vec2 P) {
+	return pnpoly(_points, P);
 }
