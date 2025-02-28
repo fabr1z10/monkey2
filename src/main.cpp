@@ -103,6 +103,7 @@ PYBIND11_MODULE(monkey2, m) {
 	py::class_<Node, std::shared_ptr<Node>>(m, "Node")
 		.def(py::init<>())
         .def_property_readonly("id", &Node::id)
+		.def_property("userData", &Node::getUserData, &Node::setUserData)
 		.def("setModel", &Node::setModel, py::arg("model"), py::arg("batch") = -1)
 		.def("setTransform", &Node::setTransform)
 		.def("add", &Node::add)

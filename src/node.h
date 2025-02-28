@@ -44,6 +44,10 @@ public:
     IRenderer* getRenderer();
 
     static Node* getNode(int);
+
+	pybind11::object getUserData();
+
+	void setUserData(pybind11::object);
 private:
     void notifyMove();
 	std::vector<std::shared_ptr<Node>> _children;
@@ -56,7 +60,7 @@ private:
     int _id;
     static int _nextId;
     static std::unordered_map<int, Node*> _nodes;
-
+	pybind11::object _userData;
 };
 
 inline const std::vector<std::shared_ptr<Node>> & Node::getChildren() const {
@@ -71,4 +75,12 @@ inline IRenderer *Node::getRenderer() {
 inline int Node::id() const {
 
     return  _id;
+}
+
+inline pybind11::object Node::getUserData() {
+	return _userData;
+}
+
+inline void Node::setUserData(pybind11::object data) {
+	_userData = data;
 }
