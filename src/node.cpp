@@ -11,6 +11,7 @@ Node::Node() : _id(Node::_nextId++), _renderer(nullptr), _parent(nullptr) {
 	_modelMatrix = glm::mat4(1.f);
 	_worldMatrix = glm::mat4(1.f);
     _nodes[_id] = this;
+	_userData = pybind11::none();
 }
 
 Node::~Node() {

@@ -103,7 +103,7 @@ PYBIND11_MODULE(monkey2, m) {
 	py::class_<Node, std::shared_ptr<Node>>(m, "Node")
 		.def(py::init<>())
         .def_property_readonly("id", &Node::id)
-		.def_property("userData", &Node::getUserData, &Node::setUserData)
+		.def_property("userData", &Node::getUserData, &Node::setUserData, py::return_value_policy::reference)
 		.def("setModel", &Node::setModel, py::arg("model"), py::arg("batch") = -1)
 		.def("setTransform", &Node::setTransform)
 		.def("add", &Node::add)
@@ -245,7 +245,8 @@ PYBIND11_MODULE(monkey2, m) {
         .def("setCursor", &MouseController::setCursor)
 		.def("setOnEnter", &MouseController::setOnEnter)
 		.def("setOnLeave", &MouseController::setOnLeave)
-		.def("setOnClick", &MouseController::setOnClick);
+		.def("setOnClick", &MouseController::setOnClick)
+		.def("setOnRightClick", &MouseController::setOnRightClick);
 
     py::class_<Obstacle, Node, std::shared_ptr<Obstacle>>(mAdv, "Obstacle")
         .def(py::init<const std::string&, int, int, int, int, float>());

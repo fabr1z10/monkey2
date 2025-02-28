@@ -18,6 +18,10 @@ MouseController::MouseController(int camId, WalkArea* walkarea, Node* player, Sc
 void MouseController::start() {
     _cam = dynamic_cast<OrthoCamera*>(Game::instance().getRoom()->getCamera(_camId));
     _camViewport = _cam->getViewport();
+	_cursorType = 0;
+	if (_onRightClick) {
+		_onRightClick(_cursorSequence[_cursorType]);
+	}
 }
 
 void MouseController::cursorPosCallback(GLFWwindow*, double x, double y) {
@@ -98,17 +102,25 @@ void MouseController::mouseButtonCallback(GLFWwindow*, int button, int action, i
             _cursorType = 0;
         }
         _cursor->getRenderer()->setAnimation(_cursorSequence[_cursorType]);
+		if (_onRightClick) {
+			_onRightClick(_cursorSequence[_cursorType]);
+		}
     }
 
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-        double xpos, ypos;
-        glfwGetCursorPos(window, &xpos, &ypos);
-        glm::vec2 worldCoords;
-        if (screenCoordsToWorldCoords({xpos, ypos}, worldCoords)) {
-            std::cout << "Clicked at " << worldCoords << "\n";
-            auto script = std::make_shared<Script>("__PLAYER");
-            script->addAction(std::make_shared<actions::WalkTo>(_player, _walkarea, worldCoords, _speed));
-            _scheduler->add(script);
+
+		// if we are hovering on a hotspot ... call onClick
+		if (_previous != nullptr && _onClick) {
+			_onClick(_previous->getNode());
+		} else {
+			double xpos, ypos;
+			glfwGetCursorPos(window, &xpos, &ypos);
+			glm::vec2 worldCoords;
+			if (screenCoordsToWorldCoords({xpos, ypos}, worldCoords)) {
+				std::cout << "Clicked at " << worldCoords << "\n";
+				auto script = std::make_shared<Script>("__PLAYER");
+				script->addAction(std::make_shared<actions::WalkTo>(_player, _walkarea, worldCoords, _speed));
+				_scheduler->add(script);
 
 //            auto pos = _player->getWorldPosition();
 //            auto path = _walkarea->dijkstraShortestPath(glm::vec2(pos), worldCoords);
@@ -132,7 +144,8 @@ void MouseController::mouseButtonCallback(GLFWwindow*, int button, int action, i
 //                _scheduler->add(script);
 //            }
 
-        }
+			}
+		}
     }
 
 }
@@ -167,4 +180,9 @@ void MouseController::setOnLeave(pybind11::function f)
 void MouseController::setOnClick(pybind11::function f)
 {
 	_onClick = f;
+}
+
+void MouseController::setOnRightClick(pybind11::function f)
+{
+	_onRightClick = f;
 }

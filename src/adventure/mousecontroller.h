@@ -32,6 +32,8 @@ namespace adventure {
 		void setOnLeave(pybind11::function f);
 
 		void setOnClick(pybind11::function f);
+
+		void setOnRightClick(pybind11::function f);
     private:
         bool screenCoordsToWorldCoords(glm::vec2 screenCoords, glm::vec2& worldCoords) const;
         WalkArea *_walkarea;
@@ -49,6 +51,7 @@ namespace adventure {
 		pybind11::function _onEnter;
 		pybind11::function _onLeave;
 		pybind11::function _onClick;
+		pybind11::function _onRightClick;
     };
 
 
