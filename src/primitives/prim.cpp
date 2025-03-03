@@ -34,21 +34,25 @@ Quad::Quad(const float* data) {
     this->anchor = glm::vec2(data[4], data[5]);
     this->size = glm::vec2(data[6], data[7]);
     this->index = (int)data[8];
+	this->color = glm::vec4(data[9], data[10], data[11], data[12]);
+
 }
 
-Quad::Quad(const float * data, float invw, float invh) {
+Quad::Quad(const float * data, float invw, float invh, glm::vec4 color) {
     this->index = static_cast<int>(data[6]);
     this->texCoord = glm::vec4(data[0] * invw, data[1] * invh, data[2] * invw, data[3] * invh);
     this->anchor = glm::vec2(data[4], data[5]);
     this->size = {data[2], data[3]};
+	this->color = color;
 }
 
 
-Quad::Quad(const float * data, float invw, float invh, int texId) {
+Quad::Quad(const float * data, float invw, float invh, int texId, glm::vec4 color) {
     this->index = texId;
     this->texCoord = glm::vec4(data[0] * invw, data[1] * invh, data[2] * invw, data[3] * invh);
     this->anchor = glm::vec2(data[4], data[5]);
     this->size = {data[2], data[3]};
+	this->color = color;
 }
 
 
@@ -101,19 +105,22 @@ void Quad::transform(VertexTexture * v, const glm::mat4 &t) const {
     v->position = bottomLeft;
     v->texCoord = glm::vec2(texCoord[0], texCoord[1] + texCoord[3]);
     v->texIndex = index;
+	v->color = color;
 
     (v+1)->position = bottomLeft + glm::vec3(size.x * xAxis.x, 0.f, 0.f);
     (v+1)->texCoord = glm::vec2(texCoord[0]+ texCoord[2], texCoord[1] + texCoord[3]);
     (v+1)->texIndex = index;
+	(v+1)->color = color;
 
     (v+2)->position = bottomLeft + glm::vec3(size.x * xAxis.x, size.y * yAxis.y, 0.f);
     (v+2)->texCoord = glm::vec2(texCoord[0] + texCoord[2], texCoord[1]);
     (v+2)->texIndex = index;
+	(v+2)->color = color;
 
-    (v+3)->position = bottomLeft + glm::vec3(0.f, size.y * yAxis.y, 0.f);
+	(v+3)->position = bottomLeft + glm::vec3(0.f, size.y * yAxis.y, 0.f);
     (v+3)->texCoord = glm::vec2(texCoord[0], texCoord[1]);
     (v+3)->texIndex = index;
-
+	(v+3)->color = color;
 }
 
 void Quad::clear(VertexTexture * v) {

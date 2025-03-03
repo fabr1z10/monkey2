@@ -77,8 +77,8 @@ bool PolyLine::raycastY(glm::vec2 origin, int dir) const
     return false;
 }
 
-
-std::shared_ptr<IModel> Line::makeModel(glm::vec4 color) {
+// mode is ignored for line and polyline
+std::shared_ptr<IModel> Line::makeModel(glm::vec4 color, int) {
 
 	std::vector<float> data {
 		x0, y0, 0.f, x1, y1, 0.f, color.r, color.g, color.b, color.a
@@ -90,7 +90,7 @@ std::shared_ptr<IModel> Line::makeModel(glm::vec4 color) {
 
 }
 
-std::shared_ptr<IModel> PolyLine::makeModel(glm::vec4 color) {
+std::shared_ptr<IModel> PolyLine::makeModel(glm::vec4 color, int) {
 	std::vector<float> data;
 	for (auto i = 0 ; i < _x.size() - 1; ++i) {
 		data.insert(data.end(), {_x[i], _y[i], 0.f, _x[i+1], _y[i+1], 0.f, color.r, color.g, color.b, color.a});

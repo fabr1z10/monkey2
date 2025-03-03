@@ -26,13 +26,16 @@
 #include "components/follow.h"
 
 #include "actions/walk.h"
+#include "actions/animate.h"
 #include "actions/delay.h"
 #include "actions/callfunc.h"
+#include "actions/waitclick.h"
 #include "components/depthscale.h"
 #include "components/hotspot.h"
 
 #include "shapes/line.h"
 #include "shapes/polygon.h"
+#include "shapes/rect.h"
 
 using namespace adventure;
 using namespace shapes;
@@ -48,6 +51,13 @@ PYBIND11_MODULE(monkey2, m) {
     py::module_ mAdv = m.def_submodule("adventure");
     py::module_ mAct = m.def_submodule("actions");
     py::module_ mSha = m.def_submodule("shapes");
+
+	py::enum_<HAlign>(m, "Alignment")
+		.value("LEFT", HAlign::LEFT)
+		.value("RIGHT", HAlign::RIGHT)
+		.value("CENTER", HAlign::CENTER)
+		.export_values();
+
 
 	m.def("test", &test);
 
@@ -71,6 +81,9 @@ PYBIND11_MODULE(monkey2, m) {
 
     py::class_<Line, Shape, std::shared_ptr<Line>>(mSha, "Line")
         .def(py::init<glm::vec2, glm::vec2>(), py::arg("a"), py::arg("b"));
+
+	py::class_<Rect, Shape, std::shared_ptr<Rect>>(mSha, "Rect")
+		.def(py::init<float, float, glm::vec2>(), py::arg("width"), py::arg("height"), py::arg("anchor")=glm::vec2(0.f));
 
     py::class_<PolyLine, Shape, std::shared_ptr<PolyLine>>(mSha, "PolyLine")
         .def(py::init<const std::vector<float>&>(), py::arg("points"));
@@ -104,14 +117,19 @@ PYBIND11_MODULE(monkey2, m) {
 		.def(py::init<>())
         .def_property_readonly("id", &Node::id)
 		.def_property("userData", &Node::getUserData, &Node::setUserData, py::return_value_policy::reference)
+		.def_property("active", &Node::active, &Node::setActive)
+		.def_property("show", &Node::show, &Node::setShow)
 		.def("setModel", &Node::setModel, py::arg("model"), py::arg("batch") = -1)
 		.def("setTransform", &Node::setTransform)
 		.def("add", &Node::add)
+		.def("remove", &Node::remove)
 		.def("addComponent", &Node::addComponent)
         .def("getPosition", &Node::getWorldPosition)
         .def("setPosition", &Node::setPosition);
 
-	py::class_<Component, std::shared_ptr<Component>>(m, "C");
+	py::class_<Component, std::shared_ptr<Component>>(m, "C")
+		.def("keepAlive", &HotSpot::setPySelf);
+
 
 	py::class_<Keyboard, Component, std::shared_ptr<Keyboard>>(m, "Keyboard")
 	    .def(py::init<>())
@@ -126,11 +144,14 @@ PYBIND11_MODULE(monkey2, m) {
     py::class_<Collider, Component, std::shared_ptr<Collider>>(m, "Collider")
         .def(py::init<std::shared_ptr<Shape>>(), py::arg("shape"));
 
-    py::class_<HotSpot, Component, std::shared_ptr<HotSpot>>(m, "HotSpot")
-        .def(py::init<std::shared_ptr<Shape>, int>(), py::arg("shape"), py::arg("priority"))
-        .def("setOnEnter", &HotSpot::setOnEnter)
-        .def("setOnLeave", &HotSpot::setOnLeave)
-        .def("setOnClick", &HotSpot::setOnClick);
+    py::class_<HotSpot, PyHotSpot, Component, std::shared_ptr<HotSpot>>(m, "HotSpot")
+        .def(py::init<std::shared_ptr<Shape>, int, int>());
+//		.def(py::init([](std::shared_ptr<Shape> shape, int priority, int camera) {
+//			auto instance = std::make_shared<PyHotSpot>(shape, priority, camera);
+//			py::object self = py::cast(instance);
+//			instance->setPySelf(self);
+//			return instance;
+//		}));
 
     py::class_<MouseListener, std::shared_ptr<MouseListener>>(m, "_MouseListener");
 
@@ -224,7 +245,7 @@ PYBIND11_MODULE(monkey2, m) {
 
     py::class_<Scheduler, Node, std::shared_ptr<Scheduler>>(m, "Scheduler")
         .def(py::init<>())
-        .def("add", &Scheduler::add);
+        .def("play", &Scheduler::play);
 
     py::class_<CollisionEngine, std::shared_ptr<CollisionEngine>>(m, "CollisionEngine")
         .def(py::init<>());
@@ -232,7 +253,11 @@ PYBIND11_MODULE(monkey2, m) {
     /* Adventure
      */
     py::class_<Text, Node, std::shared_ptr<Text>>(m, "Text")
-        .def(py::init<const std::string&, const std::string&>());
+        .def(py::init<const std::string&, const std::string&, glm::vec4, HAlign, float, glm::vec2>(),
+                py::arg("font"), py::arg("text"), py::arg("color"),
+				py::arg("align") = HAlign::LEFT, py::arg("width")=0.f,
+				py::arg("anchor")=glm::vec2(0.f))
+		.def_property_readonly("size", &Text::getSize);
 
     py::class_<WalkArea, Node, std::shared_ptr<WalkArea>>(mAdv, "WalkArea")
         .def(py::init<const std::vector<float>&, int, glm::vec4>(),
@@ -241,10 +266,9 @@ PYBIND11_MODULE(monkey2, m) {
         .def("addLine", &WalkArea::addLine, py::arg("points"), py::arg("node")=nullptr);
 
     py::class_<MouseController, Node, MouseListener, std::shared_ptr<MouseController>>(mAdv, "MouseController")
-        .def(py::init<int, WalkArea*, Node*, Scheduler*, float>())
+        .def(py::init<WalkArea*, Node*, Scheduler*, float>())
+		.def("activateCamera", &MouseController::activateCamera)
         .def("setCursor", &MouseController::setCursor)
-		.def("setOnEnter", &MouseController::setOnEnter)
-		.def("setOnLeave", &MouseController::setOnLeave)
 		.def("setOnClick", &MouseController::setOnClick)
 		.def("setOnRightClick", &MouseController::setOnRightClick);
 
@@ -253,7 +277,10 @@ PYBIND11_MODULE(monkey2, m) {
     /*
      * Actions
      */
-    py::class_<actions::WalkTo, Action, std::shared_ptr<actions::WalkTo>>(mAct, "Walk")
+    py::class_<actions::Animate, Action, std::shared_ptr<actions::Animate>>(mAct, "Animate")
+		.def(py::init<Node*, const std::string&>());
+
+	py::class_<actions::WalkTo, Action, std::shared_ptr<actions::WalkTo>>(mAct, "Walk")
         .def(py::init<Node*, WalkArea*, glm::vec2, float>(), py::arg("node"), py::arg("walkarea"),
              py::arg("position"), py::arg("speed"));
 
@@ -262,5 +289,9 @@ PYBIND11_MODULE(monkey2, m) {
 
     py::class_<actions::CallFunc, Action, std::shared_ptr<actions::CallFunc>>(mAct, "CallFunc")
         .def(py::init<pybind11::function>(), py::arg("callback"));
+
+	py::class_<actions::WaitForMouseClick, Action, std::shared_ptr<actions::WaitForMouseClick>>(mAct, "WaitForMouseClick")
+		.def(py::init<>());
+
 
 }

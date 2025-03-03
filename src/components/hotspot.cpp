@@ -7,10 +7,12 @@
 // mouse entering the area, mouse leaving area, mouse clicking
 
 
-HotSpot::HotSpot(std::shared_ptr<Shape> shape, int priority) : Component(), _shape(shape), _priority(priority)
+HotSpot::HotSpot(std::shared_ptr<Shape> shape, int priority, int cam) : Component(),
+	_shape(shape), _priority(priority), _cam(cam)
 {
 
 }
+
 
 void HotSpot::start()
 {
@@ -21,23 +23,11 @@ void HotSpot::start()
 HotSpot::~HotSpot() {
     auto hsm = dynamic_cast<adventure::MouseController*>(Game::instance().getRoom()->getHotSpotManager());
     hsm->remove(this);
+	_py_self = pybind11::none();
 
 }
 
-void HotSpot::setOnEnter(pybind11::function f)
-{
-    _onEnter = f;
-}
 
-void HotSpot::setOnLeave(pybind11::function f)
-{
-    _onLeave = f;
-}
-
-void HotSpot::setOnClick(pybind11::function f)
-{
-    _onClick = f;
-}
 
 bool HotSpot::isInside(glm::vec2 worldCoords) {
 	auto local = glm::vec2(glm::inverse(m_node->getWorldMatrix()) * glm::vec4(worldCoords, 0.f, 1.f));

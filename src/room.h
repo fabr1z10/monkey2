@@ -32,6 +32,8 @@ public:
 
 	Camera* getCamera(int camId);
 
+	int getCameraCount() const;
+
 	void setClearColor(glm::vec3);
 
     void addShader(Shader*);
@@ -69,4 +71,8 @@ inline void Room::addShader(Shader * shader) {
 
 inline void Room::setStartUpFunction(pybind11::function f) {
     _startUpFunction = f;
+}
+
+inline int Room::getCameraCount() const {
+	return _cameras.size();
 }

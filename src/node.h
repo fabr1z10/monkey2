@@ -19,9 +19,13 @@ public:
 
 	void add(std::shared_ptr<Node>);
 
+	void remove();
+
 	virtual void start();
 
 	virtual void update(double);
+
+
 
 	const std::vector<std::shared_ptr<Node>>& getChildren() const;
 
@@ -48,6 +52,16 @@ public:
 	pybind11::object getUserData();
 
 	void setUserData(pybind11::object);
+
+	bool active() const;
+
+	bool show() const;
+
+	void setActive(bool);
+
+	void setShow(bool);
+
+	bool isMarkedForRemoval() const;
 private:
     void notifyMove();
 	std::vector<std::shared_ptr<Node>> _children;
@@ -61,6 +75,9 @@ private:
     static int _nextId;
     static std::unordered_map<int, Node*> _nodes;
 	pybind11::object _userData;
+	bool _active;
+	bool _show;
+	bool _toBeRemoved;
 };
 
 inline const std::vector<std::shared_ptr<Node>> & Node::getChildren() const {
@@ -83,4 +100,25 @@ inline pybind11::object Node::getUserData() {
 
 inline void Node::setUserData(pybind11::object data) {
 	_userData = data;
+}
+
+inline bool Node::active() const {
+	return _active;
+}
+
+inline bool Node::show() const {
+	return _show;
+}
+
+inline void Node::setActive(bool value) {
+	_active = value;
+}
+
+
+inline void Node::setShow(bool value) {
+	_show = value;
+}
+
+inline bool Node::isMarkedForRemoval() const {
+	return _toBeRemoved;
 }

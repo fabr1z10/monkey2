@@ -11,7 +11,7 @@ public:
 
     void update(double) override;
 
-    void add(std::shared_ptr<Script>);
+    void play(std::shared_ptr<Script>);
 
 
 

@@ -12,7 +12,7 @@ namespace shapes {
 
         bool raycastY(glm::vec2 origin, int dir) const override;
 
-		std::shared_ptr<IModel> makeModel(glm::vec4 color) override;
+		std::shared_ptr<IModel> makeModel(glm::vec4 color, int mode) override;
 
 		bool isInside(glm::vec2) override;
 
@@ -29,7 +29,7 @@ namespace shapes {
 
         bool raycastY(glm::vec2 origin, int dir) const override;
 
-		std::shared_ptr<IModel> makeModel(glm::vec4 color) override;
+		std::shared_ptr<IModel> makeModel(glm::vec4 color, int mode) override;
 
 		bool isInside(glm::vec2) override;
 

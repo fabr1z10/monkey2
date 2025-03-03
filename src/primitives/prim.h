@@ -100,6 +100,7 @@ namespace primitives {
         glm::vec2 anchor;
         glm::vec2 size;
         int index;
+		glm::vec4 color;
 
         Quad(glm::vec4 texCoords, glm::vec2 anchor, glm::vec2 size, int);
 
@@ -107,8 +108,8 @@ namespace primitives {
          * of the size of the texture
          */
         Quad(const float*);
-        Quad(const float*, float invw, float invh);
-        Quad(const float*, float invw, float invh, int texId);
+        Quad(const float*, float invw, float invh, glm::vec4 color);
+        Quad(const float*, float invw, float invh, int texId, glm::vec4 color);
 
         static constexpr GLenum _glPrim = GL_TRIANGLES;
 
@@ -119,7 +120,7 @@ namespace primitives {
         static constexpr int _shaderType = 3;
 
         // 4 texture coordinates, 2 anchor point, and texture index
-        static constexpr int _floatsPerPrimitive = 9;
+        static constexpr int _floatsPerPrimitive = 13;
 
         static constexpr int _indices[6] = {0, 1, 2, 0, 2, 3};
 

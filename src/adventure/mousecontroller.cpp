@@ -5,19 +5,33 @@
 #include "../util.h"
 #include "../actions/walk.h"
 #include "../renderer.h"
+#include "../pyhelper.h"
 
 using namespace adventure;
 
 extern GLFWwindow * window;
 
-MouseController::MouseController(int camId, WalkArea* walkarea, Node* player, Scheduler* scheduler, float speed) :
-    Node(), MouseListener(), _camId(camId), _walkarea(walkarea), _player(player), _scheduler(scheduler), _speed(speed), _cursor(nullptr), _previous(nullptr) {
+// mouse controller first checks on which camera we are on
+MouseController::MouseController(WalkArea* walkarea, Node* player, Scheduler* scheduler, float speed) :
+    Node(), MouseListener(), _walkarea(walkarea), _player(player), _scheduler(scheduler), _speed(speed), _cursor(nullptr), _previous(nullptr) {
 
 }
 
 void MouseController::start() {
-    _cam = dynamic_cast<OrthoCamera*>(Game::instance().getRoom()->getCamera(_camId));
-    _camViewport = _cam->getViewport();
+
+	_room = Game::instance().getRoom();
+	_cameraCount = _room->getCameraCount();
+	for (int i = 0; i < _cameraCount; ++i) {
+		CameraInfo info;
+		info.cam = dynamic_cast<OrthoCamera*>(_room->getCamera(i));
+		info.viewport = info.cam->getViewport();
+		info.active = true;
+		_cam.push_back(info);
+		if (_hotSpots.find(i) == _hotSpots.end()) {
+			_hotSpots[i] = std::map<int, std::unordered_set<HotSpot*>>();
+		}
+
+	}
 	_cursorType = 0;
 	if (_onRightClick) {
 		_onRightClick(_cursorSequence[_cursorType]);
@@ -25,36 +39,29 @@ void MouseController::start() {
 }
 
 void MouseController::cursorPosCallback(GLFWwindow*, double x, double y) {
-
     // first get device coordinates
     if (_cursor != nullptr) {
         auto devCoords = Game::instance().getDeviceCoordinates({x, y});
-
-
-
-        //std::cout << "pipa:" << devCoords << "\n";
         _cursor->setPosition(glm::vec3(devCoords, 10.f));
-
     }
 
 
-    glm::vec2 worldCoords;
-    if (screenCoordsToWorldCoords({x, y}, worldCoords)) {
+    //glm::vec2 worldCoords;
+	_currentCameraId = -1;
+    if (int cam = screenCoordsToWorldCoords({x, y}, _worldCoords); cam >= 0) {
+		_currentCameraId = cam;
         // check hotspot
 		bool handled=false;
-		for (const auto&[priority, s] : _hotSpots) {
+		//std::cout << //" camera = " << cam << "\n";
+		for (const auto&[priority, s] : _hotSpots.at(cam)) {
 			for (const auto& h : s) {
-				if (h->isInside(worldCoords)) {
+				if (h->isInside(_worldCoords)) {
 					// if I'm here --> we can break and handle the enter
 					if (_previous != h) {
 						if (_previous != nullptr) {
-							if (_onLeave) {
-								_onLeave(_previous->getNode());
-							}
+							_previous->onLeave();
 						}
-						if (_onEnter) {
-							_onEnter(h->getNode());
-						}
+						h->onEnter();
 						_previous = h;
 					}
 					handled=true;
@@ -63,25 +70,29 @@ void MouseController::cursorPosCallback(GLFWwindow*, double x, double y) {
 			}
 			if (handled) break;
 		}
-		if (!handled && _previous != nullptr && _onLeave) {
-			_onLeave(_previous->getNode());
+		if (!handled && _previous != nullptr) {
+			_previous->onLeave();
 			_previous = nullptr;
 		}
     }
 }
 
 
-bool MouseController::screenCoordsToWorldCoords(glm::vec2 screenCoords, glm::vec2& worldCoords) const {
-    auto devCoords = Game::instance().getDeviceCoordinates(screenCoords);
-    bool isInViewport = devCoords.x >= _camViewport.x && devCoords.x <= _camViewport.x + _camViewport[2] &&
-                        devCoords.y >= _camViewport.y && devCoords.y <= _camViewport.y + _camViewport[3];
-    if (isInViewport) {
-        worldCoords = _cam->getWorldCoordinates(devCoords);
-
-        //std::cout << "ora in: " << worldCoords << "\n";
-        return true;
-    }
-    return false;
+int MouseController::screenCoordsToWorldCoords(glm::vec2 screenCoords, glm::vec2& worldCoords) const {
+	// loop through all cameras
+	auto devCoords = Game::instance().getDeviceCoordinates(screenCoords);
+	for (int i = 0; i < _cameraCount; ++i) {
+		auto& cam = _cam[i];
+		if (!cam.active) continue;
+		bool isInViewport = devCoords.x >= cam.viewport.x && devCoords.x <= cam.viewport.x + cam.viewport[2] &&
+							devCoords.y >= cam.viewport.y && devCoords.y <= cam.viewport.y + cam.viewport[3];
+		if (isInViewport) {
+			worldCoords = cam.cam->getWorldCoordinates(devCoords);
+			//std::cout << "cursor in cam " << i << ", pos = " << worldCoords << "\n";
+			return i;
+		}
+	}
+	return -1;
 
 }
 void MouseController::mouseButtonCallback(GLFWwindow*, int button, int action, int mods) {
@@ -96,6 +107,7 @@ void MouseController::mouseButtonCallback(GLFWwindow*, int button, int action, i
      * The pathfinding algo is then run to determine the path to the
      * target point.
      */
+
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action==GLFW_PRESS && _cursor != nullptr) {
         _cursorType++;
         if (_cursorType >= _cursorSequence.size()) {
@@ -107,43 +119,25 @@ void MouseController::mouseButtonCallback(GLFWwindow*, int button, int action, i
 		}
     }
 
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+    if (active() && button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 
 		// if we are hovering on a hotspot ... call onClick
-		if (_previous != nullptr && _onClick) {
-			_onClick(_previous->getNode());
+		if (_previous != nullptr) {
+			_previous->onClick(_worldCoords);
 		} else {
-			double xpos, ypos;
-			glfwGetCursorPos(window, &xpos, &ypos);
-			glm::vec2 worldCoords;
-			if (screenCoordsToWorldCoords({xpos, ypos}, worldCoords)) {
-				std::cout << "Clicked at " << worldCoords << "\n";
-				auto script = std::make_shared<Script>("__PLAYER");
-				script->addAction(std::make_shared<actions::WalkTo>(_player, _walkarea, worldCoords, _speed));
-				_scheduler->add(script);
+			// if we click outside a hotspot, we call onClick
+			if (_onClick) {
 
-//            auto pos = _player->getWorldPosition();
-//            auto path = _walkarea->dijkstraShortestPath(glm::vec2(pos), worldCoords);
-//            for (size_t i = 0; i < path.size(); i++) {
-//                std::cout << path[i] << (i == path.size() - 1 ? "\n" : "->");
-//            }
-//            if (!path.empty()) {
-//                auto script = std::make_shared<Script>("__PLAYER");
-//                int j = -1;
-//                std::string dir;
-//                for (size_t i = 1; i < path.size(); ++i) {
-//                    glm::vec2 increment = path[i] - path[i-1];
-//                    dir = (increment.y >= fabs(increment.x) ? "-n" : (increment.y <= -fabs(increment.x) ? "-s" : "-e"));
-//                    auto goingRight = (path[i].x - path[i-1].x) >= 0.f;
-//                    script->addAction(std::make_shared<actions::FlipHorizontal>(_player, !goingRight), j++);
-//                    script->addAction(std::make_shared<actions::Animate>(_player, "walk" + dir), j++);
-//                    script->addAction(std::make_shared<actions::MoveTo>(_player, path[i], _speed), j++);
-//                }
-//                script->addAction(std::make_shared<actions::Animate>(_player, "idle" + dir), j++);
-//
-//                _scheduler->add(script);
-//            }
-
+				double xpos, ypos;
+				glfwGetCursorPos(window, &xpos, &ypos);
+				glm::vec2 worldCoords;
+				if (int camId = screenCoordsToWorldCoords({xpos, ypos}, worldCoords); camId != -1) {
+					_onClick(camId, worldCoords);
+					//std::cout << "Clicked at " << worldCoords << "\//n";
+					//auto script = std::make_shared<Script>("__PLAYER");
+					//script->addAction(std::make_shared<actions::WalkTo>(_player, _walkarea, worldCoords, _speed));
+					//_scheduler->play(script);
+				}
 			}
 		}
     }
@@ -159,23 +153,14 @@ void MouseController::setCursor(Node* node, const std::vector<std::string>& seq)
 
 void MouseController::add(HotSpot * hs)
 {
-    _hotSpots[hs->getPriority()].insert(hs);
+    _hotSpots[hs->getCamera()][hs->getPriority()].insert(hs);
 }
 
 void MouseController::remove(HotSpot* hs) {
-    _hotSpots[hs->getPriority()].erase(hs);
+    _hotSpots[hs->getCamera()][hs->getPriority()].erase(hs);
 }
 
 
-void MouseController::setOnEnter(pybind11::function f)
-{
-	_onEnter = f;
-}
-
-void MouseController::setOnLeave(pybind11::function f)
-{
-	_onLeave = f;
-}
 
 void MouseController::setOnClick(pybind11::function f)
 {
@@ -185,4 +170,12 @@ void MouseController::setOnClick(pybind11::function f)
 void MouseController::setOnRightClick(pybind11::function f)
 {
 	_onRightClick = f;
+}
+
+void MouseController::activateCamera(int camId, bool value) {
+	_cam[camId].active = value;
+	if (!value && _currentCameraId == camId && _previous) {
+		_currentCameraId = -1;
+		_previous = nullptr;
+	}
 }

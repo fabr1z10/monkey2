@@ -3,42 +3,71 @@
 
 #include "../component.h"
 #include "../shape.h"
-#include <pybind11/pybind11.h>
+#include "../pyhelper.h"
 
 class HotSpot : public Component {
-
 public:
-    HotSpot(std::shared_ptr<Shape> shape, int);
+    HotSpot(std::shared_ptr<Shape> shape, int, int);
+
+	virtual ~HotSpot();
 
     void start() override;
 
 	bool isInside(glm::vec2);
 
-    virtual ~HotSpot();
+    virtual void onEnter() = 0;
 
-    void setOnEnter(pybind11::function f);
+    virtual void onLeave() = 0;
 
-    void setOnLeave(pybind11::function f);
-
-    void setOnClick(pybind11::function f);
-
-    void onEnter() {}
-
-    void onLeave(){}
-
-    void onClick(){}
+    virtual void onClick(glm::vec2) = 0;
 
     int getPriority() const;
 
+	int getCamera() const;
+
+
 private:
     int _priority;
+	int _cam;
     std::shared_ptr<Shape> _shape;
-    pybind11::function _onEnter;
-    pybind11::function _onLeave;
-    pybind11::function _onClick;
+
 };
 
+inline int HotSpot::getCamera() const {
+	return _cam;
+}
 
 inline int HotSpot::getPriority() const {
     return _priority;
 }
+// Step 2: Define a trampoline class inheriting from Base
+class PyHotSpot : public HotSpot {
+public:
+	using HotSpot::HotSpot; // Inherit constructors
+
+	void onEnter() override {
+		PYBIND11_OVERRIDE_PURE(
+				void,       // Return type
+				HotSpot,    // Parent class
+				onEnter     // Function name
+		);
+	}
+
+	void onLeave() override {
+		PYBIND11_OVERRIDE_PURE(
+				void,    // Return type
+				HotSpot,    // Parent class
+				onLeave // Function name
+		);
+	}
+
+	void onClick(glm::vec2 pos) override {
+		PYBIND11_OVERRIDE_PURE(
+				void,    // Return type
+				HotSpot,    // Parent class
+				onClick, // Function name,
+				pos
+		);
+	}
+
+};

@@ -9,6 +9,9 @@
 class IRenderer {
 public:
     IRenderer() : _node(nullptr), _started(false) {}
+
+	virtual ~IRenderer() = default;
+
 	void setNode(Node*);
 	virtual void update() {
     }
@@ -40,7 +43,9 @@ public:
 		_nPrimitives = _model->getPrimitiveCount();
 	}
 
-
+	~Renderer() {
+		for (auto i : _primIds) _batch->release(i);
+	}
 
 	// at initialization, renderer will request the required number of primitives from the batch
     void start() override {

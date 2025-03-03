@@ -40,7 +40,7 @@ void Scheduler::update(double dt) {
 
 }
 
-void Scheduler::add(std::shared_ptr<Script> s) {
+void Scheduler::play(std::shared_ptr<Script> s) {
     _scriptBuffer.push_back(s);
 
     // if a script has the same name of the new script, kill it

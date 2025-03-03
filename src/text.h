@@ -14,17 +14,10 @@ enum class HAlign {
 };
 
 
-enum class Anchor {
-    TOPLEFT = 0,
-    TOPRIGHT = 1,
-    BOTTOMLEFT = 2,
-    BOTTOMRIGHT = 3,
-    CENTER = 4
-};
-
 class Text : public Node {
 public:
-    Text(const std::string& font, const std::string& text);
+    Text(const std::string& font, const std::string& text, glm::vec4 color,
+		 HAlign align = HAlign::LEFT, float width = 0.f, glm::vec2 anchor = glm::vec2(0.f));
 
     void updateText(const std::string&);
 
@@ -47,9 +40,10 @@ private:
     int _lines;
     int _paletteIndex;
     HAlign _hAlign;
-    Anchor _anchor;
+    glm::vec2 _anchor;
     //std::string _sheetId;
     std::string _text;
+	glm::vec4 _color;
 
 
 };

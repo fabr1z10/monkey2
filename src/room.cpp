@@ -82,10 +82,15 @@ void Room::update(double dt) {
 		auto current = li.front();
 		li.pop_front();
 
-		current->update(dt);
 
-		std::transform(current->getChildren().begin(), current->getChildren().end(), std::back_inserter(li),
-				 [](const std::shared_ptr<Node>& ptr) { return ptr.get(); });
+		if (current->active()) {
+			// if node is not active, then we don't need to update
+			// it and also we don't care about updating its children
+			current->update(dt);
+			std::transform(current->getChildren().begin(), current->getChildren().end(), std::back_inserter(li),
+						   [](const std::shared_ptr<Node> &ptr) { return ptr.get(); });
+		}
+
 
 	}
 

@@ -7,7 +7,8 @@ int Node::_nextId = 0;
 
 std::unordered_map<int, Node*> Node::_nodes;
 
-Node::Node() : _id(Node::_nextId++), _renderer(nullptr), _parent(nullptr) {
+Node::Node() : _id(Node::_nextId++), _renderer(nullptr), _parent(nullptr), _active(true),
+	_show(true), _toBeRemoved(false) {
 	_modelMatrix = glm::mat4(1.f);
 	_worldMatrix = glm::mat4(1.f);
     _nodes[_id] = this;
@@ -15,6 +16,7 @@ Node::Node() : _id(Node::_nextId++), _renderer(nullptr), _parent(nullptr) {
 }
 
 Node::~Node() {
+	std::cout << " ** removed node " << _id << "\n";
     _nodes.erase(_id);
 }
 
@@ -48,14 +50,23 @@ void Node::notifyMove() {
 }
 
 void Node::update(double dt) {
+	// first remove all nodes marked as removal
+	_children.erase(std::remove_if(_children.begin(), _children.end(), [](const std::shared_ptr<Node>& node)
+		{ return node->isMarkedForRemoval(); }), _children.end());
+
+
     for (auto& c : _components) {
         c->update(dt);
     }
-	// node update is not recursive!
-    if (_renderer != nullptr) {
-        _renderer->update();
-    }
+	// note that wehn node is inactive, render also should not be performed!
+	// in fact, renderer updates position / frame, and if node is not
+	// active, we don't want that.
+	// node update is not recursive!ma s
+	if (_renderer != nullptr) {
+		_renderer->update();
+	}
 }
+
 
 glm::mat4 Node::getWorldMatrix() const {
 	return _worldMatrix;
@@ -81,9 +92,32 @@ void Node::add(std::shared_ptr<Node> node) {
 	node->notifyMove();
 }
 
+void Node::remove() {
+	_toBeRemoved = true;
+}
+
+
 void Node::addComponent(std::shared_ptr<Component> c) {
     _components.push_back(c);
     c->setNode(this);
+	// Extract Python object if this is a Python-derived class
+	// Try to preserve the Python object using a different approach
+	try {
+		// Acquire the GIL
+		py::gil_scoped_acquire gil;
+
+		// This will either find the existing Python object or create a new wrapper
+		py::object py_obj = py::cast(c);
+
+		// Store the Python object reference in the component
+		c->setPySelf(py_obj);
+
+		std::cout << "Python object reference stored in component" << std::endl;
+	} catch (const std::exception& e) {
+		std::cerr << "Failed to create Python reference: " << e.what() << std::endl;
+	}
+
+
 }
 
 void Node::move(glm::vec2 dx) {

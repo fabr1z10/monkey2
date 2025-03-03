@@ -49,7 +49,7 @@ bool Polygon::raycastY(glm::vec2 origin, int dir) const
     return false;
 }
 
-std::shared_ptr<IModel> Polygon::makeModel(glm::vec4 color) {
+std::shared_ptr<IModel> Polygon::makeModel(glm::vec4 color, int) {
 
 	std::vector<float> data;
 	auto n = _points.size();

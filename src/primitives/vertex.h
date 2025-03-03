@@ -44,6 +44,7 @@ public:
     glm::vec2 texCoord;
     // Each quad (sprite) needs to know which texture to use, so we add an integer texIndex to the vertex attributes:
     int texIndex;
+	glm::vec4 color;
 
     static void setupVertices() {
 
@@ -58,6 +59,8 @@ public:
         glEnableVertexAttribArray(2);
         glVertexAttribIPointer(2, 1, GL_INT, stride, (const void *) offsetof(VertexTexture, texIndex));
 
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, stride, (const void *) offsetof(VertexTexture, color));
 
 
     }

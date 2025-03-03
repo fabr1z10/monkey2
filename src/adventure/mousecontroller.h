@@ -7,13 +7,14 @@
 #include "../scheduler.h"
 #include <map>
 
+class Room;
 
 namespace adventure {
     class WalkArea;
 
     class MouseController : public Node, public MouseListener {
     public:
-        MouseController(int camId, WalkArea*,Node*, Scheduler* scheduler, float speed);
+        MouseController(WalkArea*,Node*, Scheduler* scheduler, float speed);
 
         void start() override;
 
@@ -27,31 +28,37 @@ namespace adventure {
 
         void remove(HotSpot*);
 
-		void setOnEnter(pybind11::function f);
-
-		void setOnLeave(pybind11::function f);
-
 		void setOnClick(pybind11::function f);
 
 		void setOnRightClick(pybind11::function f);
+
+		void activateCamera(int, bool);
     private:
-        bool screenCoordsToWorldCoords(glm::vec2 screenCoords, glm::vec2& worldCoords) const;
+		struct CameraInfo {
+			OrthoCamera* cam;
+			glm::vec4 viewport;
+			bool active;
+		};
+        int screenCoordsToWorldCoords(glm::vec2 screenCoords, glm::vec2& worldCoords) const;
         WalkArea *_walkarea;
         Node* _player;
         Node* _cursor;
         Scheduler* _scheduler;
         int _camId;
-        OrthoCamera *_cam;
-        glm::vec4 _camViewport;
+        std::vector<CameraInfo> _cam;
         float _speed;
         std::vector<std::string> _cursorSequence;
         int _cursorType;
-        std::map<int, std::unordered_set<HotSpot*>> _hotSpots;
+        std::unordered_map<int, std::map<int, std::unordered_set<HotSpot*>>> _hotSpots;
 		HotSpot* _previous;
 		pybind11::function _onEnter;
 		pybind11::function _onLeave;
 		pybind11::function _onClick;
 		pybind11::function _onRightClick;
+		Room* _room;
+		int _cameraCount;
+		int _currentCameraId;
+		glm::vec2 _worldCoords;
     };
 
 

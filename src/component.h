@@ -14,9 +14,11 @@ public:
     Node* getNode();
     bool isActive() const;
     void setActive(bool);
+	void setPySelf(pybind11::object self);
 protected:
     Node* m_node;
     bool _active;
+	pybind11::object _py_self;
 };
 
 inline Node* Component::getNode() {
@@ -27,6 +29,9 @@ inline void Component::setNode(Node* node) {
     m_node = node;
 }
 
+inline void Component::setPySelf(pybind11::object self) {
+	_py_self = self;
+}
 
 
 inline bool Component::isActive() const {
