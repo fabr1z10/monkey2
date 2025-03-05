@@ -6,6 +6,7 @@
 using namespace shapes;
 
 Line::Line(glm::vec2 A, glm::vec2 B) : Shape(), _A(A), _B(B) {
+	_type = ShapeType::LINE;
     if (A.x < B.x) {
         x0 = A.x;
         x1 = B.x;
@@ -23,7 +24,7 @@ Line::Line(glm::vec2 A, glm::vec2 B) : Shape(), _A(A), _B(B) {
 }
 
 
-bool Line::isInside(glm::vec2 P) {
+bool Line::isInside(glm::vec2 P) const {
 	double crossProduct = cross2D(_B - _A, P - _A);
 	if (std::fabs(crossProduct) > EPSILON) return false; // Not collinear
 
@@ -48,7 +49,7 @@ bool Line::raycastY(glm::vec2 origin, int dir) const {
     }
 }
 PolyLine::PolyLine(const std::vector<float> &data) {
-
+	_type = ShapeType::POLYLINE;
     M_Assert(data.size() % 2 == 0, "Polyline needs an even number of floats (2 per point)");
 
     for (size_t i = 0; i< data.size(); i+=2) {
@@ -99,7 +100,7 @@ std::shared_ptr<IModel> PolyLine::makeModel(glm::vec4 color, int) {
 	return model;
 }
 
-bool PolyLine::isInside(glm::vec2 P) {
+bool PolyLine::isInside(glm::vec2 P) const {
 	glm::vec2 A(_x[0], _y[0]);
 	for (auto i = 0; i < _x.size()-1; ++i) {
 		glm::vec2 B(_x[i+1], _y[i+1]);

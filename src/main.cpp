@@ -36,6 +36,7 @@
 #include "shapes/line.h"
 #include "shapes/polygon.h"
 #include "shapes/rect.h"
+#include "shapes/point.h"
 
 using namespace adventure;
 using namespace shapes;
@@ -91,6 +92,9 @@ PYBIND11_MODULE(monkey2, m) {
     py::class_<Polygon, Shape, std::shared_ptr<Polygon>>(mSha, "Polygon")
         .def(py::init<const std::vector<float>&>(), py::arg("points"));
 
+	py::class_<Point, Shape, std::shared_ptr<Point>>(mSha, "Point")
+		.def(py::init<>());
+
 
     py::class_<Game>(m, "Game")
 		.def("start", &Game::start)
@@ -125,7 +129,8 @@ PYBIND11_MODULE(monkey2, m) {
 		.def("remove", &Node::remove)
 		.def("addComponent", &Node::addComponent)
         .def("getPosition", &Node::getWorldPosition)
-        .def("setPosition", &Node::setPosition);
+        .def("setPosition", &Node::setPosition)
+		.def("setAnimation", &Node::setAnimation);
 
 	py::class_<Component, std::shared_ptr<Component>>(m, "C")
 		.def("keepAlive", &HotSpot::setPySelf);
@@ -142,7 +147,8 @@ PYBIND11_MODULE(monkey2, m) {
         .def(py::init<float, float>(), py::arg("y0"), py::arg("y1"));
 
     py::class_<Collider, Component, std::shared_ptr<Collider>>(m, "Collider")
-        .def(py::init<std::shared_ptr<Shape>>(), py::arg("shape"));
+        .def(py::init<std::shared_ptr<Shape>, int, int, const std::string&>(),
+                py::arg("shape"), py::arg("flag"), py::arg("mask"), py::arg("tag"));
 
     py::class_<HotSpot, PyHotSpot, Component, std::shared_ptr<HotSpot>>(m, "HotSpot")
         .def(py::init<std::shared_ptr<Shape>, int, int>());
@@ -247,9 +253,13 @@ PYBIND11_MODULE(monkey2, m) {
         .def(py::init<>())
         .def("play", &Scheduler::play);
 
-    py::class_<CollisionEngine, std::shared_ptr<CollisionEngine>>(m, "CollisionEngine")
-        .def(py::init<>());
 
+    py::class_<ICollisionEngine, std::shared_ptr<ICollisionEngine>>(m, "ICollisionEngine")
+		.def("addResponse", &ICollisionEngine::addResponse, py::arg("tag1"), py::arg("tag2"),
+			 py::arg("onStart")=py::none(), py::arg("onEnd")=py::none());
+        //.def(py::init<>());
+	py::class_<SpatialHashingCollisionEngine, ICollisionEngine, std::shared_ptr<SpatialHashingCollisionEngine>>(m, "CollisionEngine")
+		.def(py::init<float, float>());
     /* Adventure
      */
     py::class_<Text, Node, std::shared_ptr<Text>>(m, "Text")
@@ -291,7 +301,7 @@ PYBIND11_MODULE(monkey2, m) {
         .def(py::init<pybind11::function>(), py::arg("callback"));
 
 	py::class_<actions::WaitForMouseClick, Action, std::shared_ptr<actions::WaitForMouseClick>>(mAct, "WaitForMouseClick")
-		.def(py::init<>());
+		.def(py::init<pybind11::function, pybind11::function>());
 
 
 }

@@ -13,7 +13,7 @@ public:
     void update(double) override;
 private:
     void updateZ();
-    CollisionEngine* _engine;
+    ICollisionEngine* _engine;
     glm::vec2 _lastPos;
     float _y0, _y1, k;
 };

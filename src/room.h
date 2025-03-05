@@ -40,9 +40,9 @@ public:
 
     void setStartUpFunction(pybind11::function);
 
-    void setCollisionEngine(std::shared_ptr<CollisionEngine>);
+    void setCollisionEngine(std::shared_ptr<ICollisionEngine>);
 
-    CollisionEngine* getCollisionEngine();
+    ICollisionEngine* getCollisionEngine();
 
     void setHotSpotManager(Node*);
 
@@ -59,7 +59,7 @@ private:
 	unsigned int _quadVAO, _quadVBO;
 	glm::vec3 _clearColor;
     pybind11::function _startUpFunction;
-    std::shared_ptr<CollisionEngine> _collisionEngine;
+    std::shared_ptr<ICollisionEngine> _collisionEngine;
     Node* _hotSpotManager;
 
 };

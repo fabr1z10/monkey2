@@ -20,7 +20,7 @@ namespace adventure {
 
         void cursorPosCallback(GLFWwindow *, double, double) override;
 
-        void mouseButtonCallback(GLFWwindow *, int, int, int) override;
+        int mouseButtonCallback(GLFWwindow *, int, int, int) override;
 
         void setCursor(Node*, const std::vector<std::string>& seq);
 

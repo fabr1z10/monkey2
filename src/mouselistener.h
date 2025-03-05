@@ -10,5 +10,5 @@ public:
 
     virtual void cursorPosCallback(GLFWwindow*, double, double) = 0;
 
-    virtual void mouseButtonCallback(GLFWwindow*, int, int, int) = 0;
+    virtual int mouseButtonCallback(GLFWwindow*, int, int, int) = 0;
 };

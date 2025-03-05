@@ -7,7 +7,9 @@ using namespace shapes;
 
 Polygon::Polygon(const std::vector<float> &data)
 {
-    auto n = data.size();
+	_type = ShapeType::POLYGON;
+
+	auto n = data.size();
     M_Assert(n % 2 == 0 && n >= 6, "Provide at least 3 points (2 floats per point).");
 
     _xm = data[0];
@@ -22,6 +24,10 @@ Polygon::Polygon(const std::vector<float> &data)
         _yM = std::max(_yM, data[i+1]);
     }
 
+	_bounds.xm = _xm;
+	_bounds.xM = _xM;
+	_bounds.ym = _ym;
+	_bounds.yM = _yM;
 
 
 
@@ -64,6 +70,6 @@ std::shared_ptr<IModel> Polygon::makeModel(glm::vec4 color, int) {
 	return model;
 }
 
-bool Polygon::isInside(glm::vec2 P) {
+bool Polygon::isInside(glm::vec2 P) const {
 	return pnpoly(_points, P);
 }

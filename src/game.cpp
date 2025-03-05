@@ -256,7 +256,7 @@ void Game::key_callback(GLFWwindow* window, int key, int scancode, int action, i
 
 void Game::mouse_button_callback(GLFWwindow* win, int button, int action, int mods) {
     for (auto &listener : Game::instance()._mouseListeners) {
-        listener->mouseButtonCallback(win, button, action, mods);
+        if (listener->mouseButtonCallback(win, button, action, mods) == 0) break;
     }
 }
 

@@ -6,9 +6,9 @@
 
 namespace shapes {
 
-	class Rect : public Shape {
+	class Point : public Shape {
 	public:
-		Rect(float width, float height, glm::vec2 anchor = glm::vec2(0.f));
+		Point();
 
 		bool raycastY(glm::vec2 origin, int dir) const override;
 
@@ -16,9 +16,6 @@ namespace shapes {
 
 		bool isInside(glm::vec2) const override;
 
-	private:
-		float _width;
-		float _height;
-		glm::vec2 _bl;
 	};
+
 }

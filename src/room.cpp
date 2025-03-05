@@ -94,6 +94,10 @@ void Room::update(double dt) {
 
 	}
 
+	if (_collisionEngine) {
+		_collisionEngine->checkCollisions();
+	}
+
 }
 
 void Room::draw() {
@@ -241,11 +245,11 @@ void Room::setClearColor(glm::vec3 color) {
     _clearColor = color;
 }
 
-void Room::setCollisionEngine(std::shared_ptr<CollisionEngine> e) {
+void Room::setCollisionEngine(std::shared_ptr<ICollisionEngine> e) {
     _collisionEngine = e;
 }
 
-CollisionEngine* Room::getCollisionEngine() {
+ICollisionEngine* Room::getCollisionEngine() {
     return _collisionEngine.get();
 }
 

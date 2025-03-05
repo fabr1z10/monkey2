@@ -14,7 +14,7 @@ namespace shapes {
 
 		std::shared_ptr<IModel> makeModel(glm::vec4 color, int mode) override;
 
-		bool isInside(glm::vec2) override;
+		bool isInside(glm::vec2) const override;
 
 	private:
         float x0, x1;
@@ -31,7 +31,7 @@ namespace shapes {
 
 		std::shared_ptr<IModel> makeModel(glm::vec4 color, int mode) override;
 
-		bool isInside(glm::vec2) override;
+		bool isInside(glm::vec2) const override;
 
 	private:
 

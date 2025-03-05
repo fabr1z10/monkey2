@@ -4,6 +4,7 @@
 #include <memory>
 #include "glm/glm.hpp"
 #include "component.h"
+#include "nodeobserver.h"
 
 class IModel;
 
@@ -62,6 +63,12 @@ public:
 	void setShow(bool);
 
 	bool isMarkedForRemoval() const;
+
+	void registerObserver(NodeObserver*);
+
+	void unregisterObserver(NodeObserver*);
+
+	void setAnimation(const std::string&);
 private:
     void notifyMove();
 	std::vector<std::shared_ptr<Node>> _children;
@@ -78,6 +85,7 @@ private:
 	bool _active;
 	bool _show;
 	bool _toBeRemoved;
+	std::vector<NodeObserver*> _observers;
 };
 
 inline const std::vector<std::shared_ptr<Node>> & Node::getChildren() const {

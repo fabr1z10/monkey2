@@ -13,7 +13,7 @@ public:
 
 	std::shared_ptr<IModel> makeModel(glm::vec4 color, int mode) override;
 
-	bool isInside(glm::vec2) override;
+	bool isInside(glm::vec2) const override;
 
 private:
 

@@ -4,10 +4,11 @@
 using namespace shapes;
 
 Rect::Rect(float width, float height, glm::vec2 anchor) : Shape(), _width(width), _height(height) {
+	_type = ShapeType::RECT;
 	_bl = glm::vec2(-anchor.x * _width, -anchor.y * _height);
 }
 
-bool Rect::isInside(glm::vec2 P) {
+bool Rect::isInside(glm::vec2 P) const {
 	return (P.x >= _bl.x && P.x <= _bl.x + _width && P.y >= _bl.y && P.y <= _bl.y + _height);
 }
 

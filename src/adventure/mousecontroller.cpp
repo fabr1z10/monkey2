@@ -95,7 +95,7 @@ int MouseController::screenCoordsToWorldCoords(glm::vec2 screenCoords, glm::vec2
 	return -1;
 
 }
-void MouseController::mouseButtonCallback(GLFWwindow*, int button, int action, int mods) {
+int MouseController::mouseButtonCallback(GLFWwindow*, int button, int action, int mods) {
     /* When the user clicks the left button, the default callback
      * first checks if cursor is positioned on a mouse
      * hotspot. In this case the hotspot callback will be called.
@@ -117,6 +117,7 @@ void MouseController::mouseButtonCallback(GLFWwindow*, int button, int action, i
 		if (_onRightClick) {
 			_onRightClick(_cursorSequence[_cursorType]);
 		}
+		return 0;
     }
 
     if (active() && button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
@@ -140,8 +141,9 @@ void MouseController::mouseButtonCallback(GLFWwindow*, int button, int action, i
 				}
 			}
 		}
+		return 0;
     }
-
+	return 1;
 }
 
 void MouseController::setCursor(Node* node, const std::vector<std::string>& seq) {

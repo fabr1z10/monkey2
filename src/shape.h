@@ -1,9 +1,14 @@
 #pragma once
 
 #include "glm/glm.hpp"
+#include "bounds.h"
 #include <memory>
 
 class IModel;
+
+enum ShapeType {
+	POINT, LINE, POLYLINE, POLYGON, RECT
+};
 
 class Shape {
 public:
@@ -14,6 +19,20 @@ public:
 	// generate a line model
 	virtual std::shared_ptr<IModel> makeModel(glm::vec4 color, int mode) = 0;
 
-	virtual bool isInside(glm::vec2) = 0;
+	virtual bool isInside(glm::vec2) const = 0;
 
+	Bounds getBounds() const;
+
+	ShapeType getType() const;
+protected:
+	ShapeType _type;
+	Bounds _bounds;
 };
+
+inline Bounds Shape::getBounds() const {
+	return _bounds;
+}
+
+inline ShapeType Shape::getType() const {
+	return _type;
+}

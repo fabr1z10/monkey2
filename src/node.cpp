@@ -17,6 +17,9 @@ Node::Node() : _id(Node::_nextId++), _renderer(nullptr), _parent(nullptr), _acti
 
 Node::~Node() {
 	std::cout << " ** removed node " << _id << "\n";
+	for (auto& obs : _observers) {
+		obs->onRemove(this);
+	}
     _nodes.erase(_id);
 }
 
@@ -47,6 +50,9 @@ void Node::notifyMove() {
     for (auto& child : _children) {
         child->notifyMove();
     }
+	for (auto& obs : _observers) {
+		obs->onMove(this);
+	}
 }
 
 void Node::update(double dt) {
@@ -137,4 +143,21 @@ void Node::flipHorizontal(bool value) {
 
 Node* Node::getNode(int id) {
     return Node::_nodes.at(id);
+}
+
+
+void Node::registerObserver(NodeObserver * observer) {
+	_observers.push_back(observer);
+
+}
+
+void Node::unregisterObserver(NodeObserver * observer) {
+	_observers.erase(
+			std::remove(_observers.begin(), _observers.end(), observer),
+			_observers.end()
+	);
+}
+
+void Node::setAnimation(const std::string & anim) {
+	_renderer->setAnimation(anim);
 }
