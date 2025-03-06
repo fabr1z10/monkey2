@@ -15,11 +15,11 @@ void AssetManager::startUp()
     }
 }
 
-void AssetManager::loadAssetFile(const std::string& id, const std::string& file, int cam) {
+void AssetManager::loadAssetFile(const std::string& id, const std::string& file, int cam, const std::vector<int>& tex) {
     auto assetPath = Game::instance().getWorkingDirectory() + "/assets/";
     std::cout << " -- Loading asset file: " << file << "\n";
     auto f = YAML::LoadFile(file);
-    auto b = std::make_shared<AssetBank>(f, cam);
+    auto b = std::make_shared<AssetBank>(f, cam, tex);
     _banks[id] = b;
 }
 
@@ -56,7 +56,7 @@ std::shared_ptr<Font> AssetManager::getFont(const std::string & id)
     return p.first->getFont(p.second);
 }
 
-AssetBank::AssetBank(const YAML::Node & f, int camId) : _camId(camId)
+AssetBank::AssetBank(const YAML::Node & f, int camId, const std::vector<int>& textures) : _camId(camId)
 {
     auto assetPath = Game::instance().getWorkingDirectory() + "/assets/";
 
@@ -67,36 +67,46 @@ AssetBank::AssetBank(const YAML::Node & f, int camId) : _camId(camId)
 
     for (auto c = node.begin(); c!= node.end(); ++c) {
         auto id = c->first.as<int>();
-        auto filepath = c->second.as<std::string>();
-        std::cout << id << " - " << filepath << std::endl;
-        loadTexture(id, filepath);
+		if (std::find(textures.begin(), textures.end(), id) != textures.end()) {
+			auto filepath = c->second.as<std::string>();
+			std::cout << id << " - " << filepath << std::endl;
+			loadTexture(id, filepath);
+		}
 		// let's store here the filepath .
 
 
     }
 
     for (auto f = fonts.begin(); f != fonts.end(); ++f) {
-        auto fontId = f->first.as<std::string>();
         auto texId = f->second["tex"].as<int>();
         // need to map this to shader texture id
+		if (std::find(textures.begin(), textures.end(), texId) != textures.end()) {
+			auto fontId = f->first.as<std::string>();
 
-        //auto tex = getTexture(texId);
-        auto font = std::make_shared<Font>(f->second, _batch.get(), _textures.at(texId));
-        _fonts[fontId] = font;
+			//auto tex = getTexture(texId);
+			auto font = std::make_shared<Font>(f->second, _batch.get(), _textures.at(texId));
+			_fonts[fontId] = font;
+		}
     }
 
     for (auto s = sprites.begin(); s != sprites.end(); ++s) {
-        auto spriteId = s->first.as<std::string>();
-        auto texId = s->second["tex"].as<int>();        
-        std::cout << " -- loading sprite: " << spriteId << "\n";
-        auto sprite = std::make_shared<Sprite>(s->second, _batch.get(), _textures.at(texId));
-        _models[spriteId] = sprite;
+        auto texId = s->second["tex"].as<int>();
+		if (std::find(textures.begin(), textures.end(), texId) != textures.end()) {
+			auto spriteId = s->first.as<std::string>();
+
+			std::cout << " -- loading sprite: " << spriteId << "\n";
+			auto sprite = std::make_shared<Sprite>(s->second, _batch.get(), _textures.at(texId));
+			_models[spriteId] = sprite;
+		}
     }
 
     for (auto q = quads.begin(); q != quads.end(); q++) {
-        auto quadId = q->first.as<std::string>();
         auto texId = q->second["tex"].as<int>();
-        _models[quadId] = std::make_shared<Quad>(q->second, _batch.get(), _textures.at(texId));
+		if (std::find(textures.begin(), textures.end(), texId) != textures.end()) {
+			auto quadId = q->first.as<std::string>();
+
+			_models[quadId] = std::make_shared<Quad>(q->second, _batch.get(), _textures.at(texId));
+		}
     }
 
 }

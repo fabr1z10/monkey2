@@ -8,7 +8,7 @@ void Action::start() {
     _completed=false;
 }
 
-Script::Script(const std::string& id) : _done(false), _id(id), _loop(false) {
+Script::Script(const std::string& id) : _done(false), _id(id), _loop(false), _lastAdded(-1) {
     if (_id.empty()) {
         std::stringstream s;
         s << "_AUTO" << _scriptId++;
@@ -44,6 +44,9 @@ void Script::addEdge(size_t i , size_t j) {
 }
 
 size_t Script::addAction(const std::shared_ptr<Action>& a, int after) {
+	if (after == -2) {
+		after = _lastAdded;
+	}
     int id = _actions.size();
     _actions.push_back(a);
     _next.emplace_back();
@@ -53,6 +56,7 @@ size_t Script::addAction(const std::shared_ptr<Action>& a, int after) {
         _previous.push_back({after});
         _next[after].push_back({id});
     }
+	_lastAdded = id;
     return id;
 
 

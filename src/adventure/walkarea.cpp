@@ -45,9 +45,9 @@ void WalkArea::addHole(const std::vector<float> & data, Node* ref) {
 }
 
 void WalkArea::start() {
-    Node::start();
     _polygon.resize(_localPolygon.size());
     recalculatePoints();
+	Node::start();
 
 }
 
@@ -287,6 +287,11 @@ std::vector<glm::vec2> WalkArea::dijkstraShortestPath(glm::vec2 start, glm::vec2
 
     start = getClosestPoint(start);
     goal = getClosestPoint(goal);
+
+	if (glm::length(goal - start) < 0.01) {
+		return {};
+
+	}
     // auto isStartInWalkArea = isPointInWalkArea(start);
     // auto isEndInWalkArea = isPointInWalkArea(goal);
     // if (!isStartInWalkArea) {

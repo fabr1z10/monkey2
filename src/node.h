@@ -24,6 +24,8 @@ public:
 
 	virtual void start();
 
+	void dispose();
+
 	virtual void update(double);
 
 
@@ -69,6 +71,8 @@ public:
 	void unregisterObserver(NodeObserver*);
 
 	void setAnimation(const std::string&);
+
+	void setInRoom(bool);
 private:
     void notifyMove();
 	std::vector<std::shared_ptr<Node>> _children;
@@ -86,6 +90,9 @@ private:
 	bool _show;
 	bool _toBeRemoved;
 	std::vector<NodeObserver*> _observers;
+	// this is true if node is root or descendant of root
+	// It is important because renderer is started when you add a node to a node marked inRoom
+	bool _inRoom;
 };
 
 inline const std::vector<std::shared_ptr<Node>> & Node::getChildren() const {

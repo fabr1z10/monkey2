@@ -14,7 +14,7 @@ namespace adventure {
 
     class MouseController : public Node, public MouseListener {
     public:
-        MouseController(WalkArea*,Node*, Scheduler* scheduler, float speed);
+        MouseController(float zCursor);
 
         void start() override;
 
@@ -40,13 +40,9 @@ namespace adventure {
 			bool active;
 		};
         int screenCoordsToWorldCoords(glm::vec2 screenCoords, glm::vec2& worldCoords) const;
-        WalkArea *_walkarea;
-        Node* _player;
         Node* _cursor;
-        Scheduler* _scheduler;
         int _camId;
         std::vector<CameraInfo> _cam;
-        float _speed;
         std::vector<std::string> _cursorSequence;
         int _cursorType;
         std::unordered_map<int, std::map<int, std::unordered_set<HotSpot*>>> _hotSpots;
@@ -59,6 +55,7 @@ namespace adventure {
 		int _cameraCount;
 		int _currentCameraId;
 		glm::vec2 _worldCoords;
+		float _zCursor;
     };
 
 

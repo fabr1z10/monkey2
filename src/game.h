@@ -29,6 +29,8 @@ public:
 
 	void run();
 
+	void closeRoom();
+
 	static void WindowResizeCallback(GLFWwindow* win, int width, int height);
 	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 	static void cursor_pos_callback(GLFWwindow*, double xpos, double ypos);

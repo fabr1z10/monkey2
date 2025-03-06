@@ -2,8 +2,8 @@
 
 using namespace actions;
 
-CallFunc::CallFunc(pybind11::function f) {
-    m_func = std::move(f);
+CallFunc::CallFunc(const pybind11::function& f) {
+    m_func = f;
 }
 
 

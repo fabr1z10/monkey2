@@ -7,7 +7,7 @@ namespace actions {
 
 class CallFunc : public Action {
 public:
-    explicit CallFunc(pybind11::function f);
+    explicit CallFunc(const pybind11::function& f);
 
     void start() override;
 

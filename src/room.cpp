@@ -11,6 +11,8 @@
 Room::Room() : _clearColor(glm::vec3(0.f)) {
 	_root = std::make_shared<Node>();
 
+	_root->setInRoom(true);
+
 	_blitShader = std::make_shared<Shader>(0, blit_vs, blit_fs, "2f2f");
 
 	auto deviceSize = Game::instance().getDeviceSize();
@@ -222,18 +224,7 @@ void Room::start() {
     //for (size_t i = 0; i< _refBatch.size(); ++i) {
     //    _refBatch[i]->configure();
     //}
-	std::list<Node*> li{_root.get()};
-
-	while (!li.empty()) {
-		auto current = li.front();
-		li.pop_front();
-
-		current->start();
-
-		std::transform(current->getChildren().begin(), current->getChildren().end(), std::back_inserter(li),
-					   [](const std::shared_ptr<Node>& ptr) { return ptr.get(); });
-
-	}
+	_root->start();
 
 
 

@@ -13,7 +13,7 @@ Font::Font(const YAML::Node &node, QuadBatch* b, int texId) : _texId(texId), _ba
         auto data = n.second.as<std::vector<float>>();
         int u = 0;
         for (char32_t w : sss) {
-            std::cout << "loading character: " << w << "\n";
+            //std::cout << "loading character: " << w << "\n";
             if (u % 2 == 0) {
                 m_info[w] = CharInfo{
                                      data[0] / tw, data[1] / th, data[2] / tw, data[3] / th,     // tex coords

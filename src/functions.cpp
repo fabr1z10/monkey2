@@ -20,9 +20,9 @@ glm::vec4 fromHex(const std::string& str) {
 
 }
 
-void loadAsset(const std::string& id, const std::string& file, int camera) {
+void loadAsset(const std::string& id, const std::string& file, int camera, const std::vector<int>& tex) {
     auto wd = Game::instance().getWorkingDirectory();
-    AssetManager::instance().loadAssetFile(id, wd + "/assets/" + file, camera);
+    AssetManager::instance().loadAssetFile(id, wd + "/assets/" + file, camera, tex);
 }
 
 
@@ -49,3 +49,6 @@ std::shared_ptr<Shape> shapeFromImage(const std::string& assetBank, int texId, g
 
 }
 
+void closeRoom() {
+	Game::instance().closeRoom();
+}

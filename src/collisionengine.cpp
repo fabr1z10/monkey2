@@ -43,7 +43,7 @@ void BasicCollisionEngine::rmCollider(Collider * c) {
 }
 
 
-std::vector<Collider*> BasicCollisionEngine::raycastY(glm::vec2 origin, int direction, int mask) {
+std::vector<Collider*> BasicCollisionEngine::raycastY(glm::vec2 origin, int direction, int mask, Node*) {
     std::vector<Collider*> out;
     // origin is provided in world coordinates
     for (const auto& c : _colliders) {
@@ -61,13 +61,16 @@ std::vector<Collider*> BasicCollisionEngine::raycastY(glm::vec2 origin, int dire
     return out;
 }
 
-std::vector<Collider *> SpatialHashingCollisionEngine::raycastY(glm::vec2 origin, int direction, int mask) {
+std::vector<Collider *> SpatialHashingCollisionEngine::raycastY(glm::vec2 origin, int direction, int mask,Node* self) {
 	auto hp = hashPosition(origin);
 	std::vector<Collider*> out;
-
+	std::unordered_set<Collider*> checked;
 	for (const auto& [coords, colliders] : _colliders) {
-		if (coords.x == hp.x && (coords.y - hp.y) * direction > 0 ) {
+		if (coords.x == hp.x && (coords.y - hp.y) * direction >= 0 ) {
 			for (auto& c : colliders) {
+				if (c->getCollisionFlag() & mask == 0) continue;
+				if (self == c->getNode() || checked.count(c) > 0) continue;
+				checked.insert(c);
 				// this is the matrix to convert world to local (to the collider) coordinate system
 				auto m = glm::inverse(c->getNode()->getWorldMatrix());
 

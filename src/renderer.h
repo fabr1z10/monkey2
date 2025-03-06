@@ -17,6 +17,8 @@ public:
     }
 	virtual void start() = 0;
 
+	virtual void dispose() {}
+
     virtual void updateGeometry () = 0;
 
     virtual void draw(Shader*) {}
@@ -26,6 +28,7 @@ protected:
 	Node* _node;
     bool _started;
     bool _dirty;
+
 };
 
 
@@ -39,14 +42,24 @@ public:
 	using Primitive = typename MODEL::Primitive;
 	using Vertex = typename MODEL::Primitive::Vertex;
 
-	Renderer(MODEL* model, int batchId) : _model(model), _batchId(batchId) {
+	Renderer(MODEL* model, int batchId) : _model(model), _batchId(batchId), _disposed(false) {
 		_nPrimitives = _model->getPrimitiveCount();
 	}
 
 	~Renderer() {
-		for (auto i : _primIds) _batch->release(i);
+		if (!_disposed)
+			for (auto i : _primIds) _batch->release(i);
+
 	}
 
+	void dispose() override {
+		if (!_disposed) {
+			for (auto i : _primIds) {
+				_batch->release(i);
+			}
+		}
+		_disposed = true;
+	}
 	// at initialization, renderer will request the required number of primitives from the batch
     void start() override {
 		_batch = dynamic_cast<Batch<Primitive>*>(Game::instance().getRoom()->getBatch(_batchId));
@@ -82,6 +95,7 @@ protected:
 	std::vector<int> _primIds;
 	Vertex** _vertices;
 	MODEL* _model;
+	bool _disposed;
 
 };
 

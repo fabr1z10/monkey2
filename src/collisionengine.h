@@ -32,7 +32,7 @@ private:
 // don't need to expose CollisionResponse class
 class ICollisionEngine : public NodeObserver {
 public:
-	virtual std::vector<Collider*> raycastY(glm::vec2 origin, int direction, int mask) = 0;
+	virtual std::vector<Collider*> raycastY(glm::vec2 origin, int direction, int mask, Node* self=nullptr) = 0;
 
 	virtual void addCollider(Collider*) = 0;
 
@@ -53,7 +53,7 @@ class BasicCollisionEngine : public ICollisionEngine {
 public:
 	BasicCollisionEngine();
 
-    std::vector<Collider*> raycastY(glm::vec2 origin, int direction, int mask) override;
+    std::vector<Collider*> raycastY(glm::vec2 origin, int direction, int mask, Node* self=nullptr) override;
 
     void rmCollider(Collider*) override;
 
@@ -68,7 +68,7 @@ class SpatialHashingCollisionEngine : public ICollisionEngine {
 public:
 	SpatialHashingCollisionEngine(float width, float height);
 
-	std::vector<Collider*> raycastY(glm::vec2 origin, int direction, int mask) override;
+	std::vector<Collider*> raycastY(glm::vec2 origin, int direction, int mask, Node* self=nullptr) override;
 
 	void rmCollider(Collider*) override;
 

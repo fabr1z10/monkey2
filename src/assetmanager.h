@@ -13,7 +13,7 @@
 
 class AssetBank {
 public:
-    AssetBank(const YAML::Node&, int camId);
+    AssetBank(const YAML::Node&, int camId, const std::vector<int>& textures);
     void loadTexture(int id, const std::string& path);
     //Tex* getTexture(int id);
     std::shared_ptr<IModel> getModel(const std::string& id);
@@ -55,7 +55,7 @@ public:
         // Instantiated on first use.
         return instance;
     }
-    void loadAssetFile(const std::string& id, const std::string& file,int cam);
+    void loadAssetFile(const std::string& id, const std::string& file,int cam, const std::vector<int>& tex);
 
 	std::string getTexturePath(const std::string& assetBank, int);
 

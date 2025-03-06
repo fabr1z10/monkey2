@@ -184,6 +184,7 @@ void Game::run() {
 		} // Check if the ESC key was pressed or the window was closed
 		while (_run && !_shutdown);
 		_room->end();
+		IBatch::resetId();
 		//_room->end();
 		//m_allNodes.clear();
 		//_allPyObjects.clear();
@@ -304,4 +305,8 @@ std::string Game::getPythonScriptDirectory() {
     fs::path fl = mainModule.attr("__file__").cast<std::string>();
     auto cwd = fl.parent_path();
     return cwd;
+}
+
+void Game::closeRoom() {
+	_run = false;
 }

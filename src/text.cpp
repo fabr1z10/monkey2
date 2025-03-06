@@ -83,8 +83,12 @@ void Text::updateText(const std::string & text) {
     std::vector<float> modelRaw;
 
     float y = -_lineHeight;
+	float wd{0.f};
+	for (const auto& row : rows) {
+		wd = std::max(wd, row.length);
+	}
 
-	_size = glm::vec2(_width, rows.size() * _lineHeight);
+	_size = glm::vec2(wd, rows.size() * _lineHeight);
 	glm::vec2 offset (_anchor.x * _size.x, -_anchor.y*_size.y);
     for (const auto& row : rows) {
         float x{0.f};

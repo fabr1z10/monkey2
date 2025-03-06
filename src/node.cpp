@@ -8,7 +8,7 @@ int Node::_nextId = 0;
 std::unordered_map<int, Node*> Node::_nodes;
 
 Node::Node() : _id(Node::_nextId++), _renderer(nullptr), _parent(nullptr), _active(true),
-	_show(true), _toBeRemoved(false) {
+	_show(true), _toBeRemoved(false), _inRoom(false) {
 	_modelMatrix = glm::mat4(1.f);
 	_worldMatrix = glm::mat4(1.f);
     _nodes[_id] = this;
@@ -23,12 +23,25 @@ Node::~Node() {
     _nodes.erase(_id);
 }
 
+void Node::dispose() {
+	if (_renderer != nullptr) {
+		_renderer->dispose();
+	}
+	for (auto& c : _children) c->dispose();
+}
+
 void Node::start() {
+	// recursive start a node
 	for (auto& c : _components) {
 	    c->start();
 	}
     if (_renderer != nullptr) {
 		_renderer->start();
+	}
+
+	// start children
+	for (auto& c : _children) {
+		c->start();
 	}
 
 }
@@ -56,10 +69,17 @@ void Node::notifyMove() {
 }
 
 void Node::update(double dt) {
+	auto shouldRemove = [] (const std::shared_ptr<Node>& node) {
+		if (node->isMarkedForRemoval()) {
+			node->dispose();
+			return true;
+		}
+		return false;
+	};
 	// first remove all nodes marked as removal
-	_children.erase(std::remove_if(_children.begin(), _children.end(), [](const std::shared_ptr<Node>& node)
-		{ return node->isMarkedForRemoval(); }), _children.end());
-
+	//_children.erase(std::remove_if(_children.begin(), _children.end(), [](const std::shared_ptr<Node>& node)
+	//	{ return node->isMarkedForRemoval(); }), _children.end());
+	_children.erase(std::remove_if(_children.begin(), _children.end(), shouldRemove), _children.end());
 
     for (auto& c : _components) {
         c->update(dt);
@@ -86,16 +106,31 @@ void Node::setModel(std::shared_ptr<IModel> model, int batchId = -1) {
 	_model = model;
 	_renderer = model->getRenderer(batchId);
 	_renderer->setNode(this);
-    if (Game::instance().started()) {
-        _renderer->start();
-    }
+//    if (Game::instance().started()) {
+//        _renderer->start();
+//    }
 
+}
+
+void Node::setInRoom(bool value) {
+	if (_inRoom != value) {
+		_inRoom = value;
+		for (auto& c : _children) {
+			c->setInRoom(value);
+		}
+	}
 }
 
 void Node::add(std::shared_ptr<Node> node) {
 	_children.push_back(node);
 	node->_parent = this;
+	node->setInRoom(_inRoom);
 	node->notifyMove();
+	if (_inRoom && Game::instance().started()) {
+		// this is needed for dynamically added objects
+		node->start();
+
+    }
 }
 
 void Node::remove() {

@@ -1,7 +1,7 @@
 #include "depthscale.h"
 #include "../game.h"
 
-DepthScale::DepthScale(float y0, float y1) : Component(), _y0(y0), _y1(y1) {
+DepthScale::DepthScale(float y0, float y1, int mask) : Component(), _y0(y0), _y1(y1), _mask(mask){
     k = 1.f / (_y1 - _y0);
 }
 
@@ -15,8 +15,8 @@ void DepthScale::start() {
 void DepthScale::updateZ() {
     glm::vec2 pos = _lastPos;
     float z = (pos.y - _y0) * k;
-    auto objects = _engine->raycastY(pos, 1, 0);
-    //std::cerr << "# objects: " << objects.size() << "\n";
+    auto objects = _engine->raycastY(pos+glm::vec2(0,0.1f), 1, _mask, m_node);
+    std::cerr << "# objects: " << objects.size() << "\n";
     z += objects.size();
     m_node->setPosition(glm::vec3(pos.x, pos.y, z));
 }

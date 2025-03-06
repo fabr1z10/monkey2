@@ -26,6 +26,8 @@ public:
 	void start();
 
     int getId() const;
+
+	static void resetId() { _gId=0;}
 protected:
     // this is the batch unique id
     int _id;

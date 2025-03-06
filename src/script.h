@@ -33,7 +33,7 @@ public:
 
     bool done() const;
 
-    size_t addAction(const std::shared_ptr<Action>&, int = -1);
+    size_t addAction(const std::shared_ptr<Action>&, int = -2);
 
     void addEdge(size_t, size_t);
 
@@ -55,7 +55,7 @@ private:
     // edges
     std::vector<std::vector<int>> _next;
     std::vector<std::vector<int>> _previous;
-
+	int _lastAdded;
 };
 
 inline std::string Script::id() const {

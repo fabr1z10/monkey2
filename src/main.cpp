@@ -67,11 +67,13 @@ PYBIND11_MODULE(monkey2, m) {
 
     m.def("fromHex", &fromHex, py::arg("color"));
 
-    m.def("loadAsset", &loadAsset, py::arg("id"), py::arg("filename"), py::arg("cam"));
+    m.def("loadAsset", &loadAsset, py::arg("id"), py::arg("filename"), py::arg("cam"), py::arg("tex"));
 
     m.def("getModel", &getModel, py::arg("id"), py::return_value_policy::reference);
 
 	m.def("game", &game, py::return_value_policy::reference, "Gets the engine");
+
+	m.def("closeRoom", &closeRoom);
 
 	mSha.def("fromImage", &shapeFromImage);
 
@@ -144,7 +146,7 @@ PYBIND11_MODULE(monkey2, m) {
         .def(py::init<int>(), py::arg("camId"));
 
     py::class_<DepthScale, Component, std::shared_ptr<DepthScale>>(m, "DepthScale")
-        .def(py::init<float, float>(), py::arg("y0"), py::arg("y1"));
+        .def(py::init<float, float, int>(), py::arg("y0"), py::arg("y1"), py::arg("mask"));
 
     py::class_<Collider, Component, std::shared_ptr<Collider>>(m, "Collider")
         .def(py::init<std::shared_ptr<Shape>, int, int, const std::string&>(),
@@ -246,7 +248,7 @@ PYBIND11_MODULE(monkey2, m) {
     py::class_<Script, std::shared_ptr<Script>>(m, "Script")
         .def(py::init<const std::string&>(), py::arg("id") ="")
         .def("setLoop", &Script::setLoop)
-        .def("addAction", &Script::addAction)
+        .def("addAction", &Script::addAction, py::arg("action"), py::arg("after")=-2)
         .def("addEdge", &Script::addEdge);
 
     py::class_<Scheduler, Node, std::shared_ptr<Scheduler>>(m, "Scheduler")
@@ -276,7 +278,7 @@ PYBIND11_MODULE(monkey2, m) {
         .def("addLine", &WalkArea::addLine, py::arg("points"), py::arg("node")=nullptr);
 
     py::class_<MouseController, Node, MouseListener, std::shared_ptr<MouseController>>(mAdv, "MouseController")
-        .def(py::init<WalkArea*, Node*, Scheduler*, float>())
+        .def(py::init<float>())
 		.def("activateCamera", &MouseController::activateCamera)
         .def("setCursor", &MouseController::setCursor)
 		.def("setOnClick", &MouseController::setOnClick)
@@ -298,7 +300,7 @@ PYBIND11_MODULE(monkey2, m) {
         .def(py::init<float>(), py::arg("time"));
 
     py::class_<actions::CallFunc, Action, std::shared_ptr<actions::CallFunc>>(mAct, "CallFunc")
-        .def(py::init<pybind11::function>(), py::arg("callback"));
+        .def(py::init<const pybind11::function&>(), py::arg("callback"));
 
 	py::class_<actions::WaitForMouseClick, Action, std::shared_ptr<actions::WaitForMouseClick>>(mAct, "WaitForMouseClick")
 		.def(py::init<pybind11::function, pybind11::function>());

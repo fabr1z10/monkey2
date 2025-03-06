@@ -12,8 +12,8 @@ using namespace adventure;
 extern GLFWwindow * window;
 
 // mouse controller first checks on which camera we are on
-MouseController::MouseController(WalkArea* walkarea, Node* player, Scheduler* scheduler, float speed) :
-    Node(), MouseListener(), _walkarea(walkarea), _player(player), _scheduler(scheduler), _speed(speed), _cursor(nullptr), _previous(nullptr) {
+MouseController::MouseController(float zCursor) :
+    Node(), MouseListener(), _zCursor(zCursor), _previous(nullptr) {
 
 }
 
@@ -42,7 +42,7 @@ void MouseController::cursorPosCallback(GLFWwindow*, double x, double y) {
     // first get device coordinates
     if (_cursor != nullptr) {
         auto devCoords = Game::instance().getDeviceCoordinates({x, y});
-        _cursor->setPosition(glm::vec3(devCoords, 10.f));
+        _cursor->setPosition(glm::vec3(devCoords, _zCursor));
     }
 
 
