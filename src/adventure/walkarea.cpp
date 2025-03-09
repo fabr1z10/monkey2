@@ -74,8 +74,8 @@ void WalkArea::recalculatePoints() {
     int k = 0;
     for (const auto& p : _polyInfo) {
         if (p.active) {
-            auto s = p.offset;
-            auto l = p.length;
+            int s = p.offset;
+            int l = p.length;
             glm::vec2 offset(0.f);
             if (p.ref != nullptr) {
                 offset = p.ref->getWorldPosition();
@@ -85,7 +85,7 @@ void WalkArea::recalculatePoints() {
                 _polygon[s+i] = offset + _localPolygon[s+i];
             }
             if (p.type == PolyType::AREA) {
-                for (size_t i = 0; i < l; ++i) {
+                for (int i = 0; i < l; ++i) {
                     auto iCurr = s + i;
                     auto iPrev = s + (i-1) % l;
                     auto iNext = s + (i+1) % l;
@@ -96,17 +96,20 @@ void WalkArea::recalculatePoints() {
                     if (k > 0) cross *= -1.f;
                     if (cross < 0) {
                         _vertexToPolygonNode[_vertices.size()] = s+i;
+						_polygonToVertex[s+i] = _vertices.size();
                         _vertices.push_back(Pc);
                     }
                     auto f = {Pc.x, Pc.y, 0.f, Pn.x, Pn.y, 0.f, _color.r, _color.g, _color.b, _color.a};
                     debugModelData.insert(debugModelData.end(), f.begin(), f.end());
                     _nodeWalls.insert({iCurr, iNext});
-                    _nodeWalls.insert({iNext, iCurr});
+                    //_nodeWalls.insert({iNext, iCurr});
                 }
             } else {
                 _vertexToPolygonNode[_vertices.size()] = s;
+				_polygonToVertex[s] = _vertices.size();
                 _vertices.push_back(_polygon[s]);
                 _vertexToPolygonNode[_vertices.size()] = s + l - 1;
+				_polygonToVertex[s+l-1] = _vertices.size();
                 _vertices.push_back(_polygon[s + l - 1]);
                 for (size_t i = 0; i < l-1; ++i) {
                     auto Pc = _polygon[s+i];
@@ -213,10 +216,31 @@ void WalkArea::pushNode(glm::vec2 node) {
             _vertexToPolygonNode[j] = index;
         }
     }
+
+	// check if ndoe belongs to a wall
+	int iu = -1;
+	int iv = -1;
+	for (const auto& [u,v] : _nodeWalls) {
+		if (pointInSegment(_polygon[u], _polygon[v], node)) {
+			std::cout << " NODE " << node << " IN SEG [" << _polygon[u] << ", " << _polygon[v] << "]\n";
+			auto it = _polygonToVertex.find(u);
+			if (it != _polygonToVertex.end()) iu = it->second;
+
+			it = _polygonToVertex.find(v);
+			if (it != _polygonToVertex.end()) iv = it->second;
+
+			break;
+			// if P is in uv, then u and v are visible
+		}
+	}
     for (size_t i = 0; i < j; ++i)  {
         // checks visibility between node (j) and node i.
         // I also pass index so to avoid checking walls starting or ending at index
-        addVisibilityEdges(j, i);
+		if (i == iu || i == iv) {
+			addEdge(i, j);
+		} else {
+			addVisibilityEdges(j, i);
+		}
     }
 
 }

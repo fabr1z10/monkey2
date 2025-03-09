@@ -16,7 +16,7 @@ void DepthScale::updateZ() {
     glm::vec2 pos = _lastPos;
     float z = (pos.y - _y0) * k;
     auto objects = _engine->raycastY(pos+glm::vec2(0,0.1f), 1, _mask, m_node);
-    std::cerr << "# objects: " << objects.size() << "\n";
+    //std::cerr << "# objects: " << objects.size() << "\n";
     z += objects.size();
     m_node->setPosition(glm::vec3(pos.x, pos.y, z));
 }

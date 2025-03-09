@@ -18,4 +18,7 @@ bool pnpoly(const std::vector<glm::vec2>& points, glm::vec2 p, int offset=0, int
 // Check if segments AB and CD intersect. If they do, return intersection point in P.
 bool seg2seg(glm::vec2 A, glm::vec2 B, glm::vec2 C, glm::vec2 D, glm::vec2 &P);
 
+// Tells whether point P lies in segment AB
+bool pointInSegment(glm::vec2 A, glm::vec2 B, glm::vec2 P);
+
 bool isApproxEqual(glm::vec2 A, glm::vec2 B);

@@ -65,10 +65,10 @@ bool seg2seg(glm::vec2 A, glm::vec2 B, glm::vec2 C, glm::vec2 D, glm::vec2 &P) {
     if (std::abs(den) < EPSILON) return false; // Parallel or collinear
 
     float t = cross2D(AC, DC) / den;
-    if (t < 0.0f || t > 1.0f) return false; // No intersection along AB
+    if (t <= 0.0f || t >= 1.0f) return false; // No intersection along AB
 
     float u = cross2D(AB, AC) / den;
-    if (u < 0.0f || u > 1.0f) return false; // No intersection along CD
+    if (u <= 0.0f || u >= 1.0f) return false; // No intersection along CD
 
     // Compute intersection point
     P = A + t * AB;
@@ -81,4 +81,12 @@ bool seg2seg(glm::vec2 A, glm::vec2 B, glm::vec2 C, glm::vec2 D, glm::vec2 &P) {
 bool isApproxEqual(glm::vec2 A, glm::vec2 B) {
     glm::vec2 diff = B - A;
     return (diff.x * diff.x + diff.y * diff.y) < EPSILON2;
+}
+
+bool pointInSegment(glm::vec2 A, glm::vec2 B, glm::vec2 P) {
+	float x = cross2D(B - A, P - A);
+	if (fabs(x) > EPSILON) return false; // not collinear
+	float dot = glm::dot(P-A, B-A);
+	if (dot < EPSILON || dot > glm::dot(B-A, B-A)+EPSILON) return false;
+	return true;
 }

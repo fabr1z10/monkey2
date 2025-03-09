@@ -64,6 +64,7 @@ namespace adventure {
         std::vector<glm::vec2> _vertices;
 
         std::unordered_map<int, int> _vertexToPolygonNode;
+		std::unordered_map<int, int> _polygonToVertex;
 
         std::unordered_map<size_t, std::unordered_map<size_t, float>> _visibilityEdges;
         int _batchId;
