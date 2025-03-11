@@ -32,13 +32,17 @@ private:
 // don't need to expose CollisionResponse class
 class ICollisionEngine : public NodeObserver {
 public:
-	virtual std::vector<Collider*> raycastY(glm::vec2 origin, int direction, int mask, Node* self=nullptr) = 0;
+    virtual ~ICollisionEngine() = default;
+
+    virtual std::vector<Collider*> raycastY(glm::vec2 origin, int direction, int mask, Node* self=nullptr, bool stopAtFirst = false) = 0;
 
 	virtual void addCollider(Collider*) = 0;
 
 	virtual void rmCollider(Collider*) = 0;
 
 	virtual void checkCollisions() = 0;
+
+    virtual std::vector<Collider*> getColliders(int mask) const = 0;
 
 	bool haveResponse(Collider*, Collider*);
 
@@ -53,13 +57,17 @@ class BasicCollisionEngine : public ICollisionEngine {
 public:
 	BasicCollisionEngine();
 
-    std::vector<Collider*> raycastY(glm::vec2 origin, int direction, int mask, Node* self=nullptr) override;
+    std::vector<Collider*> raycastY(
+        glm::vec2 origin, int direction, int mask,
+        Node* self=nullptr, bool stopAtFirst = false) override;
 
     void rmCollider(Collider*) override;
 
     void addCollider (Collider*) override;
 
 	virtual void checkCollisions () override {};
+
+    std::vector<Collider*> getColliders(int mask) const override;
 private:
     std::unordered_set<Collider*> _colliders;
 };
@@ -68,7 +76,7 @@ class SpatialHashingCollisionEngine : public ICollisionEngine {
 public:
 	SpatialHashingCollisionEngine(float width, float height);
 
-	std::vector<Collider*> raycastY(glm::vec2 origin, int direction, int mask, Node* self=nullptr) override;
+    std::vector<Collider*> raycastY(glm::vec2 origin, int direction, int mask, Node* self=nullptr, bool stopAtFirst = false) override;
 
 	void rmCollider(Collider*) override;
 
@@ -79,6 +87,8 @@ public:
 	void onMove(Node*) override;
 
 	void onRemove(Node*) override;
+
+    std::vector<Collider*> getColliders(int mask) const override;
 private:
 	struct ColliderLocation {
 		ColliderLocation() = default;

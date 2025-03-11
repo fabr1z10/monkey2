@@ -72,7 +72,25 @@ public:
 
 	void setAnimation(const std::string&);
 
+    void setMultiplyColor(glm::vec4);
+
 	void setInRoom(bool);
+
+    float x() const;
+
+    float y() const;
+
+    template<typename T>
+    T* getComponent() {
+        for (auto& c : _components) {
+            T* d = dynamic_cast<T*>(c.get());
+            if (d != nullptr) {
+                return d;
+            }
+        }
+        return nullptr;
+    }
+
 private:
     void notifyMove();
 	std::vector<std::shared_ptr<Node>> _children;

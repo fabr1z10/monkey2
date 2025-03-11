@@ -34,7 +34,7 @@ void MouseController::start() {
 	}
 	_cursorType = 0;
 	if (_onRightClick) {
-		_onRightClick(_cursorSequence[_cursorType]);
+        _onRightClick(_cursorSequences[_cursorSeq][_cursorType]);
 	}
 }
 
@@ -109,14 +109,20 @@ int MouseController::mouseButtonCallback(GLFWwindow*, int button, int action, in
      */
 
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action==GLFW_PRESS && _cursor != nullptr) {
-        _cursorType++;
-        if (_cursorType >= _cursorSequence.size()) {
-            _cursorType = 0;
+        while (true) {
+            _cursorType++;
+            auto& seq = _cursorSequences[_cursorSeq];
+            if (_cursorType >= seq.size()) {
+                _cursorType = 0;
+            }
+            if (!seq[_cursorType].empty()) {
+                _cursor->getRenderer()->setAnimation(seq[_cursorType]);
+                if (_onRightClick) {
+                    _onRightClick(seq[_cursorType]);
+                }
+                break;
+            }
         }
-        _cursor->getRenderer()->setAnimation(_cursorSequence[_cursorType]);
-		if (_onRightClick) {
-			_onRightClick(_cursorSequence[_cursorType]);
-		}
 		return 0;
     }
 
@@ -133,7 +139,7 @@ int MouseController::mouseButtonCallback(GLFWwindow*, int button, int action, in
 				glfwGetCursorPos(window, &xpos, &ypos);
 				glm::vec2 worldCoords;
 				if (int camId = screenCoordsToWorldCoords({xpos, ypos}, worldCoords); camId != -1) {
-					_onClick(camId, worldCoords);
+                    _onClick(camId, worldCoords, _cursorSequences[_cursorSeq][_cursorType]);
 					//std::cout << "Clicked at " << worldCoords << "\//n";
 					//auto script = std::make_shared<Script>("__PLAYER");
 					//script->addAction(std::make_shared<actions::WalkTo>(_player, _walkarea, worldCoords, _speed));
@@ -146,12 +152,27 @@ int MouseController::mouseButtonCallback(GLFWwindow*, int button, int action, in
 	return 1;
 }
 
-void MouseController::setCursor(Node* node, const std::vector<std::string>& seq) {
+void MouseController::setCursor(Node* node) {
     _cursor = node;
-    _cursorSequence = seq;
+    _cursorSeq = 0;
+    //_cursorSequence = seq;
     _cursorType = 0;
 }
 
+void MouseController::addCursorSequence(const std::vector<std::string>& seq) {
+    _cursorSequences.push_back(seq);
+}
+
+void MouseController::setCursorAction(int seq, int index, const std::string& action) {
+    _cursorSequences[seq][index] = action;
+}
+
+void MouseController::setSequence(int seq, int index) {
+    _cursorSeq = seq;
+    _cursorType = index;
+    _cursor->getRenderer()->setAnimation(_cursorSequences[seq][_cursorType]);
+
+}
 
 void MouseController::add(HotSpot * hs)
 {

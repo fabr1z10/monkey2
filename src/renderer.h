@@ -8,7 +8,7 @@
 
 class IRenderer {
 public:
-    IRenderer() : _node(nullptr), _started(false) {}
+    IRenderer() : _node(nullptr), _started(false), _multiplyColor(glm::vec4(1.f)) {}
 
 	virtual ~IRenderer() = default;
 
@@ -24,13 +24,19 @@ public:
     virtual void draw(Shader*) {}
 
     virtual void setAnimation(const std::string&) {}
+
+    void setMultiplyColor(glm::vec4);
 protected:
 	Node* _node;
     bool _started;
     bool _dirty;
+    glm::vec4 _multiplyColor;
 
 };
 
+inline void IRenderer::setMultiplyColor(glm::vec4 color) {
+    _multiplyColor = color;
+}
 
 inline void IRenderer::setNode(Node* node) {
 	_node= node;
@@ -85,7 +91,7 @@ public:
         }
         auto worldTransform = _node->getWorldMatrix();
         for (size_t i = 0; i < _model->getPrimitiveCount(); ++i) {
-            _model->get(i).transform(_vertices[i], worldTransform);
+            _model->get(i).transform(_vertices[i], worldTransform, _multiplyColor);
         }
     }
 protected:

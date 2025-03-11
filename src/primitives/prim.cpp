@@ -5,7 +5,7 @@ using namespace primitives;
 Line::Line(const float* data) {
 	this->A = glm::vec3(data[0], data[1], data[2]);
 	this->B = glm::vec3(data[3], data[4], data[5]);
-	this->color = glm::vec4(data[6], data[7], data[8], data[9]);
+    //is->color = glm::vec4(data[6], data[7], data[8], data[9]);
 
 }
 
@@ -13,7 +13,7 @@ Triangle::Triangle(const float * data) {
 	this->A = glm::vec3(data[0], data[1], data[2]);
 	this->B = glm::vec3(data[3], data[4], data[5]);
 	this->C = glm::vec3(data[6], data[7], data[8]);
-    this->color = glm::vec4(data[9], data[10], data[11], data[12]);
+    //this->color = glm::vec4(data[9], data[10], data[11], data[12]);
 
 }
 
@@ -21,7 +21,7 @@ TriangleNormal::TriangleNormal(const float * data) {
     this->A = glm::vec3(data[0], data[1], data[2]);
     this->B = glm::vec3(data[3], data[4], data[5]);
     this->C = glm::vec3(data[6], data[7], data[8]);
-    this->color = glm::vec4(data[9], data[10], data[11], data[12]);
+    //this->color = glm::vec4(data[9], data[10], data[11], data[12]);
     this->n = glm::normalize(glm::cross(B - A, C - A));
 
 }
@@ -34,29 +34,29 @@ Quad::Quad(const float* data) {
     this->anchor = glm::vec2(data[4], data[5]);
     this->size = glm::vec2(data[6], data[7]);
     this->index = (int)data[8];
-	this->color = glm::vec4(data[9], data[10], data[11], data[12]);
+    //this->color = glm::vec4(data[9], data[10], data[11], data[12]);
 
 }
 
-Quad::Quad(const float * data, float invw, float invh, glm::vec4 color) {
+Quad::Quad(const float * data, float invw, float invh) {
     this->index = static_cast<int>(data[6]);
     this->texCoord = glm::vec4(data[0] * invw, data[1] * invh, data[2] * invw, data[3] * invh);
     this->anchor = glm::vec2(data[4], data[5]);
     this->size = {data[2], data[3]};
-	this->color = color;
+    //this->color = color;
 }
 
 
-Quad::Quad(const float * data, float invw, float invh, int texId, glm::vec4 color) {
+Quad::Quad(const float * data, float invw, float invh, int texId) {
     this->index = texId;
     this->texCoord = glm::vec4(data[0] * invw, data[1] * invh, data[2] * invw, data[3] * invh);
     this->anchor = glm::vec2(data[4], data[5]);
     this->size = {data[2], data[3]};
-	this->color = color;
+    //this->color = color;
 }
 
 
-void Line::transform(VertexColor * v, const glm::mat4 &t) const {
+void Line::transform(VertexColor * v, const glm::mat4 &t, glm::vec4 color) const {
 	v->A = glm::vec3(t * glm::vec4(A, 1.f));
 	v->color = color;
 
@@ -66,7 +66,7 @@ void Line::transform(VertexColor * v, const glm::mat4 &t) const {
 
 }
 
-void Triangle::transform(VertexColor * v, const glm::mat4 &t) const {
+void Triangle::transform(VertexColor * v, const glm::mat4 &t, glm::vec4 color) const {
 	v->A = glm::vec3(t * glm::vec4(A, 1.f));
 	v->color = color;
 
@@ -78,7 +78,7 @@ void Triangle::transform(VertexColor * v, const glm::mat4 &t) const {
 
 }
 
-void TriangleNormal::transform(VertexColorNormal * v, const glm::mat4 &t) const {
+void TriangleNormal::transform(VertexColorNormal * v, const glm::mat4 &t, glm::vec4 color) const {
     auto normalMat = glm::transpose(glm::inverse(glm::mat3(t)));
     glm::vec3 normal = normalMat * n;
 
@@ -96,7 +96,7 @@ void TriangleNormal::transform(VertexColorNormal * v, const glm::mat4 &t) const 
 
 }
 
-void Quad::transform(VertexTexture * v, const glm::mat4 &t) const {
+void Quad::transform(VertexTexture * v, const glm::mat4 &t, glm::vec4 color) const {
     auto bottomLeft = glm::vec3(t * glm::vec4(-anchor, 0.f, 1.f));
     auto xAxis = t[0];
     auto yAxis = t[1];

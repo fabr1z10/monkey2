@@ -59,6 +59,11 @@ PYBIND11_MODULE(monkey2, m) {
 		.value("CENTER", HAlign::CENTER)
 		.export_values();
 
+    py::enum_<ModelType>(m, "ModelType")
+        .value("WIRE", ModelType::WIREFRAME)
+        .value("SOLID", ModelType::SOLID)
+        .export_values();
+
 
 	m.def("test", &test);
 
@@ -122,6 +127,8 @@ PYBIND11_MODULE(monkey2, m) {
 	py::class_<Node, std::shared_ptr<Node>>(m, "Node")
 		.def(py::init<>())
         .def_property_readonly("id", &Node::id)
+        .def_property_readonly("x", &Node::x)
+        .def_property_readonly("y", &Node::y)
 		.def_property("userData", &Node::getUserData, &Node::setUserData, py::return_value_policy::reference)
 		.def_property("active", &Node::active, &Node::setActive)
 		.def_property("show", &Node::show, &Node::setShow)
@@ -132,7 +139,9 @@ PYBIND11_MODULE(monkey2, m) {
 		.def("addComponent", &Node::addComponent)
         .def("getPosition", &Node::getWorldPosition)
         .def("setPosition", &Node::setPosition)
-		.def("setAnimation", &Node::setAnimation);
+        .def("setMultiplyColor", &Node::setMultiplyColor)
+        .def("setAnimation", &Node::setAnimation)
+        .def("flipX", &Node::flipHorizontal);
 
 	py::class_<Component, std::shared_ptr<Component>>(m, "C")
 		.def("keepAlive", &HotSpot::setPySelf);
@@ -281,7 +290,10 @@ PYBIND11_MODULE(monkey2, m) {
         .def(py::init<float>())
 		.def("activateCamera", &MouseController::activateCamera)
         .def("setCursor", &MouseController::setCursor)
+        .def("addSequence", &MouseController::addCursorSequence)
+        .def("addAction", &MouseController::setCursorAction)
 		.def("setOnClick", &MouseController::setOnClick)
+        .def("setSequence", &MouseController::setSequence, py::arg("seq"), py::arg("index")=0)
 		.def("setOnRightClick", &MouseController::setOnRightClick);
 
     py::class_<Obstacle, Node, std::shared_ptr<Obstacle>>(mAdv, "Obstacle")

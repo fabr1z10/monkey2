@@ -7,7 +7,7 @@ Sprite::Sprite(const std::vector<float> &data, int batchId) : Model<primitives::
     float invw = 1.f / textureSize[0];
     float invh = 1.f / textureSize[1];
     for (size_t i = 0; i < data.size(); i += 7) {
-        _prims.emplace_back(&data[i], invw, invh, glm::vec4(1.f));
+        _prims.emplace_back(&data[i], invw, invh);
     }
 }
 
@@ -18,7 +18,7 @@ Sprite::Sprite(const YAML::Node &node, QuadBatch *batch, int texId)
     float invw = 1.f / batch->getTextureWidth();
     float invh = 1.f / batch->getTextureHeight();
     for (size_t i = 0; i < data.size(); i += 6) {
-        _prims.emplace_back(&data[i], invw, invh, texId, glm::vec4(1.f));
+        _prims.emplace_back(&data[i], invw, invh, texId);
     }
 
     auto anim = node["animations"];
@@ -50,7 +50,7 @@ Sprite::Sprite(const std::vector<float> &data, int batchId, int textureId) : Mod
     float invw = 1.f / textureSize[0];
     float invh = 1.f / textureSize[1];
     for (size_t i = 0; i < data.size(); i += primitives::Quad::_floatsPerPrimitive - 1) {
-        _prims.emplace_back(&data[i], invw, invh, textureId, glm::vec4(1.f));
+        _prims.emplace_back(&data[i], invw, invh, textureId);
     }
 }
 
@@ -83,7 +83,7 @@ void SpriteRenderer::updateGeometry() {
     const auto& quadInfo = _model->getQuad(_animation, _frame);
     if (quadInfo.id != -1) {
         auto worldTransform = _node->getWorldMatrix();
-        _model->get(quadInfo.id).transform(_vertices[0], worldTransform);
+        _model->get(quadInfo.id).transform(_vertices[0], worldTransform, _multiplyColor);
     }
 }
 void SpriteRenderer::update() {
@@ -121,7 +121,7 @@ Quad::Quad(const YAML::Node &node, QuadBatch *batch, int texId)
 
     float invw = 1.f / batch->getTextureWidth();
     float invh = 1.f / batch->getTextureHeight();
-    _prims.emplace_back(&data[0], invw, invh, texId, glm::vec4(1.f));
+    _prims.emplace_back(&data[0], invw, invh, texId);
 }
 
 Quad::Quad(const std::vector<float> &data, int batchId, int texId) : Model<primitives::Quad>(), _batchId(batchId) {
@@ -129,7 +129,7 @@ Quad::Quad(const std::vector<float> &data, int batchId, int texId) : Model<primi
     auto textureSize  = dynamic_cast<QuadBatch*>(Game::instance().getRoom()->getBatch(batchId))->getTextureSize();
     float invw = 1.f / textureSize[0];
     float invh = 1.f / textureSize[1];
-    _prims.emplace_back(&data[0], invw, invh, texId, glm::vec4(1.f));
+    _prims.emplace_back(&data[0], invw, invh, texId);
 }
 
 std::shared_ptr<IRenderer> Quad::getRenderer(int)

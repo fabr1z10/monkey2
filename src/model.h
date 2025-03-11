@@ -13,6 +13,7 @@ class IRenderer;
 class IModel {
 public:
 	IModel() = default;
+    virtual ~IModel() = default;
 	virtual std::shared_ptr<IRenderer> getRenderer(int batchId) = 0;
     virtual int getPrimitiveCount() = 0;
 };

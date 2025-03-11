@@ -18,3 +18,14 @@ Bounds Bounds::transform(const glm::mat4 &t) {
 	return transformed;
 
 }
+
+bool Bounds::overlapX(const Bounds& other) {
+    return !(xm > other.xM || other.xm > xM);
+}
+
+
+bool Bounds::overlapY(const Bounds& other) {
+    return !(ym > other.yM || other.ym > yM);
+}
+
+

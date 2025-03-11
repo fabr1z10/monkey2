@@ -171,13 +171,20 @@ void Node::setPosition(glm::vec3 pos) {
     notifyMove();
 }
 
+
+
 void Node::flipHorizontal(bool value) {
     _modelMatrix[0][0] = fabs(_modelMatrix[0][0]) * (value ? -1.0f : 1.0f);
     notifyMove();
 }
 
 Node* Node::getNode(int id) {
-    return Node::_nodes.at(id);
+    auto it = _nodes.find(id);
+    if (it == _nodes.end()) {
+        return nullptr;
+    }
+    return it->second;
+    //return Node::_nodes.at(id);
 }
 
 
@@ -195,4 +202,17 @@ void Node::unregisterObserver(NodeObserver * observer) {
 
 void Node::setAnimation(const std::string & anim) {
 	_renderer->setAnimation(anim);
+}
+
+void Node::setMultiplyColor(glm::vec4 color) {
+    _renderer->setMultiplyColor(color);
+    _renderer->updateGeometry();
+}
+
+float Node::x() const {
+    return getWorldPosition().x;
+}
+
+float Node::y() const {
+    return getWorldPosition().y;
 }

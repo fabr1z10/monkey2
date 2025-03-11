@@ -16,4 +16,8 @@ struct Bounds {
 		auto notCollide = other.xm > xM || xm > other.xM || other.ym > yM || ym > other.yM;
 		return !notCollide;
 	}
+
+    bool overlapX(const Bounds& other);
+
+    bool overlapY(const Bounds& other);
 };

@@ -99,7 +99,7 @@ void WalkArea::recalculatePoints() {
 						_polygonToVertex[s+i] = _vertices.size();
                         _vertices.push_back(Pc);
                     }
-                    auto f = {Pc.x, Pc.y, 0.f, Pn.x, Pn.y, 0.f, _color.r, _color.g, _color.b, _color.a};
+                    auto f = {Pc.x, Pc.y, 0.f, Pn.x, Pn.y, 0.f};
                     debugModelData.insert(debugModelData.end(), f.begin(), f.end());
                     _nodeWalls.insert({iCurr, iNext});
                     //_nodeWalls.insert({iNext, iCurr});
@@ -114,7 +114,7 @@ void WalkArea::recalculatePoints() {
                 for (size_t i = 0; i < l-1; ++i) {
                     auto Pc = _polygon[s+i];
                     auto Pn = _polygon[s+i+1];
-                    auto f = {Pc.x, Pc.y, 0.f, Pn.x, Pn.y, 0.f, _color.r, _color.g, _color.b, _color.a};
+                    auto f = {Pc.x, Pc.y, 0.f, Pn.x, Pn.y, 0.f};
                     debugModelData.insert(debugModelData.end(), f.begin(), f.end());
                     _nodeWalls.insert({s+i, s+i+1});
                     _nodeWalls.insert({s+i+1, s+i});
@@ -128,6 +128,7 @@ void WalkArea::recalculatePoints() {
     if (_batchId != -1) {
         auto model = std::make_shared<Model<primitives::Line>>(debugModelData);
         setModel(model, _batchId);
+        this->setMultiplyColor(_color);
     }
 
     // find visibility edges. For each pair of nodes AB, determine if
@@ -137,21 +138,21 @@ void WalkArea::recalculatePoints() {
         }
     }
 
-    std::cerr << " -- vertices:\n";
+    /*std::cerr << " -- vertices:\n";
     for (const auto& v : _vertices) {
         std::cerr << v << "\n";
 
     }
-	    std::cerr << " -- edges:\n";
+    std::cerr << " -- edges:\n";
     for (const auto& e : _visibilityEdges) {
-        std::cerr << e.first << ": ";
+        //std::cerr << e.first << ": ";
         for (const auto& m : e.second) {
-            std::cerr << m.first << "(" << m.second << ")" << ", ";
+            //std::cerr << m.first << "(" << m.second << ")" << ", ";
 
         }
         std::cerr << "\n";
     }
-
+    */
 }
 
 int WalkArea::getPolygonNodeIndex(int vertexId) const {
@@ -222,7 +223,7 @@ void WalkArea::pushNode(glm::vec2 node) {
 	int iv = -1;
 	for (const auto& [u,v] : _nodeWalls) {
 		if (pointInSegment(_polygon[u], _polygon[v], node)) {
-			std::cout << " NODE " << node << " IN SEG [" << _polygon[u] << ", " << _polygon[v] << "]\n";
+            //std::cout << " NODE " << node << " IN SEG [" << _polygon[u] << ", " << _polygon[v] << "]\n";
 			auto it = _polygonToVertex.find(u);
 			if (it != _polygonToVertex.end()) iu = it->second;
 

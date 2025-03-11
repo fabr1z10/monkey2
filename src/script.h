@@ -11,6 +11,8 @@ class Action {
 public:
     Action() : _completed(false) {}
 
+    virtual ~Action() = default;
+
     virtual void start();
 
     virtual void run(double) = 0;

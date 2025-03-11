@@ -55,7 +55,7 @@ void TileMapRenderer::updateGeometry() {
 
     auto worldTransform = _node->getWorldMatrix();
     for (auto i = 0; i < frameInfo.length; ++i) {
-        _model->get(frameInfo.offset + i).transform(_vertices[i], worldTransform);
+        _model->get(frameInfo.offset + i).transform(_vertices[i], worldTransform, _multiplyColor);
     }
 }
 void TileMapRenderer::update() {

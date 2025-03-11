@@ -10,6 +10,8 @@ class IBatch {
 public:
 	IBatch(int size, int camId);
 
+    virtual ~IBatch() = default;
+
 	virtual void setupUniforms(Shader* s);
 
 	int getShaderType() const;

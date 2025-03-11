@@ -105,8 +105,7 @@ void Text::updateText(const std::string & text) {
                 glm::vec3 p(x, y, 0.f);
                 //auto kwargs = pybind11::dict("pos"_a=glm::vec3(x,y,0.f),  "size"_a=glm::vec2(c.w,c.h), "normalized"_a=true, "pal"_a=_paletteIndex);
                 std::vector<float> charData{c.tx, c.ty, c.tw, c.th,
-					offset.x - x, offset.y -y, _lineHeight * (c.tw/c.th), _lineHeight, (float)_font->getTexId(),
-					_color.r, _color.g, _color.b, _color.a};
+                    offset.x - x, offset.y -y, _lineHeight * (c.tw/c.th), _lineHeight, (float)_font->getTexId()};
                 modelRaw.insert(modelRaw.end(), charData.begin(), charData.end());
 
                 x += c.advance;
@@ -134,6 +133,7 @@ void Text::updateText(const std::string & text) {
     auto model = std::make_shared<Model<primitives::Quad>>(modelRaw);
 
     this->setModel(model, _font->getBatchId());
+    this->setMultiplyColor(_color);
 
 
 

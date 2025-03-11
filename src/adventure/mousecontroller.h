@@ -22,7 +22,13 @@ namespace adventure {
 
         int mouseButtonCallback(GLFWwindow *, int, int, int) override;
 
-        void setCursor(Node*, const std::vector<std::string>& seq);
+        void setCursor(Node*);
+
+        void addCursorSequence(const std::vector<std::string>& seq);
+
+        void setCursorAction(int seq, int index, const std::string&);
+
+        void setSequence(int seq, int index=0);
 
         void add(HotSpot*);
 
@@ -43,8 +49,9 @@ namespace adventure {
         Node* _cursor;
         int _camId;
         std::vector<CameraInfo> _cam;
-        std::vector<std::string> _cursorSequence;
+        std::vector<std::vector<std::string>> _cursorSequences;
         int _cursorType;
+        int _cursorSeq;
         std::unordered_map<int, std::map<int, std::unordered_set<HotSpot*>>> _hotSpots;
 		HotSpot* _previous;
 		pybind11::function _onEnter;

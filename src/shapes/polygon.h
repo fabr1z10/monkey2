@@ -11,7 +11,7 @@ public:
 
     bool raycastY(glm::vec2 origin, int dir) const override;
 
-	std::shared_ptr<IModel> makeModel(glm::vec4 color, int mode) override;
+    std::shared_ptr<IModel> makeModel(ModelType type) override;
 
 	bool isInside(glm::vec2) const override;
 

@@ -43,7 +43,7 @@ void BasicCollisionEngine::rmCollider(Collider * c) {
 }
 
 
-std::vector<Collider*> BasicCollisionEngine::raycastY(glm::vec2 origin, int direction, int mask, Node*) {
+std::vector<Collider*> BasicCollisionEngine::raycastY(glm::vec2 origin, int direction, int mask, Node*, bool) {
     std::vector<Collider*> out;
     // origin is provided in world coordinates
     for (const auto& c : _colliders) {
@@ -61,30 +61,42 @@ std::vector<Collider*> BasicCollisionEngine::raycastY(glm::vec2 origin, int dire
     return out;
 }
 
-std::vector<Collider *> SpatialHashingCollisionEngine::raycastY(glm::vec2 origin, int direction, int mask,Node* self) {
+std::vector<Collider *> SpatialHashingCollisionEngine::raycastY(glm::vec2 origin, int direction, int mask,
+    Node* self, bool stopAtFirst) {
 	auto hp = hashPosition(origin);
 	std::vector<Collider*> out;
 	std::unordered_set<Collider*> checked;
-	for (const auto& [coords, colliders] : _colliders) {
-		if (coords.x == hp.x && (coords.y - hp.y) * direction >= 0 ) {
-			for (auto& c : colliders) {
-				if (c->getCollisionFlag() & mask == 0) continue;
-				if (self == c->getNode() || checked.count(c) > 0) continue;
-				checked.insert(c);
-				// this is the matrix to convert world to local (to the collider) coordinate system
-				auto m = glm::inverse(c->getNode()->getWorldMatrix());
 
-				// origin in local coordinates
-				glm::vec2 Ol = m * glm::vec4(origin, 0.f, 1.f);
-
-				if (c->getShape()->raycastY(Ol, direction)) {
-					out.push_back(c);
-				}
-			}
-		}
+    // find iy to test
+    std::vector<int> iys;
+    for (const auto& [coords, colliders] : _colliders) {
+        if (coords.x == hp.x && (coords.y - hp.y) * direction >= 0) {
+            iys.push_back(coords.y);
+        }
+    }
+    std::sort(iys.begin(), iys.end());
 
 
-	}
+    for (auto& iy : iys) {
+        auto colliders = _colliders.at({hp.x, iy});
+        for (auto& c : colliders) {
+            if ((c->getCollisionFlag() & mask) == 0) continue;
+            if (self == c->getNode() || checked.count(c) > 0) continue;
+            checked.insert(c);
+            // this is the matrix to convert world to local (to the collider) coordinate system
+            auto m = glm::inverse(c->getNode()->getWorldMatrix());
+            // origin in local coordinates
+            glm::vec2 Ol = m * glm::vec4(origin, 0.f, 1.f);
+
+            if (c->getShape()->raycastY(Ol, direction)) {
+                out.push_back(c);
+                if (stopAtFirst) {
+                    return out;
+                }
+            }
+        }
+    }
+
 	return out;
 }
 
@@ -219,3 +231,29 @@ void SpatialHashingCollisionEngine::checkCollisions() {
 
 	_previouslyCollidingPairs.insert(_currentCollidingPairs.begin(), _currentCollidingPairs.end());
 }
+
+
+std::vector<Collider*> BasicCollisionEngine::getColliders(int mask) const {
+
+    std::vector<Collider*> result;
+    for (auto& c : _colliders) {
+        if ((c->getCollisionFlag() & mask) != 0) {
+            result.push_back(c);
+        }
+    }
+    return result;
+}
+
+std::vector<Collider*> SpatialHashingCollisionEngine::getColliders(int mask) const {
+
+    std::vector<Collider*> result;
+    for (auto& [key, value] : _colliders) {
+        for (auto& c : value) {
+            if ((c->getCollisionFlag() & mask) != 0) {
+                result.push_back(c);
+            }
+        }
+    }
+    return result;
+}
+

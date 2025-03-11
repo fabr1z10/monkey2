@@ -16,20 +16,20 @@ bool Rect::raycastY(glm::vec2 origin, int dir) const {
 	return true;
 }
 
-std::shared_ptr<IModel> Rect::makeModel(glm::vec4 color, int mode) {
+std::shared_ptr<IModel> Rect::makeModel(ModelType type) {
 
-	if (mode == 0) {
+    if (type == ModelType::WIREFRAME) {
 		std::vector<float> data {
-			_bl.x, _bl.y, 0.f, _bl.x + _width, _bl.y, 0.f, color.r, color.g, color.b, color.a,
-			_bl.x + _width, _bl.y, 0.f, _bl.x+_width, _bl.y+_height, 0.f, color.r, color.g, color.b, color.a,
-			_bl.x+_width, _bl.y+_height, 0.f, _bl.x, _bl.y+_height, 0.f, color.r, color.g, color.b, color.a,
-			_bl.x, _bl.y+ _height, 0.f, _bl.x, _bl.y, 0.f, color.r, color.g, color.b, color.a
+            _bl.x, _bl.y, 0.f, _bl.x + _width, _bl.y, 0.f,
+            _bl.x + _width, _bl.y, 0.f, _bl.x+_width, _bl.y+_height, 0.f,
+            _bl.x+_width, _bl.y+_height, 0.f, _bl.x, _bl.y+_height, 0.f,
+            _bl.x, _bl.y+ _height, 0.f, _bl.x, _bl.y, 0.f
 		};
 		return std::make_shared<Model<primitives::Line>>(data);
 	} else {
 		std::vector<float> data {
-			_bl.x, _bl.y, 0.f, _bl.x+_width, _bl.y, 0.f, _bl.x+_width, _bl.y+_height, 0.f, color.r, color.g, color.b, color.a,
-			_bl.x, _bl.y, 0.f, _bl.x+_width, _bl.y+_height, 0.f, _bl.x, _bl.y+_height, 0.f, color.r, color.g, color.b, color.a,
+            _bl.x, _bl.y, 0.f, _bl.x+_width, _bl.y, 0.f, _bl.x+_width, _bl.y+_height, 0.f,
+            _bl.x, _bl.y, 0.f, _bl.x+_width, _bl.y+_height, 0.f, _bl.x, _bl.y+_height, 0.f
 		};
 		return std::make_shared<Model<primitives::Triangle>>(data);
 	}

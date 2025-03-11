@@ -20,13 +20,13 @@ bool Point::isInside(glm::vec2 P) const {
 	return glm::length(P) < EPSILON;
 }
 
-std::shared_ptr<IModel> Point::makeModel(glm::vec4 color, int) {
+std::shared_ptr<IModel> Point::makeModel(ModelType) {
 
 	std::vector<float> data {
-		-1, -1, 0.f, 1, -1, 0.f, color.r, color.g, color.b, color.a,
-		1, -1, 0.f, 1, 1, 0.f, color.r, color.g, color.b, color.a,
-		1, 1, 0.f, -1, 1, 0.f, color.r, color.g, color.b, color.a,
-		-1, 1, 0.f, -1, -1, 0.f, color.r, color.g, color.b, color.a,
+        -1, -1, 0.f, 1, -1, 0.f,
+        1, -1, 0.f, 1, 1, 0.f,
+        1, 1, 0.f, -1, 1, 0.f,
+        -1, 1, 0.f, -1, -1, 0.f
 
 	};
 

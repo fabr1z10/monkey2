@@ -17,4 +17,5 @@ private:
     ICollisionEngine* _engine;
     glm::vec2 _lastPos;
     float _y0, _y1, k;
+    Collider* _collider;
 };
