@@ -204,6 +204,10 @@ void Node::setAnimation(const std::string & anim) {
 	_renderer->setAnimation(anim);
 }
 
+std::string Node::getAnimation() const {
+    return _renderer->getAnimation();
+}
+
 void Node::setMultiplyColor(glm::vec4 color) {
     _renderer->setMultiplyColor(color);
     _renderer->updateGeometry();

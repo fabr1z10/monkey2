@@ -132,6 +132,7 @@ PYBIND11_MODULE(monkey2, m) {
 		.def_property("userData", &Node::getUserData, &Node::setUserData, py::return_value_policy::reference)
 		.def_property("active", &Node::active, &Node::setActive)
 		.def_property("show", &Node::show, &Node::setShow)
+        .def_property("animation", &Node::getAnimation, &Node::setAnimation)
 		.def("setModel", &Node::setModel, py::arg("model"), py::arg("batch") = -1)
 		.def("setTransform", &Node::setTransform)
 		.def("add", &Node::add)
@@ -139,11 +140,11 @@ PYBIND11_MODULE(monkey2, m) {
 		.def("addComponent", &Node::addComponent)
         .def("getPosition", &Node::getWorldPosition)
         .def("setPosition", &Node::setPosition)
-        .def("setMultiplyColor", &Node::setMultiplyColor)
-        .def("setAnimation", &Node::setAnimation)
+        .def("setMultiplyColor", &Node::setMultiplyColor)        
         .def("flipX", &Node::flipHorizontal);
 
 	py::class_<Component, std::shared_ptr<Component>>(m, "C")
+        .def_property_readonly("node", &Component::getNode, py::return_value_policy::reference)
 		.def("keepAlive", &HotSpot::setPySelf);
 
 
@@ -220,7 +221,7 @@ PYBIND11_MODULE(monkey2, m) {
     py::class_<Sprite, Model<primitives::Quad>, std::shared_ptr<Sprite>>(m, "Sprite")
         .def(py::init<const std::vector<float>&, int>())
         .def(py::init<const std::vector<float>&, int, int>(), py::arg("data"), py::arg("batchId"), py::arg("texId"))
-        .def("add", &Sprite::add)
+        //.def("add", &Sprite::add)
         .def_property("defaultAnimation", &Sprite::getDefaultAnimation, &Sprite::setDefaultAnimation);
 
     py::class_<TileMap, Model<primitives::Quad>, std::shared_ptr<TileMap>>(m, "TileMap")

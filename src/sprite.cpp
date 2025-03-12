@@ -31,13 +31,24 @@ Sprite::Sprite(const YAML::Node &node, QuadBatch *batch, int texId)
         if (quads.empty()) {
             // this is an alias of previous anim
             _alias[animId] = validAnimation;
-            _animationFrameCount[animId] = _animationFrameCount.at(validAnimation);
+            //_animationFrameCount[animId] = _animationFrameCount.at(validAnimation);
         } else {
             validAnimation = animId;
+            AnimInfo info;
             for (auto i = 0; i <quads.size(); ++i) {
-                _animationQuads[{animId, i}] = QuadInfo{quads[i], ticks};
+                if (quads[i] >= 0) {
+                    info.frames.push_back(QuadInfo{quads[i], ticks});
+                } else {
+                    switch(quads[i]) {
+                    case -1:
+                        // set loop index
+                        info.loopIndex = quads[++i];
+                        break;
+                    }
+                }
             }
-            _animationFrameCount[animId] = quads.size();
+            _animationInfo[animId] = info;
+            //_animationFrameCount[animId] = quads.size();
         }
 
 
@@ -54,16 +65,18 @@ Sprite::Sprite(const std::vector<float> &data, int batchId, int textureId) : Mod
     }
 }
 
-void Sprite::add(const std::string &animation, int frame, int quad, int ticks) {
-    _animationQuads[{animation, frame}] = QuadInfo{quad, ticks};
-    _animationFrameCount[animation] = std::max(_animationFrameCount[animation], frame+1);
-}
+// void Sprite::add(const std::string &animation, int frame, int quad, int ticks) {
+
+
+//     _animationQuads[{animation, frame}] = QuadInfo{quad, ticks};
+//     _animationFrameCount[animation] = std::max(_animationFrameCount[animation], frame+1);
+// }
 
 const Sprite::QuadInfo& Sprite::getQuad(const std::string &anim, int frame) const {
     auto it = _alias.find(anim);
     std::string a = (it == _alias.end()) ? anim : it->second;
-    M_Assert(_animationFrameCount.count(a) > 0, ("Unknown animation: " + anim).c_str());
-    return _animationQuads.at({a,frame});
+    M_Assert(_animationInfo.count(a) > 0, ("Unknown animation: " + anim).c_str());
+    return _animationInfo.at(a).frames[frame];
     // auto it = _animationQuads.find({anim, frame});
     // if (it == _animationQuads.end()) {
     //     return {-1, 0};
@@ -86,18 +99,26 @@ void SpriteRenderer::updateGeometry() {
         _model->get(quadInfo.id).transform(_vertices[0], worldTransform, _multiplyColor);
     }
 }
+
+void SpriteRenderer::start() {
+    Renderer<Sprite>::start();
+    _animInfo = _model->getAnimationInfo(_animation);
+}
+
+
 void SpriteRenderer::update() {
-    if (!_started) {
+    if (!_started || _animInfo == nullptr) {
         return;
     }
-    const auto& quadInfo = _model->getQuad(_animation, _frame);
+
+    const auto& quadInfo = _animInfo->frames[_frame]; //_model->getQuad(_animation, _frame);
     if (quadInfo.id != -1) {
         _tickCounter++;
         if (_tickCounter >= quadInfo.ticks) {
             // increment frame
             _frame++;
-            if (_frame >= _model->getAnimationFrames(_animation)) {
-                _frame = 0;
+            if (_frame >= _animInfo->frames.size()) {
+                _frame = _animInfo->loopIndex;
             }
             _tickCounter=0;
             updateGeometry();
@@ -109,6 +130,7 @@ void SpriteRenderer::setAnimation(const std::string & anim) {
     if (_animation != anim) {
         _animation = anim;
         _frame = 0;
+        _animInfo = _model->getAnimationInfo(anim);
     }
 
 }

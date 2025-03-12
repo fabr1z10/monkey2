@@ -72,6 +72,7 @@ public:
 
 	void setAnimation(const std::string&);
 
+    std::string getAnimation() const;
     void setMultiplyColor(glm::vec4);
 
 	void setInRoom(bool);

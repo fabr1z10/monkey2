@@ -25,6 +25,8 @@ public:
 
     virtual void setAnimation(const std::string&) {}
 
+    virtual std::string getAnimation() const;
+
     void setMultiplyColor(glm::vec4);
 protected:
 	Node* _node;
@@ -33,6 +35,10 @@ protected:
     glm::vec4 _multiplyColor;
 
 };
+
+inline std::string IRenderer::getAnimation() const {
+    return "";
+}
 
 inline void IRenderer::setMultiplyColor(glm::vec4 color) {
     _multiplyColor = color;

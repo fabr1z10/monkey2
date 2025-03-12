@@ -175,7 +175,7 @@ void WalkArea::addVisibilityEdges(int i, int j) {
     // requesting if vertex_i connects to vertex_j
     auto ni = getPolygonNodeIndex(i);
     auto nj = getPolygonNodeIndex(j);
-    if (_nodeWalls.count({ni, nj}) > 0) {
+    if (_nodeWalls.count({ni, nj}) > 0 || _nodeWalls.count({nj, ni}) > 0) {
         // in this case nodes are visible
         addEdge(i, j);
         return;
