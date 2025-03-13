@@ -30,6 +30,8 @@
 #include "actions/delay.h"
 #include "actions/callfunc.h"
 #include "actions/waitclick.h"
+#include "actions/move.h"
+
 #include "components/depthscale.h"
 #include "components/hotspot.h"
 
@@ -304,6 +306,9 @@ PYBIND11_MODULE(monkey2, m) {
      */
     py::class_<actions::Animate, Action, std::shared_ptr<actions::Animate>>(mAct, "Animate")
 		.def(py::init<Node*, const std::string&>());
+
+    py::class_<actions::MoveTo, Action, std::shared_ptr<actions::MoveTo>>(mAct, "MoveTo")
+        .def(py::init<Node*, glm::vec2, float>(), py::arg("node"), py::arg("pos"), py::arg("speed"));
 
 	py::class_<actions::WalkTo, Action, std::shared_ptr<actions::WalkTo>>(mAct, "Walk")
         .def(py::init<Node*, WalkArea*, glm::vec2, float>(), py::arg("node"), py::arg("walkarea"),

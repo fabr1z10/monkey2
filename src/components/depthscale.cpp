@@ -39,7 +39,7 @@ void DepthScale::updateZ() {
         }
         size_t nObjects = 0;
         for (auto& t : xTest) {
-            auto objects = _engine->raycastY(t + glm::vec2(0,0.1f), 1, _mask, m_node);
+            auto objects = _engine->raycastY(glm::vec2(t, b.ym + 0.1f), 1, _mask, m_node);
             nObjects = std::max(nObjects, objects.size());
         }
         zAdjust = static_cast<float>(nObjects);

@@ -2,14 +2,14 @@
 
 using namespace actions;
 
-FlipHorizontal::FlipHorizontal(Node * node, bool value) : Action(), _node(node), _value(value) {
+// FlipHorizontal::FlipHorizontal(Node * node, bool value) : Action(), _node(node), _value(value) {
 
-}
+// }
 
-void FlipHorizontal::start() {
-    _node->flipHorizontal(_value);
-    _completed = true;
-}
+// void FlipHorizontal::start() {
+//     _node->flipHorizontal(_value);
+//     _completed = true;
+// }
 
 MoveTo::MoveTo(Node* node, glm::vec2 position, float speed) : Action(), _node(node), _targetPosition(position),
     _speed(speed) {}

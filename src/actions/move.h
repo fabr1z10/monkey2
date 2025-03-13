@@ -26,15 +26,15 @@ namespace actions {
         glm::vec2 _direction;
     };
 
-    class FlipHorizontal : public Action {
-    public:
-        FlipHorizontal(Node*, bool value);
+    // class FlipHorizontal : public Action {
+    // public:
+    //     FlipHorizontal(Node*, bool value);
 
-        void start() override;
+    //     void start() override;
 
-        void run(double) override {}
-    private:
-        Node* _node;
-        bool _value;
-    };
+    //     void run(double) override {}
+    // private:
+    //     Node* _node;
+    //     bool _value;
+    // };
 }
