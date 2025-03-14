@@ -8,7 +8,9 @@ void Collider::start() {
 }
 
 Collider::Collider(std::shared_ptr<Shape> shape, int flag, int mask, const std::string& tag) : Component(),
-	_shape(shape), _flag(flag), _mask(mask), _tag(tag) {}
+    _shape(shape), _flag(flag), _mask(mask), _tag(tag) {
+
+}
 
 
 Collider::~Collider() {
@@ -19,5 +21,8 @@ Collider::~Collider() {
 
 Bounds Collider::getBounds() {
 	auto b = _shape->getBounds();
+    if (m_node == nullptr) {
+        return b;
+    }
 	return b.transform(m_node->getWorldMatrix());
 }
