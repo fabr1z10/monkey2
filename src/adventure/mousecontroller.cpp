@@ -181,6 +181,9 @@ void MouseController::add(HotSpot * hs)
 
 void MouseController::remove(HotSpot* hs) {
     _hotSpots[hs->getCamera()][hs->getPriority()].erase(hs);
+    if (_previous == hs) {
+        _previous = nullptr;
+    }
 }
 
 

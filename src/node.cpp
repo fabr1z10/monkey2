@@ -27,6 +27,7 @@ void Node::dispose() {
 	if (_renderer != nullptr) {
 		_renderer->dispose();
 	}
+    for (auto& c : _components) c->dispose();
 	for (auto& c : _children) c->dispose();
 }
 

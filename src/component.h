@@ -11,6 +11,7 @@ public:
     virtual void start() {}
     virtual void update(double) {}
     virtual void setNode(Node*);
+    virtual void dispose();
     Node* getNode();
     bool isActive() const;
     void setActive(bool);
@@ -21,6 +22,9 @@ protected:
 	pybind11::object _py_self;
 };
 
+inline void Component::dispose() {
+    _py_self = pybind11::none();
+}
 inline Node* Component::getNode() {
     return m_node;
 }
