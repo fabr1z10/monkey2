@@ -9,7 +9,7 @@ DepthScale::DepthScale(float y0, float y1, int mask) : Component(),
 
 void DepthScale::start() {
     _engine = Game::instance().getRoom()->getCollisionEngine();
-    _lastPos = m_node->getWorldPosition();
+    _lastPos = m_node->getWorldPosition().toGlm();
 
     // check if I have a collider
     _collider = m_node->getComponent<Collider>();
@@ -46,17 +46,17 @@ void DepthScale::updateZ() {
     } else {
         auto objects = _engine->raycastY(pos+glm::vec2(0,0.1f), 1, _mask, m_node, true);
         if (!objects.empty()) {
-            auto cpos = objects.front()->getNode()->getWorldPosition();
+            auto cpos = objects.front()->getNode()->getWorldPosition().toGlm();
             zAdjust = 1.0f + (cpos.z - (cpos.y - _y0) * k);
         }
         //zAdjust = objects.size();
     }
-    std::cerr << "# objects: " << zAdjust << "\n";
+    //std::cerr << "# objects: " << zAdjust << "\n";
     z += zAdjust;
-    m_node->setPosition(glm::vec3(pos.x, pos.y, z));
+    m_node->setPosition(Vec3(pos.x, pos.y, z));
 }
 void DepthScale::update(double) {
-    glm::vec2 pos = m_node->getWorldPosition();
+    glm::vec2 pos = m_node->getWorldPosition().toGlm();
     if (!_valid || fabs(pos.x-_lastPos.x) > 0.01 || fabs(pos.y - _lastPos.y) > 0.01) {
         _lastPos = pos;
         _valid = true;

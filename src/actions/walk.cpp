@@ -3,13 +3,13 @@
 
 using namespace actions;
 
-WalkTo::WalkTo(Node *node, adventure::WalkArea * walkArea, glm::vec2 position, float speed) : Action(),
-    _node(node), _walkArea(walkArea), _targetPosition(position), _speed(speed) {
+WalkTo::WalkTo(Node *node, adventure::WalkArea * walkArea, Vec2 position, float speed) : Action(),
+    _node(node), _walkArea(walkArea), _targetPosition(position.toGlm()), _speed(speed) {
 }
 
 void WalkTo::start() {
     Action::start();
-    glm::vec2 pos = _node->getWorldPosition();
+    glm::vec2 pos = _node->getWorldPosition().toGlm();
     if (glm::length(pos - _targetPosition) < 0.01) {
         _completed = true;
         return;
@@ -55,7 +55,7 @@ void WalkTo::run(double dt) {
     _node->move(delta);
     _distanceTraversed += ds;
     if (_distanceTraversed >= seg.length) {
-        _node->setPosition(glm::vec3(seg.targetPosition, 0.f));
+        _node->setPosition(Vec3(seg.targetPosition.x, seg.targetPosition.y, 0.f));
         _segmentId++;
         if (_segmentId >= _segments.size()) {
             _node->getRenderer()->setAnimation("idle" + _lastDirection);

@@ -25,10 +25,10 @@ void Game::start() {
 	_settings = py::module_::import("settings");
 	_source = py::module_::import("src");
 
-	_deviceSize = py_get<glm::ivec2>(_settings, "device_size");
-	_windowSize = py_get<glm::ivec2>(_settings, "window_size", _deviceSize);
+    _deviceSize = py_get<IVec2>(_settings, "device_size");
+    _windowSize = py_get<IVec2>(_settings, "window_size", _deviceSize);
 	_enableMouse = py_get<bool>(_settings, "enable_mouse", false);
-	_deviceAspectRatio = static_cast<double>(_deviceSize[0]) / _deviceSize[1];
+    _deviceAspectRatio = static_cast<double>(_deviceSize.x) / _deviceSize.y;
     //fs::path fl = _mainModule.attr("__file__").cast<std::string>();
 
     _cwd = getPythonScriptDirectory();
@@ -59,7 +59,7 @@ void Game::initGL() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Open a window and create its OpenGL context
-	window = glfwCreateWindow( _windowSize[0], _windowSize[1], _title.c_str(), NULL, NULL);
+    window = glfwCreateWindow( _windowSize.x, _windowSize.y, _title.c_str(), NULL, NULL);
 	if( window == NULL ){
 		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
 		getchar();
@@ -98,7 +98,7 @@ void Game::initGL() {
 //    }
 	// Ensure we can capture the escape key being pressed below
 	//glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-	Game::WindowResizeCallback(window, _windowSize[0], _windowSize[1]);
+    Game::WindowResizeCallback(window, _windowSize.x, _windowSize.y);
 	glfwSetKeyCallback(window, key_callback );
 	if (_enableMouse) {
 		glfwSetMouseButtonCallback(window, mouse_button_callback);
@@ -214,7 +214,7 @@ void Game::WindowResizeCallback(GLFWwindow* win, int width, int height) {
     auto& game = Game::instance();
     game._screenHeight = height;
 	float winAspectRatio = static_cast<float>(width) / height;
-	game._windowSize = glm::ivec2(width, height);
+    game._windowSize = IVec2(width, height);
 	auto deviceSize = game.getDeviceSize();
 	auto dar = game.getDeviceAspectRatio();
 	int vx, vy, vw, vh;

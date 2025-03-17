@@ -42,7 +42,7 @@ void MouseController::cursorPosCallback(GLFWwindow*, double x, double y) {
     // first get device coordinates
     if (_cursor != nullptr) {
         auto devCoords = Game::instance().getDeviceCoordinates({x, y});
-        _cursor->setPosition(glm::vec3(devCoords, _zCursor));
+        _cursor->setPosition(Vec3(devCoords.x, devCoords.y, _zCursor));
     }
 
 
@@ -130,7 +130,7 @@ int MouseController::mouseButtonCallback(GLFWwindow*, int button, int action, in
 
 		// if we are hovering on a hotspot ... call onClick
 		if (_previous != nullptr) {
-			_previous->onClick(_worldCoords);
+            _previous->onClick(Vec2(_worldCoords.x, _worldCoords.y));
 		} else {
 			// if we click outside a hotspot, we call onClick
 			if (_onClick) {
@@ -139,7 +139,7 @@ int MouseController::mouseButtonCallback(GLFWwindow*, int button, int action, in
 				glfwGetCursorPos(window, &xpos, &ypos);
 				glm::vec2 worldCoords;
 				if (int camId = screenCoordsToWorldCoords({xpos, ypos}, worldCoords); camId != -1) {
-                    _onClick(camId, worldCoords, _cursorSequences[_cursorSeq][_cursorType]);
+                    _onClick(camId, Vec2(worldCoords.x, worldCoords.y), _cursorSequences[_cursorSeq][_cursorType]);
 					//std::cout << "Clicked at " << worldCoords << "\//n";
 					//auto script = std::make_shared<Script>("__PLAYER");
 					//script->addAction(std::make_shared<actions::WalkTo>(_player, _walkarea, worldCoords, _speed));

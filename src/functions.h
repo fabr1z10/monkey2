@@ -9,7 +9,7 @@ void loadAsset(const std::string& id, const std::string& file,int camId, const s
 
 std::shared_ptr<IModel> getModel(const std::string& id);
 
-std::shared_ptr<Shape> shapeFromImage(const std::string& assetBank, int texId, glm::ivec4 coords, int n);
+std::shared_ptr<Shape> shapeFromImage(const std::string& assetBank, int texId, Vec4 coords, int n);
 
 void closeRoom();
 

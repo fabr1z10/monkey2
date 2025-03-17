@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <memory>
-#include "glm/glm.hpp"
+#include "vec.h"
 #include "component.h"
 #include "nodeobserver.h"
 
@@ -34,9 +34,11 @@ public:
 
 	glm::mat4 getWorldMatrix() const;
 
-    glm::vec3 getWorldPosition() const;
+    Vec3 getWorldPosition() const;
 
-    void setPosition(glm::vec3);
+    glm::vec3 getPosition() const;
+
+    void setPosition(Vec3);
 
     void move(glm::vec2);
 
@@ -73,7 +75,8 @@ public:
 	void setAnimation(const std::string&);
 
     std::string getAnimation() const;
-    void setMultiplyColor(glm::vec4);
+
+    void setMultiplyColor(Color);
 
 	void setInRoom(bool);
 

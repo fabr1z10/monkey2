@@ -17,7 +17,7 @@ MoveTo::MoveTo(Node* node, glm::vec2 position, float speed) : Action(), _node(no
 
 void MoveTo::start() {
     Action::start();
-    auto pos = glm::vec2(_node->getWorldPosition());
+    auto pos = glm::vec2(_node->getWorldPosition().toGlm());
 
     _direction = glm::normalize(_targetPosition - pos);
     _length = glm::length(_targetPosition - pos);
@@ -33,7 +33,7 @@ void MoveTo::run(double dt) {
     _node->move(delta);
     _distanceTraversed += ds;
     if (_distanceTraversed >= _length) {
-        _node->setPosition(glm::vec3(_targetPosition, 0.f));
+        _node->setPosition(Vec3(_targetPosition.x, _targetPosition.y, 0.f));
         _completed = true;
     }
 }

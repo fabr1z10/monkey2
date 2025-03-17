@@ -3,7 +3,7 @@
 
 #include "../component.h"
 #include "../shape.h"
-#include "../pyhelper.h"
+#include "../vec.h"
 
 class HotSpot : public Component {
 public:
@@ -19,7 +19,7 @@ public:
 
     virtual void onLeave() = 0;
 
-    virtual void onClick(glm::vec2) = 0;
+    virtual void onClick(Vec2) = 0;
 
     int getPriority() const;
 
@@ -61,7 +61,7 @@ public:
 		);
 	}
 
-	void onClick(glm::vec2 pos) override {
+    void onClick(Vec2 pos) override {
 		PYBIND11_OVERRIDE_PURE(
 				void,    // Return type
 				HotSpot,    // Parent class

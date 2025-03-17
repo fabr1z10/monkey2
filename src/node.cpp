@@ -99,7 +99,11 @@ glm::mat4 Node::getWorldMatrix() const {
 	return _worldMatrix;
 }
 
-glm::vec3 Node::getWorldPosition() const {
+Vec3 Node::getWorldPosition() const {
+    return Vec3(glm::vec3(_worldMatrix[3]));
+}
+
+glm::vec3 Node::getPosition() const {
     return glm::vec3(_worldMatrix[3]);
 }
 
@@ -154,7 +158,7 @@ void Node::addComponent(std::shared_ptr<Component> c) {
 		// Store the Python object reference in the component
 		c->setPySelf(py_obj);
 
-		std::cout << "Python object reference stored in component" << std::endl;
+        //std::cout << "Python object reference stored in component" << std::endl;
 	} catch (const std::exception& e) {
 		std::cerr << "Failed to create Python reference: " << e.what() << std::endl;
 	}
@@ -167,8 +171,8 @@ void Node::move(glm::vec2 dx) {
     notifyMove();
 }
 
-void Node::setPosition(glm::vec3 pos) {
-    _modelMatrix[3] = glm::vec4(pos, 1.f);
+void Node::setPosition(Vec3 pos) {
+    _modelMatrix[3] = glm::vec4(pos.x, pos.y, pos.z, 1.f);
     notifyMove();
 }
 
@@ -209,8 +213,8 @@ std::string Node::getAnimation() const {
     return _renderer->getAnimation();
 }
 
-void Node::setMultiplyColor(glm::vec4 color) {
-    _renderer->setMultiplyColor(color);
+void Node::setMultiplyColor(Color color) {
+    _renderer->setMultiplyColor(color.toGlm());
     _renderer->updateGeometry();
 }
 

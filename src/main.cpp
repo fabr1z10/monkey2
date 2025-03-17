@@ -1,5 +1,4 @@
-
-#include "pyhelper.h"
+#include <pybind11/stl.h>
 #include <iostream>
 #include "functions.h"
 #include "room.h"
@@ -16,6 +15,7 @@
 #include "scheduler.h"
 #include "sprite.h"
 #include "tilemap.h"
+#include "vec.h"
 
 #include "skeletal/mesh.h"
 #include "skeletal/skeletalmodel.h"
@@ -34,6 +34,7 @@
 
 #include "components/depthscale.h"
 #include "components/hotspot.h"
+#include "components/npc.h"
 
 #include "shapes/line.h"
 #include "shapes/polygon.h"
@@ -72,7 +73,7 @@ PYBIND11_MODULE(monkey2, m) {
     // gets node with given id
     m.def("getNode", &getNode, py::arg("id"), py::return_value_policy::reference);
 
-    m.def("fromHex", &fromHex, py::arg("color"));
+    //m.def("fromHex", &fromHex, py::arg("color"));
 
     m.def("loadAsset", &loadAsset, py::arg("id"), py::arg("filename"), py::arg("cam"), py::arg("tex"));
 
@@ -84,7 +85,55 @@ PYBIND11_MODULE(monkey2, m) {
 
 	mSha.def("fromImage", &shapeFromImage);
 
+    py::class_<Vec2>(m, "Vec2")
+        .def(py::init<>())
+        .def(py::init<float, float>())
+        .def(py::init<std::vector<float>>())
+        .def_readwrite("x", &Vec2::x)  // Expose member variables
+        .def_readwrite("y", &Vec2::y)
+        .def("__add__", &Vec2::operator+)  // Addition operator
+        .def("__mul__", &Vec2::operator*)  // Multiplication by scalar
+        .def("length", &Vec2::length);   // Length method
 
+    py::class_<Vec3>(m, "Vec3")
+        .def(py::init<>())
+        .def(py::init<float, float, float>())
+        .def(py::init<std::vector<float>>())
+        .def_readwrite("x", &Vec3::x)  // Expose member variables
+        .def_readwrite("y", &Vec3::y)
+        .def_readwrite("z", &Vec3::z)
+        .def("__add__", &Vec3::operator+)  // Addition operator
+        .def("__mul__", &Vec3::operator*)  // Multiplication by scalar
+        .def("length", &Vec3::length);   // Length method
+
+    py::class_<Vec4>(m, "Vec4")
+        .def(py::init<>())
+        .def(py::init<float, float, float, float>())
+        .def(py::init<std::vector<float>>())
+        .def_readwrite("x", &Vec4::x)  // Expose member variables
+        .def_readwrite("y", &Vec4::y)
+        .def_readwrite("z", &Vec4::z)
+        .def_readwrite("w", &Vec4::w)
+        .def("__add__", &Vec4::operator+)  // Addition operator
+        .def("__mul__", &Vec4::operator*)  // Multiplication by scalar
+        .def("length", &Vec4::length);   // Length method
+
+    py::class_<Color>(m, "Color")
+        .def(py::init<const std::string&>())
+        .def(py::init<float, float, float, float>())
+        .def_readwrite("r", &Color::r)  // Expose member variables
+        .def_readwrite("g", &Color::g)
+        .def_readwrite("b", &Color::b)
+        .def_readwrite("a", &Color::a);
+
+    py::class_<IVec2>(m, "IVec2")
+        .def(py::init<>())
+        .def(py::init<float, float>())
+        .def_readwrite("x", &IVec2::x)  // Expose member variables
+        .def_readwrite("y", &IVec2::y)
+        .def("__add__", &IVec2::operator+)  // Addition operator
+        .def("__mul__", &IVec2::operator*)  // Multiplication by scalar
+        .def("length", &IVec2::length);   // Length method
 
     py::class_<Shape, std::shared_ptr<Shape>>(m, "Shape")
 		.def("toModel", &Shape::makeModel);
@@ -93,7 +142,7 @@ PYBIND11_MODULE(monkey2, m) {
         .def(py::init<glm::vec2, glm::vec2>(), py::arg("a"), py::arg("b"));
 
 	py::class_<Rect, Shape, std::shared_ptr<Rect>>(mSha, "Rect")
-		.def(py::init<float, float, glm::vec2>(), py::arg("width"), py::arg("height"), py::arg("anchor")=glm::vec2(0.f));
+        .def(py::init<float, float, Vec2>(), py::arg("width"), py::arg("height"), py::arg("anchor")=Vec2());
 
     py::class_<PolyLine, Shape, std::shared_ptr<PolyLine>>(mSha, "PolyLine")
         .def(py::init<const std::vector<float>&>(), py::arg("points"));
@@ -173,16 +222,19 @@ PYBIND11_MODULE(monkey2, m) {
 //			return instance;
 //		}));
 
+    py::class_<NPC, Component, std::shared_ptr<NPC>>(m, "NPC")
+        .def(py::init<adventure::WalkArea*, float, pybind11::function, pybind11::function>());
+
     py::class_<MouseListener, std::shared_ptr<MouseListener>>(m, "_MouseListener");
 
 	py::class_<CamControl3D, Component, std::shared_ptr<CamControl3D>>(m, "CamControl3D")
         .def(py::init<int, float, float>());
 
 	py::class_<OrthoCamera, Camera, std::shared_ptr<OrthoCamera>>(m, "CamOrtho")
-		.def(py::init<float, float, glm::vec4>(), py::arg("width"), py::arg("height"), py::arg("viewport") = glm::vec4(0.f));
+        .def(py::init<float, float, Vec4>(), py::arg("width"), py::arg("height"), py::arg("viewport") = Vec4());
 
 	py::class_<PerspectiveCamera, Camera, std::shared_ptr<PerspectiveCamera>>(m, "CamPerspective")
-		.def(py::init<glm::vec4, float, float, float>(), py::arg("viewport") = glm::vec4(0.f), py::arg("fov")=45.f, py::arg("near")=0.1f, py::arg("far")=100.f);
+        .def(py::init<Vec4, float, float, float>(), py::arg("viewport") = Vec4(), py::arg("fov")=45.f, py::arg("near")=0.1f, py::arg("far")=100.f);
 
 	// batches
 	// base class - not instantiable
@@ -277,14 +329,14 @@ PYBIND11_MODULE(monkey2, m) {
     /* Adventure
      */
     py::class_<Text, Node, std::shared_ptr<Text>>(m, "Text")
-        .def(py::init<const std::string&, const std::string&, glm::vec4, HAlign, float, glm::vec2>(),
+        .def(py::init<const std::string&, const std::string&, Color, HAlign, float, Vec2>(),
                 py::arg("font"), py::arg("text"), py::arg("color"),
 				py::arg("align") = HAlign::LEFT, py::arg("width")=0.f,
-				py::arg("anchor")=glm::vec2(0.f))
+                py::arg("anchor")=Vec2())
 		.def_property_readonly("size", &Text::getSize);
 
     py::class_<WalkArea, Node, std::shared_ptr<WalkArea>>(mAdv, "WalkArea")
-        .def(py::init<const std::vector<float>&, int, glm::vec4>(),
+        .def(py::init<const std::vector<float>&, int, Color>(),
                 py::arg("poly"), py::arg("batch") = -1, py::arg("color"))
         .def("addHole", &WalkArea::addHole, py::arg("points"), py::arg("node")=nullptr)
         .def("addLine", &WalkArea::addLine, py::arg("points"), py::arg("node")=nullptr);
@@ -310,9 +362,10 @@ PYBIND11_MODULE(monkey2, m) {
     py::class_<actions::MoveTo, Action, std::shared_ptr<actions::MoveTo>>(mAct, "MoveTo")
         .def(py::init<Node*, glm::vec2, float>(), py::arg("node"), py::arg("pos"), py::arg("speed"));
 
-	py::class_<actions::WalkTo, Action, std::shared_ptr<actions::WalkTo>>(mAct, "Walk")
-        .def(py::init<Node*, WalkArea*, glm::vec2, float>(), py::arg("node"), py::arg("walkarea"),
-             py::arg("position"), py::arg("speed"));
+    py::class_<actions::WalkTo, Action, std::shared_ptr<actions::WalkTo>>(mAct, "Walk")
+        //.def(py::init<glm::vec2, py::float_>());
+        .def(py::init<Node*, WalkArea*, Vec2, py::float_>(), py::arg("node"), py::arg("walkarea"),
+            py::arg("position"), py::arg("speed"));
 
     py::class_<actions::Delay, Action, std::shared_ptr<actions::Delay>>(mAct, "Delay")
         .def(py::init<float>(), py::arg("time"));

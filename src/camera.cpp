@@ -1,15 +1,16 @@
 #include "camera.h"
 #include "game.h"
 #include <glm/gtc/matrix_transform.hpp>
-#include "pyhelper.h"
 
-Camera::Camera(glm::vec4 viewport) {
 
-	if (viewport == glm::vec4(0.f)) {
+Camera::Camera(Vec4 viewport) {
+
+    if (viewport.isZero()) {
 		auto deviceSize = Game::instance().getDeviceSize();
-		viewport = glm::vec4(0.f, 0.f, deviceSize.x, deviceSize.y);
-	}
-	_viewport = viewport;
+        _viewport = glm::vec4(0.f, 0.f, deviceSize.x, deviceSize.y);
+    } else {
+        _viewport = viewport.toGlm();
+    }
 	auto t = std::numeric_limits<float>::infinity();
 
 	_xBounds = glm::vec2(-t, t);
@@ -17,15 +18,28 @@ Camera::Camera(glm::vec4 viewport) {
 	_zBounds = _xBounds;
 }
 
-void Camera::setPosition(glm::vec3 eye, glm::vec3 dir, glm::vec3 up) {
-	_fwd = dir;
-	_up = up;
-	_eye = eye;
+void Camera::setPosition(Vec3 eye, Vec3 dir, Vec3 up) {
+    _fwd = dir.toGlm();
+    _up = up.toGlm();
+    _eye = eye.toGlm();
 	_eye.x = std::clamp(_eye.x, _xBounds[0], _xBounds[1]);
 	_eye.y = std::clamp(_eye.y, _yBounds[0], _yBounds[1]);
 	_eye.z = std::clamp(_eye.z, _zBounds[0], _zBounds[1]);
-	_viewMatrix = glm::lookAt(_eye, _eye + dir, up);
+    _viewMatrix = glm::lookAt(_eye, _eye + _fwd, _up);
 }
+
+
+void Camera::setPos(glm::vec3 eye, glm::vec3 dir, glm::vec3 up) {
+    _eye = eye;
+    _fwd = dir;
+    _up = up;
+
+    _eye.x = std::clamp(_eye.x, _xBounds[0], _xBounds[1]);
+    _eye.y = std::clamp(_eye.y, _yBounds[0], _yBounds[1]);
+    _eye.z = std::clamp(_eye.z, _zBounds[0], _zBounds[1]);
+    _viewMatrix = glm::lookAt(_eye, _eye + _fwd, _up);
+}
+
 
 void Camera::setFwd(glm::vec3 dir) {
     _fwd = dir;
@@ -47,7 +61,7 @@ void Camera::move(glm::vec3 delta) {
 }
 
 
-OrthoCamera::OrthoCamera(float width, float height, glm::vec4 viewport) : Camera(viewport), _orthoWidth(width), _orthoHeight(height) {
+OrthoCamera::OrthoCamera(float width, float height, Vec4 viewport) : Camera(viewport), _orthoWidth(width), _orthoHeight(height) {
 	float hw = _orthoWidth / 2.0f;
 	float hh = _orthoHeight / 2.0f;
 	_projectionMatrix = glm::ortho(-hw, hw, -hh, hh, -100.0f, 100.0f);
@@ -61,6 +75,6 @@ glm::vec2 OrthoCamera::getWorldCoordinates(glm::vec2 deviceCoordinates) const {
 }
 
 
-PerspectiveCamera::PerspectiveCamera(glm::vec4 viewport, float fov, float near, float far) : Camera(viewport), _fov(fov), _near(near), _far(far) {
+PerspectiveCamera::PerspectiveCamera(Vec4 viewport, float fov, float near, float far) : Camera(viewport), _fov(fov), _near(near), _far(far) {
 	_projectionMatrix = glm::perspective (_fov, _viewport[2]/_viewport[3], _near, _far);
 }

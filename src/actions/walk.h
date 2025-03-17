@@ -8,7 +8,7 @@
 namespace actions {
     class WalkTo : public Action {
     public:
-        WalkTo(Node* node, adventure::WalkArea*, glm::vec2 position, float speed);
+        WalkTo(Node* node, adventure::WalkArea*, Vec2 position, float speed);
 
         void start() override;
 
@@ -35,15 +35,5 @@ namespace actions {
         std::vector<WalkSegment> _segments;
     };
 
-    class FlipHorizontal : public Action {
-    public:
-        FlipHorizontal(Node*, bool value);
 
-        void start() override;
-
-        void run(double) override {}
-    private:
-        Node* _node;
-        bool _value;
-    };
 }

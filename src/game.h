@@ -19,9 +19,9 @@ public:
 		return instance;
 	}
 
-	[[nodiscard]] glm::ivec2 getDeviceSize() const;
+    [[nodiscard]] IVec2 getDeviceSize() const;
 
-	[[nodiscard]] glm::ivec2 getWindowSize() const;
+    [[nodiscard]] IVec2 getWindowSize() const;
 
 	[[nodiscard]] double getDeviceAspectRatio() const;
 
@@ -64,8 +64,8 @@ private:
 	pybind11::module_ _source;
 	glm::vec4 _windowViewport;
 
-	glm::ivec2 _windowSize;
-	glm::ivec2 _deviceSize;
+    IVec2 _windowSize;
+    IVec2 _deviceSize;
 	std::string _title;
 	double _deviceAspectRatio;
 	bool _enableMouse;
@@ -81,11 +81,11 @@ private:
     std::string _cwd;
 };
 
-inline glm::ivec2 Game::getDeviceSize() const {
+inline IVec2 Game::getDeviceSize() const {
 	return _deviceSize;
 }
 
-inline glm::ivec2 Game::getWindowSize() const {
+inline IVec2 Game::getWindowSize() const {
 	return _windowSize;
 }
 

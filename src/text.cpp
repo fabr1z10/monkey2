@@ -3,8 +3,8 @@
 #include "util.h"
 #include "model.h"
 
-Text::Text(const std::string& font, const std::string &text, glm::vec4 color, HAlign align, float width, glm::vec2 anchor) : Node(),
-	_color(color), _hAlign(align), _width(width), _anchor(anchor) {
+Text::Text(const std::string& font, const std::string &text, Color color, HAlign align, float width, Vec2 anchor) : Node(),
+    _color(color), _hAlign(align), _width(width), _anchor(anchor.x, anchor.y) {
 
     _font = AssetManager::instance().getFont(font).get();
 

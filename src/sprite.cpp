@@ -65,6 +65,19 @@ Sprite::Sprite(const std::vector<float> &data, int batchId, int textureId) : Mod
     }
 }
 
+const Sprite::AnimInfo* Sprite::getAnimationInfo(const std::string& id) {
+    auto it = _animationInfo.find(id);
+    if (it == _animationInfo.end()) {
+        auto aliasId = _alias.find(id);
+        if (aliasId == _alias.end()) {
+            GLIB_FAIL("Don't know animation " + id);
+        }
+        it = _animationInfo.find(aliasId->second);
+
+    }
+    return &it->second;
+}
+
 // void Sprite::add(const std::string &animation, int frame, int quad, int ticks) {
 
 

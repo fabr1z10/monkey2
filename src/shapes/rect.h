@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../shape.h"
+#include "../vec.h"
 #include <vector>
 
 
@@ -8,7 +9,7 @@ namespace shapes {
 
 	class Rect : public Shape {
 	public:
-		Rect(float width, float height, glm::vec2 anchor = glm::vec2(0.f));
+        Rect(float width, float height, Vec2 anchor = Vec2());
 
 		bool raycastY(glm::vec2 origin, int dir) const override;
 

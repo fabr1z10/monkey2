@@ -1,8 +1,8 @@
 #include "walkarea.h"
 #include "../geometry.h"
 #include "../error.h"
-#include <iostream>
-#include "../util.h"
+
+
 #include "../model.h"
 #include <queue>
 
@@ -30,7 +30,7 @@ void WalkArea::addPoly(const std::vector<float> & data, PolyType type, Node* ref
 }
 
 
-WalkArea::WalkArea(const std::vector<float> & data, int batchId, glm::vec4 color) : Node(), _batchId(batchId), _color(color) {
+WalkArea::WalkArea(const std::vector<float> & data, int batchId, Color color) : Node(), _batchId(batchId), _color(color) {
     addPoly(data, PolyType::AREA, nullptr);
 }
 
@@ -78,7 +78,7 @@ void WalkArea::recalculatePoints() {
             int l = p.length;
             glm::vec2 offset(0.f);
             if (p.ref != nullptr) {
-                offset = p.ref->getWorldPosition();
+                offset = p.ref->getWorldPosition().toGlm();
             }
             // trasnform poly points in world coords
             for (size_t i = 0; i < l; ++i) {

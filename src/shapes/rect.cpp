@@ -3,7 +3,7 @@
 
 using namespace shapes;
 
-Rect::Rect(float width, float height, glm::vec2 anchor) : Shape(), _width(width), _height(height) {
+Rect::Rect(float width, float height, Vec2 anchor) : Shape(), _width(width), _height(height) {
 	_type = ShapeType::RECT;
 	_bl = glm::vec2(-anchor.x * _width, -anchor.y * _height);
 }

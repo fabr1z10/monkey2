@@ -66,9 +66,7 @@ private:
 };
 
 
-inline const Sprite::AnimInfo* Sprite::getAnimationInfo(const std::string& id) {
-    return &_animationInfo.at(id);
-}
+
 
 inline std::string Sprite::getDefaultAnimation() const {
     return _defaultAnimation;

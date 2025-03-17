@@ -2,7 +2,7 @@
 
 #include <vector>
 #include "../node.h"
-#include "glm/glm.hpp"
+#include "../vec.h"
 #include "../hashpair.h"
 
 namespace adventure {
@@ -13,7 +13,7 @@ namespace adventure {
 
     class WalkArea : public Node {
     public:
-        WalkArea(const std::vector<float> &, int batchId = -1, glm::vec4 color = glm::vec4(1.f));
+        WalkArea(const std::vector<float> &, int batchId = -1, Color color = Color(1.f, 1.f, 1.f, 1.f));
 
         void addHole(const std::vector<float>&, Node* ref = nullptr);
 
@@ -68,7 +68,7 @@ namespace adventure {
 
         std::unordered_map<size_t, std::unordered_map<size_t, float>> _visibilityEdges;
         int _batchId;
-        glm::vec4 _color;
+        Color _color;
         std::vector<PolyInfo> _polyInfo;
     };
 }

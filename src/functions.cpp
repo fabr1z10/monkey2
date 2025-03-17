@@ -5,6 +5,7 @@
 #include "shapes/polygon.h"
 #include "util.h"
 #include "shapes/polyapprox.h"
+#include <pybind11/stl.h>
 
 
 Game& game() {
@@ -34,11 +35,11 @@ Node* getNode(int id) {
     return Node::getNode(id);
 }
 
-std::shared_ptr<Shape> shapeFromImage(const std::string& assetBank, int texId, glm::ivec4 coords, int n) {
+std::shared_ptr<Shape> shapeFromImage(const std::string& assetBank, int texId, Vec4 coords, int n) {
 
 	auto filePath = AssetManager::instance().getTexturePath(assetBank, texId);
 	//filePath = Game::instance().getWorkingDirectory() + "/assets/" + filePath;
-	auto points = PolyApproximation::approximatePoly(filePath, coords, n);
+    auto points = PolyApproximation::approximatePoly(filePath, coords.toGlm(), n);
 
 	std::vector<float> data;
 	for (auto& p : points) {

@@ -16,14 +16,14 @@ enum class HAlign {
 
 class Text : public Node {
 public:
-    Text(const std::string& font, const std::string& text, glm::vec4 color,
-		 HAlign align = HAlign::LEFT, float width = 0.f, glm::vec2 anchor = glm::vec2(0.f));
+    Text(const std::string& font, const std::string& text, Color color,
+         HAlign align = HAlign::LEFT, float width = 0.f, Vec2 anchor = Vec2());
 
     void updateText(const std::string&);
 
     std::string getText() const;
 
-    glm::vec2 getSize() const;
+    Vec2 getSize() const;
 private:
     struct TextRow {
         TextRow (int iStart) : indexStart(iStart), indexEnd(-1), length(0.f) {}
@@ -43,7 +43,7 @@ private:
     glm::vec2 _anchor;
     //std::string _sheetId;
     std::string _text;
-	glm::vec4 _color;
+    Color _color;
 
 
 };
@@ -52,6 +52,6 @@ inline std::string Text::getText() const {
     return _text;
 }
 
-inline glm::vec2 Text::getSize() const {
-    return _size;
+inline Vec2 Text::getSize() const {
+    return Vec2(_size.x, _size.y);
 }
