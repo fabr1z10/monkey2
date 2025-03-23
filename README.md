@@ -72,6 +72,7 @@ Go to https://www.zlib.net/ and download the source code. Unzip it, open a MS V
     cd build
     cmake ..
     msbuild INSTALL.vcxproj /p:Configuration=Release
+	cmake --install .
 
 This should build and install the library in a proper location (should be in `c:\Program Files (x86)\zlib` or the like).
 
@@ -83,23 +84,8 @@ Go to http://www.libpng.org/pub/png/libpng.html and get the latest source code. 
     cd build
     cmake ..
     msbuild libpng.sln /p:Configuration=Release
-You should now have a `Release` folder inside the `Build` folder containing the binary files. Copy `libpng16.lib` and `libpng16_static.lib` into `{VC Root}\lib\x64`. Copy `libpng16.dll` into `c:\windows\system32`. Also copy `png.h`, `pngconf.h` and `build\pnglibconf.h` in `{VC Root}\include`.
-
-### JPG
-
-Get the `JPEG` lib package from https://www.nuget.org/packages/libjpeg/.
-
-### FreeType
-
-Go to the Freetype main page https://www.freetype.org/ and download the latest stable release. Unzip it, and in a MS Visual Studio prompt (run it as administrator) type in the following:
-
-    md build
-	cd build
-	cmake .. -DBUILD_SHARED_LIBS:BOOL=TRUE
-	msbuild INSTALL.vcxproj /p:Configuration=Release 
-
-This will build the library and install it in the proper location, typically in a `freetype` folder in `C:\Program Files (x86)` or similar.
-
+	cmake --install .
+	
 ### YAML
 
 You can find this library at https://github.com/jbeder/yaml-cpp. Download and unzip the latest release, then in the root folder type:
