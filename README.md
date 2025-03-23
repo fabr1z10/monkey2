@@ -55,7 +55,10 @@ Get the source code from https://www.glfw.org/, and unzip it. Open up a MS Visua
     MSBuild GLFW.sln /p:Configuration=Release
     cmake --install .
 
-This will create a `GLFW` folder in your `C:\Program Files` folder. However (I don't know why, if anyone does please let me know) it looks like I need to rename GLFW into glfw3 to make it work.
+You probably need to tell `Cmake` where to find GLFW, for instance:
+
+	set(glfw3_DIR "C:/Program Files (x86)/GLFW/lib/cmake/glfw3")
+
 
 ### GLM
 
