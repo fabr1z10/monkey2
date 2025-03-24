@@ -1,6 +1,6 @@
 #include "sprite.h"
 #include "quadbatch.h"
-#include "../error.h"
+#include "error.h"
 
 Sprite::Sprite(const std::vector<float> &data, int batchId) : Model<primitives::Quad>(), _batchId(batchId) {
     auto textureSize  = dynamic_cast<QuadBatch*>(Game::instance().getRoom()->getBatch(batchId))->getTextureSize();

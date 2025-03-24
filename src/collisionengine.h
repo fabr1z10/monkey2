@@ -9,25 +9,48 @@
 
 class CollisionResponse {
 public:
-	CollisionResponse(pybind11::object onStart,
-					  pybind11::object onEnd, bool flip) : _flip(false) {
-		if (!onStart.is_none()) {
-			_onStart = onStart.cast<pybind11::function>();
-		}
-		if (!onEnd.is_none()) {
-			_onEnd = onEnd.cast<pybind11::function>();
-		}
+	virtual ~CollisionResponse() = default;
+	virtual void onStart(Node*, Node*) = 0;
+
+	virtual void onEnd(Node*, Node*) = 0;
+};
+
+
+// Trampoline class to forward calls to Python
+class PyCollisionResponse : public CollisionResponse {
+public:
+	using CollisionResponse::CollisionResponse;  // Inherit constructors
+
+	void onStart(Node* a, Node* b) override {
+		PYBIND11_OVERRIDE_PURE(void, CollisionResponse, onStart, a, b);
 	}
 
-
-	void onStart(Node* n1, Node* n2);
-
-	void onEnd(Node* n1, Node* n2);
-private:
-	pybind11::function _onStart;
-	pybind11::function _onEnd;
-	bool _flip;
+	void onEnd(Node* a, Node* b) override {
+		PYBIND11_OVERRIDE_PURE(void, CollisionResponse, onEnd, a, b);
+	}
 };
+
+//class CollisionResponse {
+//public:
+//	CollisionResponse(pybind11::object onStart,
+//					  pybind11::object onEnd, bool flip) : _flip(false) {
+//		if (!onStart.is_none()) {
+//			_onStart = onStart.cast<pybind11::function>();
+//		}
+//		if (!onEnd.is_none()) {
+//			_onEnd = onEnd.cast<pybind11::function>();
+//		}
+//	}
+//
+//
+//	void onStart(Node* n1, Node* n2);
+//
+//	void onEnd(Node* n1, Node* n2);
+//private:
+//	pybind11::function _onStart;
+//	pybind11::function _onEnd;
+//	bool _flip;
+//};
 
 // don't need to expose CollisionResponse class
 class ICollisionEngine : public NodeObserver {
@@ -46,9 +69,11 @@ public:
 
 	bool haveResponse(Collider*, Collider*);
 
-	void addResponse(const std::string& tag1, const std::string& tag2,
-					 pybind11::object onStart=pybind11::none(),
-					 pybind11::object onEnd=pybind11::none());
+	void addResponse(const std::string& tag1, const std::string& tag2, std::shared_ptr<CollisionResponse>);
+
+	void onStart(Collider*, Collider*);
+	void onEnd(Collider*, Collider*);
+
 protected:
 	std::unordered_map<std::pair<std::string, std::string>, std::shared_ptr<CollisionResponse>> _response;
 };

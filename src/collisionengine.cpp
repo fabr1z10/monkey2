@@ -2,28 +2,39 @@
 #include "node.h"
 #include <iostream>
 
-void ICollisionEngine::addResponse(const std::string &tag1, const std::string &tag2, pybind11::object onStart,
-								   pybind11::object onEnd) {
-	_response[{tag1, tag2}] = std::make_shared<CollisionResponse>(onStart, onEnd, false);
-	_response[{tag2, tag1}]= std::make_shared<CollisionResponse>(onStart, onEnd, true);
+void ICollisionEngine::addResponse(const std::string &tag1, const std::string &tag2, std::shared_ptr<CollisionResponse> response) {
+	_response[{tag1, tag2}] = response;
+	//_response[{tag2, tag1}]= std::make_shared<CollisionResponse>(onStart, onEnd, true);
 }
 
 bool ICollisionEngine::haveResponse(Collider * c1, Collider * c2) {
-	return _response.count({c1->getTag(), c2->getTag()});
+	return _response.count({ c1->getTag(), c2->getTag() }) || _response.count({ c2->getTag(), c1->getTag() });
 }
 
 
-void CollisionResponse::onStart(Node *n1, Node *n2) {
-	if (_onStart) {
-		if (_flip) std::swap(n1, n2);
-		_onStart(n1, n2);
+void ICollisionEngine::onStart(Collider *c1, Collider *c2) {
+	auto it = _response.find({ c1->getTag(), c2->getTag() });
+	if (it == _response.end()) {
+		it = _response.find({ c2->getTag(), c1->getTag() });
+		if (it != _response.end()) {
+			it->second->onStart(c2->getNode(), c1->getNode());
+		}
+	}
+	else {
+		it->second->onStart(c1->getNode(), c2->getNode());
 	}
 }
 
-void CollisionResponse::onEnd(Node *n1, Node *n2) {
-	if (_onEnd) {
-		if (_flip) std::swap(n1, n2);
-		_onEnd(n1, n2);
+void ICollisionEngine::onEnd(Collider* c1, Collider* c2) {
+	auto it = _response.find({ c1->getTag(), c2->getTag() });
+	if (it == _response.end()) {
+		it = _response.find({ c2->getTag(), c1->getTag() });
+		if (it != _response.end()) {
+			it->second->onEnd(c2->getNode(), c1->getNode());
+		}
+	}
+	else {
+		it->second->onEnd(c1->getNode(), c2->getNode());
 	}
 }
 
@@ -201,7 +212,8 @@ void SpatialHashingCollisionEngine::checkCollisions() {
 							UPair<Collider*> p(collider, current);
 							if (_previouslyCollidingPairs.count(p) == 0) {
 								// callback
-								_response.at({collider->getTag(), current->getTag()})->onStart(collider->getNode(), current->getNode());
+								onStart(collider, current);
+								//_response.at({collider->getTag(), current->getTag()})->onStart(collider->getNode(), current->getNode());
 							}
 							_currentCollidingPairs.insert(p);
 
@@ -220,8 +232,7 @@ void SpatialHashingCollisionEngine::checkCollisions() {
 	for (auto it = _previouslyCollidingPairs.begin(); it != _previouslyCollidingPairs.end(); ) {
 		if (checked.count(it->first) > 0 || checked.count(it->second) > 0) {  // Remove even numbers
 			if (_currentCollidingPairs.count(*it) == 0) {
-				_response.at({it->first->getTag(), it->second->getTag()})->
-					onEnd(it->first->getNode(), it->second->getNode());
+				onEnd(it->first, it->second);
 			}
 			it = _previouslyCollidingPairs.erase(it); // erase() returns the next valid iterator
 		} else {

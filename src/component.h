@@ -6,7 +6,7 @@ class Node;
 
 class Component {
 public:
-    Component() : _active(true) {}
+    Component() : _active(true), m_node(nullptr) {}
     virtual ~Component() = default;
     virtual void start() {}
     virtual void update(double) {}

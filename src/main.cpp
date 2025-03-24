@@ -184,6 +184,7 @@ PYBIND11_MODULE(monkey2, m) {
 		.def_property("active", &Node::active, &Node::setActive)
 		.def_property("show", &Node::show, &Node::setShow)
         .def_property("animation", &Node::getAnimation, &Node::setAnimation)
+        .def("getChildren", &Node::getChildren, py::return_value_policy::reference)
 		.def("setModel", &Node::setModel, py::arg("model"), py::arg("batch") = -1)
 		.def("setTransform", &Node::setTransform)
 		.def("add", &Node::add)
@@ -319,10 +320,14 @@ PYBIND11_MODULE(monkey2, m) {
         .def(py::init<>())
         .def("play", &Scheduler::play);
 
+    py::class_<CollisionResponse, PyCollisionResponse, std::shared_ptr<CollisionResponse>>(m, "CollisionResponse")
+        .def(py::init<>())  // Allow Python subclasses
+        .def("onStart", &CollisionResponse::onStart)
+        .def("onEnd", &CollisionResponse::onEnd);
+
 
     py::class_<ICollisionEngine, std::shared_ptr<ICollisionEngine>>(m, "ICollisionEngine")
-		.def("addResponse", &ICollisionEngine::addResponse, py::arg("tag1"), py::arg("tag2"),
-			 py::arg("onStart")=py::none(), py::arg("onEnd")=py::none());
+        .def("addResponse", &ICollisionEngine::addResponse, py::arg("tag1"), py::arg("tag2"), py::arg("response"));
         //.def(py::init<>());
 	py::class_<SpatialHashingCollisionEngine, ICollisionEngine, std::shared_ptr<SpatialHashingCollisionEngine>>(m, "CollisionEngine")
 		.def(py::init<float, float>());

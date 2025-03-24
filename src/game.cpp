@@ -304,7 +304,7 @@ std::string Game::getPythonScriptDirectory() {
     auto mainModule = py::module_::import("__main__");
     fs::path fl = mainModule.attr("__file__").cast<std::string>();
     auto cwd = fl.parent_path();
-    return cwd;
+	return cwd.string();
 }
 
 void Game::closeRoom() {
