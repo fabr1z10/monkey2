@@ -157,6 +157,7 @@ PYBIND11_MODULE(monkey2, m) {
     py::class_<Game>(m, "Game")
 		.def("start", &Game::start)
 		.def("run", &Game::run)
+		.def("room", &Game::getRoom, py::return_value_policy::reference)
         .def("makeCurrent", &Game::makeCurrent);
 
 
@@ -224,7 +225,7 @@ PYBIND11_MODULE(monkey2, m) {
 //		}));
 
     py::class_<NPC, Component, std::shared_ptr<NPC>>(m, "NPC")
-        .def(py::init<adventure::WalkArea*, float, pybind11::function, pybind11::function>());
+        .def(py::init<adventure::WalkArea*, float, float, pybind11::function>());
 
     py::class_<MouseListener, std::shared_ptr<MouseListener>>(m, "_MouseListener");
 

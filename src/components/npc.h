@@ -6,7 +6,7 @@
 
 class NPC: public Component {
 public:
-    NPC(adventure::WalkArea* walkarea, float refreshTime, pybind11::function onRefresh, pybind11::function onReach);
+    NPC(adventure::WalkArea* walkarea, float refreshTime, float speed, pybind11::function onRefresh);
     
     void start() override;
 
@@ -20,9 +20,9 @@ private:
 
     pybind11::function _onRefresh;
 
-    pybind11::function _onReach;
-
     float _timer;
+
+	float _speed;
 
     float _refreshTime;
 
