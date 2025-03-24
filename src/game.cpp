@@ -17,8 +17,8 @@ Game::Game() : _run(false) {
 }
 
 Game::~Game() {
-	_settings.release();
-	_source.release();
+	//_settings.release();
+	//_source.release();
 }
 
 void Game::start() {

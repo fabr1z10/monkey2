@@ -119,18 +119,18 @@ void Room::draw() {
 		}
 
         // disable this if batch only mode
-        std::list<Node*> li{_root.get()};
+        //std::list<Node*> li{_root.get()};
 
-        while (!li.empty()) {
-            auto current = li.front();
-            li.pop_front();
-            auto* r = current->getRenderer();
-            if (r != nullptr) r->draw(_shaders[i]);
+        //while (!li.empty()) {
+        //    auto current = li.front();
+        //    li.pop_front();
+        //    auto* r = current->getRenderer();
+        //    if (r != nullptr) r->draw(_shaders[i]);
 
-            std::transform(current->getChildren().begin(), current->getChildren().end(), std::back_inserter(li),
-                           [](const std::shared_ptr<Node>& ptr) { return ptr.get(); });
+        //    std::transform(current->getChildren().begin(), current->getChildren().end(), std::back_inserter(li),
+        //                   [](const std::shared_ptr<Node>& ptr) { return ptr.get(); });
 
-        }
+        //}
 
 
 
@@ -202,6 +202,7 @@ Camera* Room::getCamera(int id) {
 }
 
 void Room::end() {
+	_root->dispose();
 	_root = nullptr;
 
 }

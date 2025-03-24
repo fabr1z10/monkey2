@@ -114,8 +114,11 @@ void SpriteRenderer::updateGeometry() {
 }
 
 void SpriteRenderer::start() {
-    Renderer<Sprite>::start();
-    _animInfo = _model->getAnimationInfo(_animation);
+    if (!_started) {
+        _started = true;
+        Renderer<Sprite>::start();
+        _animInfo = _model->getAnimationInfo(_animation);
+    }
 }
 
 

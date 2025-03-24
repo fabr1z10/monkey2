@@ -111,9 +111,9 @@ void Node::setModel(std::shared_ptr<IModel> model, int batchId = -1) {
 	_model = model;
 	_renderer = model->getRenderer(batchId);
 	_renderer->setNode(this);
-//    if (Game::instance().started()) {
-//        _renderer->start();
-//    }
+    if (Game::instance().started()) {
+        _renderer->start();
+    }
 
 }
 

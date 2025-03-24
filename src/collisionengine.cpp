@@ -145,7 +145,7 @@ glm::ivec2 SpatialHashingCollisionEngine::hashPosition(glm::vec2 P) {
 }
 
 void SpatialHashingCollisionEngine::onRemove(Node * node) {
-	rmCollider(_nodeToCollider.at(node));
+	//rmCollider(_nodeToCollider.at(node));
 }
 
 void SpatialHashingCollisionEngine::onMove(Node * node) {
