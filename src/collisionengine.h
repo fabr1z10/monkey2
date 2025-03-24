@@ -6,13 +6,16 @@
 #include "shapes/intersection.h"
 #include "nodeobserver.h"
 #include "upair.h"
+#include "pysubclassable.h"
 
-class CollisionResponse {
+class CollisionResponse : public PySubclassable {
 public:
 	virtual ~CollisionResponse() = default;
+
 	virtual void onStart(Node*, Node*) = 0;
 
 	virtual void onEnd(Node*, Node*) = 0;
+
 };
 
 

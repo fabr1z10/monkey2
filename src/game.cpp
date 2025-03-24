@@ -148,35 +148,23 @@ void Game::run() {
 			/// note: if I run the update only every frame time CPU goes to 100%. If I run it on
 			/// every iter, it doesn't. Tried move the glfwSwapBuffers call (and successive) out of the loop
 			/// and that seems to work.
-			if (true || currentTime - _timeLastUpdate >= _frameTime) {
-				double dt = currentTime - _timeLastUpdate;
-				_timeLastUpdate = currentTime;
-
-				// remove all entities scheduled for removal
-//				if (!m_scheduledForRemoval.empty()) {
-//					for (auto & g : m_scheduledForRemoval) {
-//						g->getParent()->removeChild(g->getId());
-//						m_allNodes.erase(g->getId());
-//					}
-//					m_scheduledForRemoval.clear();
-//				}
-
-
-
-				// restore if you want framebuffer rendering
-				//glBindFramebuffer(GL_FRAMEBUFFER, _fb);
-				//glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)
-
-				// update the room
-				_room->update(dt);
-
-				// draw the room
-				_room->draw();
-				//_engineDraw->draw(_room.get());
-
-				glfwSwapBuffers(window);
-				glfwPollEvents();
+			// Wait until it's time for the next frame
+			while (currentTime - _timeLastUpdate < _frameTime) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(1)); // Yield CPU
+				currentTime = glfwGetTime();
 			}
+			double dt = currentTime - _timeLastUpdate;
+			_timeLastUpdate = currentTime;
+
+
+			_room->update(dt);
+			// draw the room
+			_room->draw();
+			//_engineDraw->draw(_room.get());
+
+			glfwSwapBuffers(window);
+			glfwPollEvents();
+			
 			//m_shutdown = !(glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
 			//             glfwWindowShouldClose(window) == 0);
 			_shutdown = !(glfwWindowShouldClose(window) == 0);

@@ -5,6 +5,7 @@
 void ICollisionEngine::addResponse(const std::string &tag1, const std::string &tag2, std::shared_ptr<CollisionResponse> response) {
 	_response[{tag1, tag2}] = response;
 	//_response[{tag2, tag1}]= std::make_shared<CollisionResponse>(onStart, onEnd, true);
+	addPyRef(response);
 }
 
 bool ICollisionEngine::haveResponse(Collider * c1, Collider * c2) {

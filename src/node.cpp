@@ -148,20 +148,21 @@ void Node::addComponent(std::shared_ptr<Component> c) {
     c->setNode(this);
 	// Extract Python object if this is a Python-derived class
 	// Try to preserve the Python object using a different approach
-	try {
-		// Acquire the GIL
-		py::gil_scoped_acquire gil;
+	addPyRef(c);
+	//try {
+	//	// Acquire the GIL
+	//	py::gil_scoped_acquire gil;
 
-		// This will either find the existing Python object or create a new wrapper
-		py::object py_obj = py::cast(c);
+	//	// This will either find the existing Python object or create a new wrapper
+	//	py::object py_obj = py::cast(c);
 
-		// Store the Python object reference in the component
-		c->setPySelf(py_obj);
+	//	// Store the Python object reference in the component
+	//	c->setPySelf(py_obj);
 
-        //std::cout << "Python object reference stored in component" << std::endl;
-	} catch (const std::exception& e) {
-		std::cerr << "Failed to create Python reference: " << e.what() << std::endl;
-	}
+ //       //std::cout << "Python object reference stored in component" << std::endl;
+	//} catch (const std::exception& e) {
+	//	std::cerr << "Failed to create Python reference: " << e.what() << std::endl;
+	//}
 
 
 }

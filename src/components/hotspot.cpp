@@ -23,7 +23,7 @@ void HotSpot::start()
 HotSpot::~HotSpot() {
     auto hsm = dynamic_cast<adventure::MouseController*>(Game::instance().getRoom()->getHotSpotManager());
     hsm->remove(this);
-	_py_self = pybind11::none();
+
 
 }
 

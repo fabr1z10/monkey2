@@ -87,7 +87,7 @@ void WalkArea::recalculatePoints() {
             if (p.type == PolyType::AREA) {
                 for (int i = 0; i < l; ++i) {
                     auto iCurr = s + i;
-                    auto iPrev = s + (i-1) % l;
+                    auto iPrev = s + (i-1+l) % l;
                     auto iNext = s + (i+1) % l;
                     auto Pc = _polygon[iCurr];
                     auto Pp = _polygon[iPrev];
