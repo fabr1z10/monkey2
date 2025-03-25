@@ -28,7 +28,7 @@ public:
 		_py_self = self;
 	}
 
-    void dispose() {
+    virtual void dispose() {
         _py_self = pybind11::none();
     }
 

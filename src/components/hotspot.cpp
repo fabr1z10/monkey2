@@ -21,10 +21,17 @@ void HotSpot::start()
 }
 
 HotSpot::~HotSpot() {
+    //auto hsm = dynamic_cast<adventure::MouseController*>(Game::instance().getRoom()->getHotSpotManager());
+    //hsm->remove(this);
+
+
+}
+
+void HotSpot::dispose() {
+
     auto hsm = dynamic_cast<adventure::MouseController*>(Game::instance().getRoom()->getHotSpotManager());
     hsm->remove(this);
-
-
+    Component::dispose();
 }
 
 

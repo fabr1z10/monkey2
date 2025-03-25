@@ -69,7 +69,7 @@ AssetBank::AssetBank(const YAML::Node & f, int camId, const std::vector<int>& te
         auto id = c->first.as<int>();
 		if (std::find(textures.begin(), textures.end(), id) != textures.end()) {
 			auto filepath = c->second.as<std::string>();
-			std::cout << id << " - " << filepath << std::endl;
+			//std::cout << id << " - " << filepath << std::endl;
 			loadTexture(id, filepath);
 		}
 		// let's store here the filepath .
@@ -82,7 +82,7 @@ AssetBank::AssetBank(const YAML::Node & f, int camId, const std::vector<int>& te
         // need to map this to shader texture id
 		if (std::find(textures.begin(), textures.end(), texId) != textures.end()) {
 			auto fontId = f->first.as<std::string>();
-
+            std::cout << " -- Loading font: " << fontId << std::endl;
 			//auto tex = getTexture(texId);
 			auto font = std::make_shared<Font>(f->second, _batch.get(), _textures.at(texId));
 			_fonts[fontId] = font;

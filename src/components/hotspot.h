@@ -25,6 +25,8 @@ public:
 
 	int getCamera() const;
 
+	void dispose() override;
+
 
 private:
     int _priority;
