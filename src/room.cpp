@@ -1,6 +1,5 @@
 #include "room.h"
 #include <list>
-#include <list>
 #include <algorithm>
 #include "glsl/glsl.h"
 #include "game.h"

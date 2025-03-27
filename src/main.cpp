@@ -16,6 +16,7 @@
 #include "sprite.h"
 #include "tilemap.h"
 #include "vec.h"
+#include "multisprite.h"
 
 #include "skeletal/mesh.h"
 #include "skeletal/skeletalmodel.h"
@@ -46,10 +47,6 @@ using namespace shapes;
 
 namespace py = pybind11;
 
-void test() {
-	std::cout << "viva la figa\n";
-}
-
 PYBIND11_MODULE(monkey2, m) {
 
     py::module_ mAdv = m.def_submodule("adventure");
@@ -67,8 +64,6 @@ PYBIND11_MODULE(monkey2, m) {
         .value("SOLID", ModelType::SOLID)
         .export_values();
 
-
-	m.def("test", &test);
 
     // gets node with given id
     m.def("getNode", &getNode, py::arg("id"), py::return_value_policy::reference);
@@ -195,6 +190,11 @@ PYBIND11_MODULE(monkey2, m) {
         .def("setPosition", &Node::setPosition)
         .def("setMultiplyColor", &Node::setMultiplyColor)        
         .def("flipX", &Node::flipHorizontal);
+
+    py::class_<MultiSprite, Node, std::shared_ptr<MultiSprite>>(m, "MultiSprite")
+        .def(py::init<>())
+        .def("addNode", &MultiSprite::addNode)
+        .def("addAnimation", &MultiSprite::addAnimation);
 
 	py::class_<Component, std::shared_ptr<Component>>(m, "C")
         .def_property_readonly("node", &Component::getNode, py::return_value_policy::reference)

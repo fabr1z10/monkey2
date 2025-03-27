@@ -1,11 +1,11 @@
 #include "error.h"
 #include <iostream>
 
-void setConsoleColorRed() {
+static void setConsoleColorRed() {
     std::cerr << "\033[1;31m";
 }  // ANSI escape code for red
 
-void resetConsoleColor() {
+static void resetConsoleColor() {
     std::cerr << "\033[0m";
 }      // Reset color
 

@@ -126,7 +126,8 @@ namespace primitives {
 
         using Vertex = VertexTexture;
 
-        void transform(VertexTexture*, const glm::mat4& t, glm::vec4 color) const;
+        void transform(VertexTexture*, const glm::mat4& t, glm::vec4 color,
+            bool fliph = false, bool flipv = false) const;
 
         void clear(VertexTexture*);
     };

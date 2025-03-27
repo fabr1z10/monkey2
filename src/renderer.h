@@ -21,6 +21,8 @@ public:
 
     virtual void updateGeometry () = 0;
 
+	virtual bool updateFrame() { return false;  }
+
     virtual void draw(Shader*) {}
 
     virtual void setAnimation(const std::string&) {}

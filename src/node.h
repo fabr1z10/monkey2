@@ -26,7 +26,11 @@ public:
 
 	void dispose();
 
-	virtual void update(double);
+	void update(double);
+
+	virtual void render();
+
+	virtual void customUpdate(double) {}
 
 
 
@@ -72,7 +76,7 @@ public:
 
 	void unregisterObserver(NodeObserver*);
 
-	void setAnimation(const std::string&);
+	virtual void setAnimation(const std::string&);
 
     std::string getAnimation() const;
 
@@ -95,9 +99,12 @@ public:
         return nullptr;
     }
 
-private:
-    void notifyMove();
+	void notifyMove();
+	
+protected:
 	std::vector<std::shared_ptr<Node>> _children;
+private:
+    
 	glm::mat4 _modelMatrix;
 	glm::mat4 _worldMatrix;
 	std::shared_ptr<IRenderer> _renderer;

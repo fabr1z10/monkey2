@@ -9,7 +9,7 @@ class Scheduler : public Node {
 public:
     Scheduler() = default;
 
-    void update(double) override;
+    void customUpdate(double) override;
 
     void play(std::shared_ptr<Script>);
 

@@ -85,15 +85,22 @@ void Node::update(double dt) {
     for (auto& c : _components) {
         c->update(dt);
     }
+
+	customUpdate(dt);
+
+	render();
 	// note that wehn node is inactive, render also should not be performed!
 	// in fact, renderer updates position / frame, and if node is not
 	// active, we don't want that.
 	// node update is not recursive!ma s
+}
+
+void Node::render() {
 	if (_renderer != nullptr) {
 		_renderer->update();
 	}
-}
 
+}
 
 glm::mat4 Node::getWorldMatrix() const {
 	return _worldMatrix;

@@ -27,6 +27,7 @@ public:
     struct QuadInfo {
         int id;
         int ticks;
+        bool fliph;
     };
     struct AnimInfo {
         AnimInfo() : loopIndex(0) {}
@@ -53,6 +54,8 @@ public:
 
     const QuadInfo& getQuad(const std::string& anim, int frame) const;
 
+    glm::vec2 getSlot(const std::string& anim, int frame, int slot) const;
+
     int getAnimationFrames(const std::string& anim) const;
 
     const AnimInfo* getAnimationInfo(const std::string&);
@@ -63,6 +66,7 @@ private:
     std::string _defaultAnimation;
     std::unordered_map<std::string, std::string> _alias;
     int _batchId;
+    std::vector<std::vector<glm::vec2>> _slots;
 };
 
 
@@ -95,6 +99,12 @@ public:
 
     std::string getAnimation() const override;
 
+    // returns true if frame changed
+    bool updateFrame();
+
+    glm::vec2 getSlot(int);
+
+    int getFrame() const;
 private:
     const Sprite::AnimInfo* _animInfo;
     std::string _animation;
@@ -102,6 +112,9 @@ private:
     int _tickCounter;
 };
 
+inline int SpriteRenderer::getFrame() const {
+    return _frame; 
+}
 
 inline std::string SpriteRenderer::getAnimation() const {
     return _animation;

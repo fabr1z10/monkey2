@@ -1,6 +1,6 @@
 #include "scheduler.h"
 
-void Scheduler::update(double dt) {
+void Scheduler::customUpdate(double dt) {
     // terminate scripts
     if (!_terminationBuffer.empty()) {
         for (auto it: _terminationBuffer) {

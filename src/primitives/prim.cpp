@@ -1,4 +1,6 @@
 #include "prim.h"
+#include <utility>
+
 
 using namespace primitives;
 
@@ -96,29 +98,39 @@ void TriangleNormal::transform(VertexColorNormal * v, const glm::mat4 &t, glm::v
 
 }
 
-void Quad::transform(VertexTexture * v, const glm::mat4 &t, glm::vec4 color) const {
-    auto bottomLeft = glm::vec3(t * glm::vec4(-anchor, 0.f, 1.f));
+void Quad::transform(VertexTexture * v, const glm::mat4 &t, glm::vec4 color,
+    bool fliph, bool flipv) const {
+    float ax = fliph ? size.x - anchor.x : anchor.x;
+    auto bottomLeft = glm::vec3(t * glm::vec4(-ax,-anchor.y, 0.f, 1.f));
     auto xAxis = t[0];
     auto yAxis = t[1];
 
+    auto tx0 = texCoord[0];
+    auto tx1 = texCoord[0] + texCoord[2];
+    if (fliph) std::swap(tx0, tx1);
+
+    auto ty0 = texCoord[1];
+    auto ty1 = texCoord[1] + texCoord[3];
+    if (flipv) std::swap(ty0, ty1);
+
 
     v->position = bottomLeft;
-    v->texCoord = glm::vec2(texCoord[0], texCoord[1] + texCoord[3]);
+    v->texCoord = glm::vec2(tx0, ty1);
     v->texIndex = index;
 	v->color = color;
 
     (v+1)->position = bottomLeft + glm::vec3(size.x * xAxis.x, 0.f, 0.f);
-    (v+1)->texCoord = glm::vec2(texCoord[0]+ texCoord[2], texCoord[1] + texCoord[3]);
+    (v + 1)->texCoord = glm::vec2(tx1, ty1);
     (v+1)->texIndex = index;
 	(v+1)->color = color;
 
     (v+2)->position = bottomLeft + glm::vec3(size.x * xAxis.x, size.y * yAxis.y, 0.f);
-    (v+2)->texCoord = glm::vec2(texCoord[0] + texCoord[2], texCoord[1]);
+    (v + 2)->texCoord = glm::vec2(tx1, ty0);
     (v+2)->texIndex = index;
 	(v+2)->color = color;
 
 	(v+3)->position = bottomLeft + glm::vec3(0.f, size.y * yAxis.y, 0.f);
-    (v+3)->texCoord = glm::vec2(texCoord[0], texCoord[1]);
+    (v + 3)->texCoord = glm::vec2(tx0, ty0);
     (v+3)->texIndex = index;
 	(v+3)->color = color;
 }

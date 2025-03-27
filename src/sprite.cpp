@@ -15,6 +15,8 @@ Sprite::Sprite(const YAML::Node &node, QuadBatch *batch, int texId)
 {
     _batchId = batch->getId();
     auto data = node["data"].as<std::vector<float>>();
+    M_Assert(data.size() % 6 == 0, "[Sprite] data must be a multiple of 6.");
+    int nquads = data.size() / 6;
     float invw = 1.f / batch->getTextureWidth();
     float invh = 1.f / batch->getTextureHeight();
     for (size_t i = 0; i < data.size(); i += 6) {
@@ -37,13 +39,17 @@ Sprite::Sprite(const YAML::Node &node, QuadBatch *batch, int texId)
             AnimInfo info;
             for (auto i = 0; i <quads.size(); ++i) {
                 if (quads[i] >= 0) {
-                    info.frames.push_back(QuadInfo{quads[i], ticks});
+                    info.frames.push_back(QuadInfo{quads[i], ticks, false});
                 } else {
                     switch(quads[i]) {
                     case -1:
                         // set loop index
                         info.loopIndex = quads[++i];
                         break;
+                    case -2:
+                        info.frames.push_back(QuadInfo{ quads[++i], ticks, true });
+                        break;
+
                     }
                 }
             }
@@ -54,6 +60,25 @@ Sprite::Sprite(const YAML::Node &node, QuadBatch *batch, int texId)
 
     }
 
+    if (auto slots = node["slots"]; slots.IsDefined()) {
+        auto slotRaw = slots.as<std::vector<float>>();
+        int floatsPerSlot = nquads * 2;
+        M_Assert(slotRaw.size() % floatsPerSlot == 0, "no");
+        int slotSize = slotRaw.size() / floatsPerSlot;
+        for (size_t j = 0; j < slotSize; ++j) {
+            int offset = j * floatsPerSlot;
+            _slots.push_back({});
+            for (size_t i = 0; i < nquads; i++) {
+                float ax = data[6 * i + 4];
+                float ay = data[6 * i + 5];
+
+                _slots[j].push_back(glm::vec2(slotRaw[offset + 2*i]-ax, 
+                    slotRaw[offset + 2*i + 1]-ay));
+            }
+        }
+
+    }
+    
 }
 
 Sprite::Sprite(const std::vector<float> &data, int batchId, int textureId) : Model<primitives::Quad>(), _batchId(batchId) {
@@ -102,6 +127,11 @@ std::shared_ptr<IRenderer> Sprite::getRenderer(int) {
 
 }
 
+glm::vec2 Sprite::getSlot(const std::string& anim, int frame, int slot) const {
+    auto& q = getQuad(anim, frame);
+    return _slots[slot][q.id];
+}
+
 void SpriteRenderer::updateGeometry() {
     if (!_started) {
         return;
@@ -109,7 +139,7 @@ void SpriteRenderer::updateGeometry() {
     const auto& quadInfo = _model->getQuad(_animation, _frame);
     if (quadInfo.id != -1) {
         auto worldTransform = _node->getWorldMatrix();
-        _model->get(quadInfo.id).transform(_vertices[0], worldTransform, _multiplyColor);
+        _model->get(quadInfo.id).transform(_vertices[0], worldTransform, _multiplyColor, quadInfo.fliph);
     }
 }
 
@@ -121,10 +151,9 @@ void SpriteRenderer::start() {
     }
 }
 
-
-void SpriteRenderer::update() {
+bool SpriteRenderer::updateFrame() {
     if (!_started || _animInfo == nullptr) {
-        return;
+        return false;
     }
 
     const auto& quadInfo = _animInfo->frames[_frame]; //_model->getQuad(_animation, _frame);
@@ -136,10 +165,18 @@ void SpriteRenderer::update() {
             if (_frame >= _animInfo->frames.size()) {
                 _frame = _animInfo->loopIndex;
             }
-            _tickCounter=0;
-            updateGeometry();
+            _tickCounter = 0;
+            return true;
         }
     }
+    return false;
+}
+
+void SpriteRenderer::update() {
+    if (updateFrame()) {
+        updateGeometry();
+    }
+
 }
 
 void SpriteRenderer::setAnimation(const std::string & anim) {
@@ -174,4 +211,8 @@ std::shared_ptr<IRenderer> Quad::getRenderer(int)
 {
     return std::make_shared<Renderer<Quad>>(this, _batchId);
 
+}
+
+glm::vec2 SpriteRenderer::getSlot(int id) {
+    return _model->getSlot(_animation, _frame, id);
 }
