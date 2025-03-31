@@ -24,6 +24,7 @@ Node::~Node() {
 }
 
 void Node::dispose() {
+	std::cout << "DISPOSE " << this->id() << "\n";
 	if (_renderer != nullptr) {
 		_renderer->dispose();
 	}

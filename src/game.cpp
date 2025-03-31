@@ -158,6 +158,7 @@ void Game::run() {
 
 
 			_room->update(dt);
+			
 			// draw the room
 			_room->draw();
 			//_engineDraw->draw(_room.get());
@@ -193,6 +194,7 @@ void Game::run() {
 	//_factory.release();
 	//_main.release();
 	glfwTerminate();
+	std::cout << "mica\n";
 }
 
 void Game::WindowResizeCallback(GLFWwindow* win, int width, int height) {

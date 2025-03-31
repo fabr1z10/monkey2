@@ -59,7 +59,7 @@ void MultiSprite::render() {
 				// check slot to which child is attached
 				
 				_subNodes[c.id]->setPosition(glm::vec3(slot, c.z));
-				std::cout << "ciao " << _renderers[current]->getFrame() << slot.x << ", " << slot.y << "\n";
+
 			}
 		}
 		for (const auto& c : _tree[current]) {

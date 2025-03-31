@@ -12,6 +12,7 @@
 #include "directionallight.h"
 #include "quadbatch.h"
 #include "script.h"
+#include "script.h"
 #include "scheduler.h"
 #include "sprite.h"
 #include "tilemap.h"
@@ -241,6 +242,7 @@ PYBIND11_MODULE(monkey2, m) {
 	// batches
 	// base class - not instantiable
 	py::class_<IBatch, std::shared_ptr<IBatch>>(m, "Y")
+        .def_property_readonly("id", &IBatch::getId)
 	    .def("addLight", &IBatch::addLight);
 
 	py::class_<Batch<primitives::Line>, IBatch, std::shared_ptr<Batch<primitives::Line>> >(m, "LineBatch")

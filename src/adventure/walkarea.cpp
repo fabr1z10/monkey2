@@ -13,6 +13,7 @@ using namespace adventure;
 // this is for area
 void WalkArea::addPoly(const std::vector<float> & data, PolyType type, Node* ref) {
     M_Assert(data.size() >= (type == PolyType::AREA ? 6 : 4) && data.size() % 2 == 0, "To specify a polygon, provide an even number of coordinates (provide at least 3 points).");
+    // localPolygon holds *all* vertices of the walkarea (main and holes)
     size_t offset = _localPolygon.size();
     std::vector<glm::vec2> p;
     for (size_t i = 0; i < data.size(); i += 2) {
@@ -128,7 +129,7 @@ void WalkArea::recalculatePoints() {
     if (_batchId != -1) {
         auto model = std::make_shared<Model<primitives::Line>>(debugModelData);
         setModel(model, _batchId);
-        this->setMultiplyColor(_color);
+    //    this->setMultiplyColor(_color);
     }
 
     // find visibility edges. For each pair of nodes AB, determine if

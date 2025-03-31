@@ -203,7 +203,8 @@ Camera* Room::getCamera(int id) {
 void Room::end() {
 	_root->dispose();
 	_root = nullptr;
-
+	_hotSpotManager = nullptr;
+	std::cout << "room ended.\n";
 }
 
 
@@ -218,6 +219,7 @@ void Room::start() {
 	for (const auto& b : _refBatch) {
         b.second->start();
         b.second->configure();
+		std::cerr << "started batch " << b.first << "\n";
 	}
 
 
@@ -225,7 +227,7 @@ void Room::start() {
     //    _refBatch[i]->configure();
     //}
 	_root->start();
-
+	std::cerr << "aa\n";
 
 
 

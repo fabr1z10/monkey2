@@ -35,6 +35,7 @@ namespace adventure {
             size_t offset;
             size_t length;
             PolyType type;
+            // a polygon/line can be associated to a node
             Node* ref;
             bool active;
         };

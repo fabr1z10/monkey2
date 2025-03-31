@@ -18,7 +18,7 @@ MouseController::MouseController(float zCursor) :
 }
 
 void MouseController::start() {
-
+	Node::start();
 	_room = Game::instance().getRoom();
 	_cameraCount = _room->getCameraCount();
 	for (int i = 0; i < _cameraCount; ++i) {

@@ -16,6 +16,7 @@ namespace adventure {
     public:
         MouseController(float zCursor);
 
+        
         void start() override;
 
         void cursorPosCallback(GLFWwindow *, double, double) override;
