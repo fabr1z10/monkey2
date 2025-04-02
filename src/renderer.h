@@ -56,7 +56,7 @@ public:
 	using Primitive = typename MODEL::Primitive;
 	using Vertex = typename MODEL::Primitive::Vertex;
 
-	Renderer(MODEL* model, int batchId) : _model(model), _batchId(batchId), _disposed(false) {
+	Renderer(MODEL* model, int batchId) : _model(model), _batchId(batchId), _disposed(false), _vertices(nullptr)  {
 		_nPrimitives = _model->getPrimitiveCount();
 	}
 

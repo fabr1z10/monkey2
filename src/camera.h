@@ -16,7 +16,9 @@ public:
     void setPosition(Vec3 eye, Vec3 direction, Vec3 up = Vec3(0, 1, 0));
 	void move(glm::vec3);
 	void setFwd(glm::vec3);
-	//void setBounds(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax);
+	void setBounds(float xMin, float xMax, 
+		float yMin, float yMax, 
+		float zMin, float zMax);
 
 	const glm::mat4& getViewMatrix() const;
 	const glm::mat4& getProjectionMatrix() const;

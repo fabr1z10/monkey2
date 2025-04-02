@@ -170,6 +170,7 @@ PYBIND11_MODULE(monkey2, m) {
 
     py::class_<Camera, std::shared_ptr<Camera>>(m, "camera")
 		.def("setPosition", &Camera::setPosition)
+		.def("setBounds", &Camera::setBounds)
 		.def("move", &Camera::move);
 
 	py::class_<Node, std::shared_ptr<Node>>(m, "Node")
@@ -341,6 +342,7 @@ PYBIND11_MODULE(monkey2, m) {
                 py::arg("font"), py::arg("text"), py::arg("color"),
 				py::arg("align") = HAlign::LEFT, py::arg("width")=0.f,
                 py::arg("anchor")=Vec2())
+        .def("updateText" , &Text::updateText)
 		.def_property_readonly("size", &Text::getSize);
 
     py::class_<WalkArea, Node, std::shared_ptr<WalkArea>>(mAdv, "WalkArea")

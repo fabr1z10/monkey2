@@ -9,6 +9,6 @@ Animate::Animate(Node *node, const std::string &animation) : Action(), _node(nod
 
 
 void Animate::start() {
-    _node->getRenderer()->setAnimation(_animation);
+    _node->setAnimation(_animation);
     _completed = true;
 }

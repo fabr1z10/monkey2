@@ -18,6 +18,14 @@ Camera::Camera(Vec4 viewport) {
 	_zBounds = _xBounds;
 }
 
+void Camera::setBounds(float xm, float xM, float ym, float yM, float zm, float zM) {
+    _xBounds = { xm, xM };
+    _yBounds = { ym, yM };
+    _zBounds = { zm, zM };
+    setPosition(_eye, _fwd, _up);
+
+}
+
 void Camera::setPosition(Vec3 eye, Vec3 dir, Vec3 up) {
     _fwd = dir.toGlm();
     _up = up.toGlm();

@@ -14,7 +14,7 @@ void WalkTo::start() {
         _completed = true;
         return;
     }
-    auto path = _walkArea->dijkstraShortestPath(pos, _targetPosition);
+        auto path = _walkArea->dijkstraShortestPath(pos, _targetPosition);
 
     if (path.size() < 2) {
         _completed = true;
@@ -45,7 +45,7 @@ void WalkTo::initialize() {
     _distanceTraversed = 0.f;
     const auto& s = _segments[_segmentId];
     _node->flipHorizontal(s.flip);
-    _node->getRenderer()->setAnimation(s.anim);
+    _node->setAnimation(s.anim);
 }
 
 void WalkTo::run(double dt) {
@@ -58,7 +58,7 @@ void WalkTo::run(double dt) {
         _node->setPosition(Vec3(seg.targetPosition.x, seg.targetPosition.y, 0.f));
         _segmentId++;
         if (_segmentId >= _segments.size()) {
-            _node->getRenderer()->setAnimation("idle" + _lastDirection);
+            _node->setAnimation("idle" + _lastDirection);
             _completed = true;
         } else {
             initialize();

@@ -29,6 +29,11 @@ namespace adventure {
 
         glm::vec2 getClosestPoint(glm::vec2);
     private:
+
+        std::unordered_map<int, glm::vec2> _vertexInUnitVec;
+        std::unordered_map<std::pair<int, int>, glm::vec2> _wallInUnitVec;
+
+        
         struct PolyInfo {
             PolyInfo(size_t offset, size_t length, PolyType type, Node* ref)
                 : offset(offset), length(length), type(type), active(true), ref(ref) {}

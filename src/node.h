@@ -78,7 +78,7 @@ public:
 
 	virtual void setAnimation(const std::string&);
 
-    std::string getAnimation() const;
+	virtual std::string getAnimation() const;
 
     void setMultiplyColor(Color);
 

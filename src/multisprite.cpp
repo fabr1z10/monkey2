@@ -34,6 +34,11 @@ void MultiSprite::setAnimation(const std::string& anim) {
 			_subNodes[i]->setAnimation(v[i]);
 		}
 	}
+	_animation = anim;
+}
+
+std::string MultiSprite::getAnimation() const {
+	return _animation;
 }
 
 void MultiSprite::addAnimation(const std::string& anim, const std::vector<std::string>& subAnims) {

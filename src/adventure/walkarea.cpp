@@ -94,7 +94,11 @@ void WalkArea::recalculatePoints() {
                     auto Pp = _polygon[iPrev];
                     auto Pn = _polygon[iNext];
                     auto cross = cross2D(Pc - Pp, Pn - Pc);
-                    if (k > 0) cross *= -1.f;
+                    float hadj = k > 0 ? -1.f : 1.f;
+                    _vertexInUnitVec[iCurr] = hadj * glm::normalize(Pp + Pn - 2.0f * Pc);
+                    glm::vec2 normal(-(Pn.y - Pc.y), Pn.x - Pc.x);
+                    _wallInUnitVec[{iCurr, iNext}] = hadj * glm::normalize(normal);
+                    cross *= hadj;
                     if (cross < 0) {
                         _vertexToPolygonNode[_vertices.size()] = s+i;
 						_polygonToVertex[s+i] = _vertices.size();
@@ -103,6 +107,7 @@ void WalkArea::recalculatePoints() {
                     auto f = {Pc.x, Pc.y, 0.f, Pn.x, Pn.y, 0.f};
                     debugModelData.insert(debugModelData.end(), f.begin(), f.end());
                     _nodeWalls.insert({iCurr, iNext});
+                    
                     //_nodeWalls.insert({iNext, iCurr});
                 }
             } else {
@@ -277,7 +282,7 @@ bool WalkArea::isPointInWalkArea(glm::vec2 P) {
 glm::vec2 WalkArea::getClosestPoint(glm::vec2 P)
 {
     int i {0};
-    for (const auto& p : _polyInfo) {
+    for (const auto& p : _polyInfo) {        
         if (p.type == PolyType::AREA) {
             auto inside = pnpoly(_polygon, P, p.offset, p.length);
             if ((i == 0 && !inside) || (i > 0 && inside)) {
@@ -286,17 +291,29 @@ glm::vec2 WalkArea::getClosestPoint(glm::vec2 P)
                 float dbest = std::numeric_limits<float>::infinity();
                 for (int i = 0; i < p.length; ++i) {
                     int j = (i + 1) % p.length;
-                    glm::vec2 A = _polygon[p.offset+i];
-                    glm::vec2 B = _polygon[p.offset+j];
+                    int i0 = p.offset + i;
+                    int i1 = p.offset + j;
+                    glm::vec2 A = _polygon[i0];
+                    glm::vec2 B = _polygon[i1];
                     float t = glm::dot(P - A, B - A) / glm::dot(B-A, B-A);
                     glm::vec2 Q = (t < 0) ? A : (t > 1 ? B : A + t*(B-A));
                     float d2 = glm::dot(P-Q, P-Q);
                     if (d2 < dbest) {
                         dbest = d2;
-                        best = Q;
+                        glm::vec2 inUnitVec;
+                        if (t < 0) {
+                            inUnitVec = _vertexInUnitVec[i0];
+						}
+						else if (t > 1) {
+							inUnitVec = _vertexInUnitVec[i1];
+						}
+						else {
+                            inUnitVec = _wallInUnitVec[{i0, i1}];
+						}
+                        best = Q + 0.1f * inUnitVec;
                     }
                 }
-                return P+ (best-P)*1.01f;
+                return best;
             }
         }
         i++;
