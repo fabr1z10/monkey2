@@ -173,25 +173,27 @@ PYBIND11_MODULE(monkey2, m) {
 		.def("setBounds", &Camera::setBounds)
 		.def("move", &Camera::move);
 
-	py::class_<Node, std::shared_ptr<Node>>(m, "Node")
-		.def(py::init<>())
+    py::class_<Node, std::shared_ptr<Node>>(m, "Node")
+        .def(py::init<>())
         .def_property_readonly("id", &Node::id)
         .def_property_readonly("x", &Node::x)
         .def_property_readonly("y", &Node::y)
-		.def_property("userData", &Node::getUserData, &Node::setUserData, py::return_value_policy::reference)
-		.def_property("active", &Node::active, &Node::setActive)
-		.def_property("show", &Node::show, &Node::setShow)
+        .def_property("userData", &Node::getUserData, &Node::setUserData, py::return_value_policy::reference)
+        .def_property("active", &Node::active, &Node::setActive)
+        .def_property("show", &Node::show, &Node::setShow)
         .def_property("animation", &Node::getAnimation, &Node::setAnimation)
         .def("getChildren", &Node::getChildren, py::return_value_policy::reference)
-		.def("setModel", &Node::setModel, py::arg("model"), py::arg("batch") = -1)
-		.def("setTransform", &Node::setTransform)
-		.def("add", &Node::add)
-		.def("remove", &Node::remove)
-		.def("addComponent", &Node::addComponent)
+        .def("getComponent", &Node::getComponentById)
+        .def("setModel", &Node::setModel, py::arg("model"), py::arg("batch") = -1)
+        .def("setTransform", &Node::setTransform)
+        .def("add", &Node::add)
+        .def("remove", &Node::remove)
+        .def("addComponent", &Node::addComponent)
         .def("getPosition", &Node::getWorldPosition)
         .def("setPosition", &Node::setPosition)
-        .def("setMultiplyColor", &Node::setMultiplyColor)        
-        .def("flipX", &Node::flipHorizontal);
+        .def("setMultiplyColor", &Node::setMultiplyColor)
+        .def("flipX", &Node::flipHorizontal)
+        .def("clear", &Node::clear);
 
     py::class_<MultiSprite, Node, std::shared_ptr<MultiSprite>>(m, "MultiSprite")
         .def(py::init<>())
@@ -200,6 +202,7 @@ PYBIND11_MODULE(monkey2, m) {
 
 	py::class_<Component, std::shared_ptr<Component>>(m, "C")
         .def_property_readonly("node", &Component::getNode, py::return_value_policy::reference)
+		.def_property("id", &Component::getId, &Component::setId)
 		.def("keepAlive", &HotSpot::setPySelf);
 
 
@@ -218,7 +221,8 @@ PYBIND11_MODULE(monkey2, m) {
                 py::arg("shape"), py::arg("flag"), py::arg("mask"), py::arg("tag"));
 
     py::class_<HotSpot, PyHotSpot, Component, std::shared_ptr<HotSpot>>(m, "HotSpot")
-        .def(py::init<std::shared_ptr<Shape>, int, int>());
+        .def(py::init<std::shared_ptr<Shape>, int, int, int>())
+        .def("setShape", &HotSpot::setShape);
 //		.def(py::init([](std::shared_ptr<Shape> shape, int priority, int camera) {
 //			auto instance = std::make_shared<PyHotSpot>(shape, priority, camera);
 //			py::object self = py::cast(instance);

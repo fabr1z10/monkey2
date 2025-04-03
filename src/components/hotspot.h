@@ -7,7 +7,9 @@
 
 class HotSpot : public Component {
 public:
-    HotSpot(std::shared_ptr<Shape> shape, int, int);
+    HotSpot(std::shared_ptr<Shape> shape, int priority, int cam, int batchId=-1);
+
+	void setShape(std::shared_ptr<Shape>);
 
 	virtual ~HotSpot();
 
@@ -29,10 +31,12 @@ public:
 
 
 private:
+	void redraw();
     int _priority;
 	int _cam;
     std::shared_ptr<Shape> _shape;
-
+	int _batchId;
+	Node* _debugDrawNode;
 };
 
 inline int HotSpot::getCamera() const {

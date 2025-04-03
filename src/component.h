@@ -15,11 +15,22 @@ public:
     Node* getNode();
     bool isActive() const;
     void setActive(bool);
+    std::string getId() const;
+    void setId(const std::string& id);
 protected:
     Node* m_node;
     bool _active;
+    std::string _id;
 
 };
+
+inline std::string Component::getId() const {
+    return _id;
+}
+
+inline void Component::setId(const std::string& id) {
+    _id = id;
+}
 
 
 

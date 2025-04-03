@@ -234,3 +234,19 @@ float Node::x() const {
 float Node::y() const {
     return getWorldPosition().y;
 }
+
+Component* Node::getComponentById(const std::string& t) {
+	for (auto& c : _components) {
+		if (c->getId() == t) {
+			return c.get();
+		}
+	}
+	return nullptr;
+}
+
+void Node::clear() {
+	for (auto& c : _children) {
+		c->remove();
+	}
+	//_children.clear();
+}

@@ -7,17 +7,23 @@
 // mouse entering the area, mouse leaving area, mouse clicking
 
 
-HotSpot::HotSpot(std::shared_ptr<Shape> shape, int priority, int cam) : Component(),
-	_shape(shape), _priority(priority), _cam(cam)
+HotSpot::HotSpot(std::shared_ptr<Shape> shape, int priority, int cam, int batchId) : Component(),
+	_shape(shape), _priority(priority), _cam(cam), _batchId(batchId), _debugDrawNode(nullptr)
 {
 
 }
 
+void HotSpot::setShape(std::shared_ptr<Shape> shape) {
+    _shape = shape;
+    redraw();
+
+}
 
 void HotSpot::start()
 {
     auto hsm = dynamic_cast<adventure::MouseController*>(Game::instance().getRoom()->getHotSpotManager());
     hsm->add(this);
+    redraw();
 }
 
 HotSpot::~HotSpot() {
@@ -26,6 +32,20 @@ HotSpot::~HotSpot() {
 
 
 }
+void HotSpot::redraw() {
+
+    if (_batchId != -1) {
+        if (_debugDrawNode != nullptr) {
+            _debugDrawNode->remove();
+        }
+        auto node = std::make_shared<Node>();
+        auto model = _shape->makeModel(ModelType::WIREFRAME);
+        node->setModel(model, _batchId);
+        getNode()->add(node);
+        _debugDrawNode = node.get();
+    }
+}
+
 
 void HotSpot::dispose() {
 

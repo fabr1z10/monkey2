@@ -32,6 +32,7 @@ public:
 
 	virtual void customUpdate(double) {}
 
+	void clear();
 
 
 	const std::vector<std::shared_ptr<Node>>& getChildren() const;
@@ -98,6 +99,8 @@ public:
         }
         return nullptr;
     }
+
+	Component* getComponentById(const std::string& id);
 
 	void notifyMove();
 	
