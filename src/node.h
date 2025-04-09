@@ -104,6 +104,7 @@ public:
 
 	void notifyMove();
 	
+	Node* getParent();
 protected:
 	std::vector<std::shared_ptr<Node>> _children;
 private:
@@ -168,4 +169,8 @@ inline void Node::setShow(bool value) {
 
 inline bool Node::isMarkedForRemoval() const {
 	return _toBeRemoved;
+}
+
+inline Node* Node::getParent() {
+	return _parent;
 }

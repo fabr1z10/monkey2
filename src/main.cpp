@@ -42,6 +42,8 @@
 #include "shapes/polygon.h"
 #include "shapes/rect.h"
 #include "shapes/point.h"
+#include "platformer/tileworld.h"
+#include "platformer/tilecontroller.h"
 
 using namespace adventure;
 using namespace shapes;
@@ -200,11 +202,16 @@ PYBIND11_MODULE(monkey2, m) {
         .def("addNode", &MultiSprite::addNode)
         .def("addAnimation", &MultiSprite::addAnimation);
 
+    py::class_<TileWorld, Node, std::shared_ptr<TileWorld>>(m, "TileWorld")
+        .def(py::init<int, int, const std::vector<uint8_t>&>());
+
 	py::class_<Component, std::shared_ptr<Component>>(m, "C")
         .def_property_readonly("node", &Component::getNode, py::return_value_policy::reference)
 		.def_property("id", &Component::getId, &Component::setId)
 		.def("keepAlive", &HotSpot::setPySelf);
 
+	py::class_<TileController, Component, std::shared_ptr<TileController>>(m, "TileController")
+		.def(py::init<float, float, int>(), py::arg("width"), py::arg("height"), py::arg("batch"));
 
 	py::class_<Keyboard, Component, std::shared_ptr<Keyboard>>(m, "Keyboard")
 	    .def(py::init<>())
