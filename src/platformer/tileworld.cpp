@@ -116,7 +116,7 @@ TileCollisionResult TileWorld::hor(float x0, float y0, float x1) {
 	for (int i = 0;i <= abs(ix0 - ix1); i++) {
         auto it = _tiles.find({ ix, iy });
         if (it != _tiles.end()) {
-            auto result = it->second->ver(x0, y0, x1);
+            auto result = it->second->hor(x0, y0, x1);
             if (result.collide) {
                 return result;
             }
