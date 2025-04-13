@@ -35,6 +35,25 @@ void MultiSprite::setAnimation(const std::string& anim) {
 		}
 	}
 	_animation = anim;
+	resetPosition();
+}
+
+void MultiSprite::resetPosition() {
+	std::list<int> l = { 0 };
+
+	while (!l.empty()) {
+		auto current = l.front();
+		l.pop_front();
+		auto& node = _subNodes[current];
+		//node->getRenderer()->updateGeometry();
+		for (const auto& c : _tree[current]) {
+			glm::vec2 slot = _renderers[current]->getSlot(c.slot);
+			_subNodes[c.id]->setPosition(glm::vec3(slot, c.z));
+		}
+		for (const auto& c : _tree[current]) {
+			l.push_back(c.id);
+		}
+	}
 }
 
 std::string MultiSprite::getAnimation() const {

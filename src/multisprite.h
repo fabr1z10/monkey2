@@ -18,7 +18,7 @@ public:
 	void render() override;
 
 private:
-
+	void resetPosition();
 	struct NodeRelation {
 		int id;
 		int slot;
