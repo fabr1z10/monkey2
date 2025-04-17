@@ -42,9 +42,7 @@
 #include "shapes/polygon.h"
 #include "shapes/rect.h"
 #include "shapes/point.h"
-#include "platformer/tileworld.h"
-#include "platformer/tilecollider.h"
-#include "platformer/playercontroller.h"
+#include "tiledsprite.h"
 
 using namespace adventure;
 using namespace shapes;
@@ -203,22 +201,13 @@ PYBIND11_MODULE(monkey2, m) {
         .def("addNode", &MultiSprite::addNode)
         .def("addAnimation", &MultiSprite::addAnimation);
 
-    py::class_<TileWorld, Node, std::shared_ptr<TileWorld>>(m, "TileWorld")
-        .def(py::init<int, int, const std::vector<uint8_t>&>());
-
+    
 	py::class_<Component, std::shared_ptr<Component>>(m, "C")
         .def_property_readonly("node", &Component::getNode, py::return_value_policy::reference)
 		.def_property("id", &Component::getId, &Component::setId)
 		.def("keepAlive", &HotSpot::setPySelf);
 
-	py::class_<TileCollider, Component, std::shared_ptr<TileCollider>>(m, "TileCollider")
-		.def(py::init<float, float, float, int, int, int>(), 
-            py::arg("width"), py::arg("height"), py::arg("gravity"), py::arg("batch"),
-            py::arg("verticalRays") = 2, py::arg("horizontalRays") = 2);
-
-    py::class_<PlayerController, Component, std::shared_ptr<PlayerController>>(m, "PlayerController")
-        .def(py::init<float, float>());
-
+	
 	py::class_<Keyboard, Component, std::shared_ptr<Keyboard>>(m, "Keyboard")
 	    .def(py::init<>())
 	    .def("add", &Keyboard::addFunction);
@@ -301,8 +290,11 @@ PYBIND11_MODULE(monkey2, m) {
         .def_property("defaultAnimation", &Sprite::getDefaultAnimation, &Sprite::setDefaultAnimation);
 
     py::class_<TileMap, Model<primitives::Quad>, std::shared_ptr<TileMap>>(m, "TileMap")
-        .def(py::init<int, int, glm::ivec2>())
-        .def("addFrame", &TileMap::addFrame);
+        .def(py::init<float, const std::vector<uint16_t>&>());
+
+    py::class_<TiledSprite, Model<primitives::Quad>, std::shared_ptr<TiledSprite>>(m, "TiledSprite")
+        .def(py::init<int, int, int>())
+        .def("addFrame", &TiledSprite::addFrame);
 
     // base light - not instantiable
     py::class_<Light, std::shared_ptr<Light>>(m, "__Light");

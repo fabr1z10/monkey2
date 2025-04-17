@@ -28,14 +28,15 @@ TriangleNormal::TriangleNormal(const float * data) {
 
 }
 
-Quad::Quad(glm::vec4 texCoords, glm::vec2 anchor, glm::vec2 size, int texIndex)
-    : texCoord(texCoords), anchor(anchor), size(size), index(texIndex) {}
+Quad::Quad(glm::vec4 texCoords, glm::vec2 anchor, glm::vec2 size, int texIndex, float z)
+    : texCoord(texCoords), anchor(anchor), size(size), index(texIndex), z(z) {}
 
 Quad::Quad(const float* data) {
     this->texCoord = glm::vec4(data[0], data[1], data[2], data[3]);
     this->anchor = glm::vec2(data[4], data[5]);
     this->size = glm::vec2(data[6], data[7]);
     this->index = (int)data[8];
+    this->z = 0;
     //this->color = glm::vec4(data[9], data[10], data[11], data[12]);
 
 }
@@ -45,6 +46,7 @@ Quad::Quad(const float * data, float invw, float invh) {
     this->texCoord = glm::vec4(data[0] * invw, data[1] * invh, data[2] * invw, data[3] * invh);
     this->anchor = glm::vec2(data[4], data[5]);
     this->size = {data[2], data[3]};
+    this->z = 0.f;
     //this->color = color;
 }
 
@@ -54,6 +56,7 @@ Quad::Quad(const float * data, float invw, float invh, int texId) {
     this->texCoord = glm::vec4(data[0] * invw, data[1] * invh, data[2] * invw, data[3] * invh);
     this->anchor = glm::vec2(data[4], data[5]);
     this->size = {data[2], data[3]};
+    this->z = 0.f;
     //this->color = color;
 }
 
@@ -101,7 +104,7 @@ void TriangleNormal::transform(VertexColorNormal * v, const glm::mat4 &t, glm::v
 void Quad::transform(VertexTexture * v, const glm::mat4 &t, glm::vec4 color,
     bool fliph, bool flipv) const {
     float ax = fliph ? size.x - anchor.x : anchor.x;
-    auto bottomLeft = glm::vec3(t * glm::vec4(-ax,-anchor.y, 0.f, 1.f));
+    auto bottomLeft = glm::vec3(t * glm::vec4(-ax,-anchor.y, z, 1.f));
     auto xAxis = t[0];
     auto yAxis = t[1];
 

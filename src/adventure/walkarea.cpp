@@ -104,7 +104,7 @@ void WalkArea::recalculatePoints() {
 						_polygonToVertex[s+i] = _vertices.size();
                         _vertices.push_back(Pc);
                     }
-                    auto f = {Pc.x, Pc.y, 0.f, Pn.x, Pn.y, 0.f};
+                    auto f = {Pc.x, Pc.y, 10.f, Pn.x, Pn.y, 10.f};
                     debugModelData.insert(debugModelData.end(), f.begin(), f.end());
                     _nodeWalls.insert({iCurr, iNext});
                     

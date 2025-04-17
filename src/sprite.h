@@ -44,7 +44,7 @@ public:
 
     std::shared_ptr<IRenderer> getRenderer(int batchId = -1) override;
 
-    int getPrimitiveCount() override {
+    int getPrimitiveCount() const override {
         return 1;
     }
 

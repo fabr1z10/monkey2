@@ -123,7 +123,7 @@ void AssetBank::loadTexture(int id, const std::string &path)
     int shaderTexId = _batch->addTexture(path);
     _textures[id] = shaderTexId;
 	_texPath[id] = path;
-    //startUp();
+    startUp();
 }
 
 void AssetBank::startUp()

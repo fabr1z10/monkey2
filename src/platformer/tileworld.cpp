@@ -18,78 +18,12 @@ TileWorld::TileWorld(int size, int batchId, const std::vector<uint8_t>& data) : 
 
 
 
-    size_t pos{ 0 };
-    int x{ 0 };
-    int y{ 0 };
-        
-    while (pos < data.size()) {
-        ChunkType chunk = static_cast<ChunkType>(data[pos++]);
-        if (chunk == ChunkType::EndOfMap) break;
-
-        switch (chunk) {
-        case ChunkType::RLE: {
-            uint8_t tile = data[pos++];
-            uint8_t count = data[pos++];
-            emitTiles(tile, count,x, y);
-            x += count;
-            break;
-        }
-        case ChunkType::Region: {
-            uint8_t tile = data[pos++];
-            uint8_t x = data[pos++];
-            uint8_t y = data[pos++];
-            uint8_t w = data[pos++];
-            uint8_t h = data[pos++];
-            fillRegion(tile, x, y, w, h);
-			x += w;
-            break;
-        }
-        case ChunkType::RawLine: {
-            uint8_t count = data[pos++];
-            for (int i = 0; i < count; ++i) {
-                uint8_t tile = data[pos++];
-                emitTile(tile, x++, y);                
-            }
-            break;
-        }
-		case ChunkType::MoveCursor: {
-			x = data[pos++];
-			y = data[pos++];
-			break;
-		}
-        default:
-            std::cerr << "Unknown chunk type: " << static_cast<int>(chunk) << "\n";
-            return;
-        }
-    }
+	
 
 	
 }	
 
-void TileWorld::emitTile(int tile, int x, int y) {
-    addTile(x, y, _tileFactory[tile]());
-}
 
-void TileWorld::emitTiles(int tile, int count, int x, int y) {
-	for (int i = 0; i < count; ++i) {
-		addTile(x + i, y, _tileFactory[tile]());
-	}
-}
-
-void TileWorld::fillRegion(int tile, int x, int y, int w, int h) {
-	for (int i = 0; i < w; ++i) {
-		for (int j = 0; j < h; ++j) {
-			addTile(x + i, y + j, _tileFactory[tile]());
-		}
-	}
-}
-
-
-
-
-void TileWorld::addTile(int x, int y, std::unique_ptr<Tile> tile) {
-	_tiles[{x, y}] = std::move(tile);
-}
 void TileWorld::start() {
     Node::start();
 	std::vector<float> debugModelData;

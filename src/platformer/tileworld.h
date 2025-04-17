@@ -32,9 +32,7 @@ private:
 	int _n;
 	int _batchId;
 	std::unordered_map<std::pair<int, int>, std::unique_ptr<Tile> > _tiles;
-	void emitTile(int tile, int x, int y);
-	void emitTiles(int tile, int count, int x, int y);
-	void fillRegion(int tile, int x, int y, int w, int h);
+
 	std::unordered_map<int, std::function<std::unique_ptr<Tile>()>> _tileFactory;
 };
 

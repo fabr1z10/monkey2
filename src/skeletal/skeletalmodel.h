@@ -37,7 +37,7 @@ public:
     void setDefaultAnimation(const std::string&);
 
     SkeletalModel();
-    int getPrimitiveCount() override {return 0;}
+    int getPrimitiveCount() const override {return 0;}
 //
     void init();
     std::vector<glm::mat4> calculateCurrentPose(std::unordered_map<int, JointTransform>& pose);

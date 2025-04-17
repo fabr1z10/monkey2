@@ -15,7 +15,7 @@ public:
 	IModel() = default;
     virtual ~IModel() = default;
 	virtual std::shared_ptr<IRenderer> getRenderer(int batchId) = 0;
-    virtual int getPrimitiveCount() = 0;
+    virtual int getPrimitiveCount() const = 0;
 };
 
 
@@ -42,7 +42,7 @@ public:
         return std::make_shared<Renderer<Model<P>>>(this, batchId);
     }
 
-    int getPrimitiveCount() override {
+    int getPrimitiveCount() const override {
         return _prims.size();
     }
 

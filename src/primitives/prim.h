@@ -99,10 +99,11 @@ namespace primitives {
         glm::vec2 anchor;
         glm::vec2 size;
         int index;
+        float z;
         // color is provided by the renderer
         //glm::vec4 color;
 
-        Quad(glm::vec4 texCoords, glm::vec2 anchor, glm::vec2 size, int);
+        Quad(glm::vec4 texCoords, glm::vec2 anchor, glm::vec2 size, int, float z=0.f);
 
         /* Constructs a quad from raw data - requires the inverse
          * of the size of the texture
