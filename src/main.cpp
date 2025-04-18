@@ -289,12 +289,12 @@ PYBIND11_MODULE(monkey2, m) {
         //.def("add", &Sprite::add)
         .def_property("defaultAnimation", &Sprite::getDefaultAnimation, &Sprite::setDefaultAnimation);
 
-    py::class_<TileMap, Model<primitives::Quad>, std::shared_ptr<TileMap>>(m, "TileMap")
-        .def(py::init<float, const std::vector<uint16_t>&>());
+    py::class_<TileMap, Node, std::shared_ptr<TileMap>>(m, "TileMap")
+        .def(py::init<int, int, int, int>(), py::arg("width"), py::arg("height"), py::arg("tileSize"), py::arg("batchId"));
 
-    py::class_<TiledSprite, Model<primitives::Quad>, std::shared_ptr<TiledSprite>>(m, "TiledSprite")
-        .def(py::init<int, int, int>())
-        .def("addFrame", &TiledSprite::addFrame);
+    //py::class_<TiledSprite, Model<primitives::Quad>, std::shared_ptr<TiledSprite>>(m, "TiledSprite")
+    //    .def(py::init<int, int, int>())
+    //    .def("addFrame", &TiledSprite::addFrame);
 
     // base light - not instantiable
     py::class_<Light, std::shared_ptr<Light>>(m, "__Light");

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "node.h"
 #include "model.h"
 #include "primitives/prim.h"
 #include "renderer.h"
@@ -25,40 +26,60 @@ enum class ChunkType : uint16_t {
 };
 
 
-class TileMap : public Model<primitives::Quad> {
+// tileworld
+class TileMap : public Node {
 
 public:
-    struct FrameInfo {
-        size_t offset;
-        size_t length;
-        int ticks;
+
+    struct Tile {
+        uint16_t tileId;
+        uint8_t effects;
     };
 
-    TileMap(float dz, const std::vector<uint16_t>& data);
+    /**
+     * width = world width in tiles
+     * height = world height in tiles
+     * tilesize = must be a pow of 2
+     */
+    TileMap(int width, int height, int tileSize, int batchId);
+
+    // define the tilemap from a string
+    void define(const std::string&);
 
     //void addFrame(const std::vector<int>& data, int ticks);
 
-    std::shared_ptr<IRenderer> getRenderer(int) override;
+    //std::shared_ptr<IRenderer> getRenderer(int) override;
 
-    const FrameInfo& getFrameInfo(int) const;
+    //const FrameInfo& getFrameInfo(int) const;
 
+    void store(int x, int y, uint16_t id, uint8_t fx = 0);
 
-    int getFrameCount() const;
+    const Tile* load(int x, int y);
+
+    //int getFrameCount() const;
 
 private:
+    std::unordered_map<std::pair<int, int>, Tile> _tiles;
+    // x, y camera position
+    float camX;
+    float camY;
+    int _n;
+    int _tileSize;
     //void emitTile(int tile, int x, int y);
     void emitTiles(int tile, int count, int x, int y);
     void fillRegion(int tile, int x, int y, int w, int h);
     void addTile(int x, int y, int tile);
     //int _height;
-    float _tileSize;
+    
     float _tw;
     float _th;
-    int _tilesPerRow;
-    int _tilesPerCol;
-    int _n;
+    int _screenTilesPerRow;
+    int _screenTilesPerCol;
+    int _atlasTilesPerRow;
+    int _atlasTilesPerCol;
+    
     // for each frame we store offset and length
-    std::vector<FrameInfo> _frameInfo;
+    //std::vector<FrameInfo> _frameInfo;
     size_t _maxFrameLength;
     int _batchId;
     int _textureId;
@@ -67,25 +88,29 @@ private:
     int _width;
 };
 
-inline int TileMap::getFrameCount() const {
-    return _frameInfo.size();
+
+
+inline void TileMap::store(int x, int y, uint16_t id, uint8_t fx) {
+    _tiles[{x, y}] = { id, fx };
 }
 
-inline const TileMap::FrameInfo &TileMap::getFrameInfo(int i) const {
-    return _frameInfo[i];
+inline const TileMap::Tile* TileMap::load(int x, int y) {
+    if (auto it = _tiles.find({ x, y }); it != _tiles.end()) {
+        return &it->second;
+    }
+    return nullptr;
 }
 
-
-//class TileMapRenderer : public Renderer<TileMap> {
-//public:
-//    TileMapRenderer(TileMap* model, int batchId) : Renderer<TileMap>(model, batchId),
+class TileMapRenderer : public Renderer<Model<primitives::Quad>> {
+public:
+    TileMapRenderer(TileMap* node, Model<primitives::Quad>* model, int batch);
 //        _frame(0), _tickCount(0) {}
-//    void update() override;
-//    void updateGeometry() override;
+    void update() override;
+    void updateGeometry() override;
 //private:
 //    int _frame;
 //    int _tickCount;
-//};
+};
 //
 //
 //

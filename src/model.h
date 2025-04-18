@@ -26,6 +26,12 @@ public:
 
     Model() : IModel() {}
 
+    Model(int size) : IModel() {
+        for (size_t i = 0; i < size; ++i) {
+            _prims.push_back(P());
+        }
+    }
+
     Model(const std::vector<float>& data) {
         M_Assert(data.size() % P::_floatsPerPrimitive == 0, "LineModel requires a vector whose size is multiple of 6.");
 

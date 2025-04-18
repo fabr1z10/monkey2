@@ -102,6 +102,7 @@ namespace primitives {
         float z;
         // color is provided by the renderer
         //glm::vec4 color;
+        Quad() = default;
 
         Quad(glm::vec4 texCoords, glm::vec2 anchor, glm::vec2 size, int, float z=0.f);
 

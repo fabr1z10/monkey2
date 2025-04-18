@@ -2,139 +2,171 @@
 #include "game.h"
 #include "quadbatch.h"
 #include "error.h"
+#include "model.h"
+#include "util.h"
 
-
-TileMap::TileMap(float yMax, const std::vector<uint16_t>& data) : Model<primitives::Quad>() 
-    , _yMax(yMax)
+TileMap::TileMap(int width, int height, int tileSize, int batchId) : Node(), camX(0.f), camY(0.f)
 {
+    M_Assert(tileSize > 0 && (tileSize & (tileSize - 1)) == 0, " [TileMap]: tile size must be a power of 2");
+    _n = std::log2(tileSize);
+    _tileSize = tileSize;
+
+    auto* batch = dynamic_cast<QuadBatch*>(Game::instance().getRoom()->getBatch(batchId));
+    auto atlasSize = batch->getTextureSize();
+    auto cameraId = batch->getCameraId();
+
+    Camera* cam = Game::instance().getRoom()->getCamera(cameraId);
+    auto viewport = cam->getViewport();
+    // calculate width and height of viewport in tiles
+    _screenTilesPerRow = viewport[2] / _tileSize;
+    _screenTilesPerCol = viewport[3] / _tileSize;
+    _atlasTilesPerRow = atlasSize.x >> _n;
+    _atlasTilesPerCol = atlasSize.y >> _n;
+
+    int gridWidth = _screenTilesPerRow + 2;
+    int gridHeight = _screenTilesPerCol + 2;
+    int quadCount = gridWidth * gridHeight;
+
+    // create the model, with the correct number of quads
+    auto model = std::make_shared<Model<primitives::Quad>>(quadCount);
+    _model = model;
     
-    _batchId = data[0];
-    _textureId = data[1];
-    _tileSize = data[2];
-    auto* batch = dynamic_cast<QuadBatch*>(Game::instance().getRoom()->getBatch(_batchId));
+    std::cout << " atlas size: " << atlasSize << std::endl;
+    
+    // create renderer!
+    _renderer = std::make_shared<TileMapRenderer>(this, model.get(), _batchId);
 
-    M_Assert(batch->getTextureWidth() == batch->getTextureHeight(), "Require square texture maps");
-    _tw = _tileSize / batch->getTextureWidth();
-    _tilesPerRow = batch->getTextureWidth() / _tileSize;
-    M_Assert(_tilesPerRow > 0 && (_tilesPerRow & (_tilesPerRow - 1)) == 0, " [TileMap]: size must be a power of 2");
-    _n = std::log2(_tilesPerRow);
+  //  
+  //  _batchId = data[0];
+  //  _textureId = data[1];
+  //  _tileSize = data[2];
 
-
-    size_t pos{ 3 };
-    int x{ 0 };
-    int y{ 0 };
-    _z = 0.f;
-    _width = 0;
-    std::list<std::pair<int, size_t>> loop;
-
-    while (pos < data.size()) {
-        auto word = data[pos++];
-        //if (chunk == ChunkType::EndOfMap) break;
-
-        // this is how it works. We hav just a sequence of tiles
-        // each tile specified by a 16 bit number
-		// if msb is 1, then this is a special chunk
-        // for instance, 0x8001 --> RLE 
-        // in this case the 1st number is the count, 2nd is the tile
-        // 0x8002 --> specifies the width of the map. When x reaches the end
-		// for the line, x is reset to 0 and y is incremented
-        if ((word & 0x8000) != 0) {
-            ChunkType chunk = static_cast<ChunkType>(word);
-            switch (chunk) {
-            case ChunkType::RLE: {
-                uint16_t count = data[pos++];
-                uint16_t tile = data[pos++];
-
-                for (int i = 0; i < count; ++i) {
-                    addTile(x, y, tile);
-                    x++;
-                    if (_width > 0 && x >= _width) {
-                        x = 0;
-                        y++;
-                    }
-                }
-                break;
-            }
-
-            case ChunkType::SetWidth: {
-                _width = data[pos++];
-                break;
-            }
-            case ChunkType::SetYBase: {
-				auto yBase = data[pos++];
-                _z = 1.f - (_tileSize*yBase) / _yMax;
-                break;
-            }
-            case ChunkType::SetBackground: {
-                _z = 0.f;
-                break;
-
-            }
-            case ChunkType::SetBackgroundLayer: {
-                _z = -data[pos++];
-                break;
-
-            }
-            case ChunkType::Loop: {
-                int count = data[pos++];
-                loop.push_back({ count, pos });
-                break;
-            }
-            case ChunkType::LoopEnd: {
-                if (loop.empty()) {
-                    GLIB_FAIL("[TileMap] Loop end outside of loop.");
-                }
-                loop.front().first--;
-                if (loop.front().first == 0) {
-                    loop.pop_front();
-                }
-                else {
-                    pos = loop.front().second;
-                }
-                break;
-            }
-            case ChunkType::Skip: {
-                x++;
-                if (_width > 0 && x >= _width) {
-                    x = 0;
-                    y++;
-                }
-                break;
-            }
-            case ChunkType::GoTo: {
-                x = data[pos++];
-                y = data[pos++];
-                break;
-            }
-            case ChunkType::Back: {
-                if (_width > 0 && x == 0) {
-                    x = _width - 1;
-                    y--;
-                }
-                else {
-                    x--;
-                }
-                break;
-            }
-            }
-        } else {
-			// this is a tile
-			// if x >= width, then we need to reset x and increment y
-			addTile(x, y, word);
-			x++;
-			if (_width > 0 && x >= _width) {
-				x = 0;
-				y++;
-			}
-		}
+  //  M_Assert(batch->getTextureWidth() == batch->getTextureHeight(), "Require square texture maps");
+  //  _tw = _tileSize / batch->getTextureWidth();
+  //  _tilesPerRow = batch->getTextureWidth() / _tileSize;
+  //  M_Assert(_tilesPerRow > 0 && (_tilesPerRow & (_tilesPerRow - 1)) == 0, " [TileMap]: size must be a power of 2");
+  //  _n = std::log2(_tilesPerRow);
 
 
+  //  size_t pos{ 3 };
+  //  int x{ 0 };
+  //  int y{ 0 };
+  //  _z = 0.f;
+  //  _width = 0;
+  //  std::list<std::pair<int, size_t>> loop;
 
-   
-    }
+  //  while (pos < data.size()) {
+  //      auto word = data[pos++];
+  //      //if (chunk == ChunkType::EndOfMap) break;
+
+  //      // this is how it works. We hav just a sequence of tiles
+  //      // each tile specified by a 16 bit number
+		//// if msb is 1, then this is a special chunk
+  //      // for instance, 0x8001 --> RLE 
+  //      // in this case the 1st number is the count, 2nd is the tile
+  //      // 0x8002 --> specifies the width of the map. When x reaches the end
+		//// for the line, x is reset to 0 and y is incremented
+  //      if ((word & 0x8000) != 0) {
+  //          ChunkType chunk = static_cast<ChunkType>(word);
+  //          switch (chunk) {
+  //          case ChunkType::RLE: {
+  //              uint16_t count = data[pos++];
+  //              uint16_t tile = data[pos++];
+
+  //              for (int i = 0; i < count; ++i) {
+  //                  addTile(x, y, tile);
+  //                  x++;
+  //                  if (_width > 0 && x >= _width) {
+  //                      x = 0;
+  //                      y++;
+  //                  }
+  //              }
+  //              break;
+  //          }
+
+  //          case ChunkType::SetWidth: {
+  //              _width = data[pos++];
+  //              break;
+  //          }
+  //          case ChunkType::SetYBase: {
+		//		auto yBase = data[pos++];
+  //              _z = 1.f - (_tileSize*yBase) / _yMax;
+  //              break;
+  //          }
+  //          case ChunkType::SetBackground: {
+  //              _z = 0.f;
+  //              break;
+
+  //          }
+  //          case ChunkType::SetBackgroundLayer: {
+  //              _z = -data[pos++];
+  //              break;
+
+  //          }
+  //          case ChunkType::Loop: {
+  //              int count = data[pos++];
+  //              loop.push_back({ count, pos });
+  //              break;
+  //          }
+  //          case ChunkType::LoopEnd: {
+  //              if (loop.empty()) {
+  //                  GLIB_FAIL("[TileMap] Loop end outside of loop.");
+  //              }
+  //              loop.front().first--;
+  //              if (loop.front().first == 0) {
+  //                  loop.pop_front();
+  //              }
+  //              else {
+  //                  pos = loop.front().second;
+  //              }
+  //              break;
+  //          }
+  //          case ChunkType::Skip: {
+  //              x++;
+  //              if (_width > 0 && x >= _width) {
+  //                  x = 0;
+  //                  y++;
+  //              }
+  //              break;
+  //          }
+  //          case ChunkType::GoTo: {
+  //              x = data[pos++];
+  //              y = data[pos++];
+  //              break;
+  //          }
+  //          case ChunkType::Back: {
+  //              if (_width > 0 && x == 0) {
+  //                  x = _width - 1;
+  //                  y--;
+  //              }
+  //              else {
+  //                  x--;
+  //              }
+  //              break;
+  //          }
+  //          }
+  //      } else {
+		//	// this is a tile
+		//	// if x >= width, then we need to reset x and increment y
+		//	addTile(x, y, word);
+		//	x++;
+		//	if (_width > 0 && x >= _width) {
+		//		x = 0;
+		//		y++;
+		//	}
+		//}
+
+
+
+  // 
+  //  }
 
 }
 
+TileMapRenderer::TileMapRenderer(TileMap* map, Model<primitives::Quad>* model, int batch) : 
+    Renderer<Model<primitives::Quad>>(model, batch) {
+    setNode(map);
+}
 
 void TileMap::emitTiles(int tile, int count, int x, int y) {
     for (int i = 0; i < count; ++i) {
@@ -154,27 +186,27 @@ void TileMap::fillRegion(int tile, int x, int y, int w, int h) {
 
 
 void TileMap::addTile(int x, int y, int tile) {
-    // First of all find texture coordinates
-    if (tile == 0x8007) return;
-    uint16_t tileNumber = tile & 0x0FFF; // mask lower 12 bits
-    uint8_t effects = tile >> 12; // shift right by 12 bits
+ //   // First of all find texture coordinates
+ //   if (tile == 0x8007) return;
+ //   uint16_t tileNumber = tile & 0x0FFF; // mask lower 12 bits
+ //   uint8_t effects = tile >> 12; // shift right by 12 bits
 
-	bool flipX = (effects & 0x01) != 0;
+	//bool flipX = (effects & 0x01) != 0;
 
-    int row = tileNumber >> _n;
-    int col = tileNumber & ((1 << _n) - 1);
-    glm::vec4 texCoordinates(col * _tw, row * _tw, _tw, _tw);
-    if (flipX) {
-        texCoordinates.x += _tw;
-        texCoordinates[2] = -_tw;
-    }
-	_prims.push_back(primitives::Quad(
-		texCoordinates,
-		glm::vec2(-x * _tileSize, -y * _tileSize),
-		glm::vec2(_tileSize, _tileSize),
-        _textureId,
-        _z));
-    
+ //   int row = tileNumber >> _n;
+ //   int col = tileNumber & ((1 << _n) - 1);
+ //   glm::vec4 texCoordinates(col * _tw, row * _tw, _tw, _tw);
+ //   if (flipX) {
+ //       texCoordinates.x += _tw;
+ //       texCoordinates[2] = -_tw;
+ //   }
+	//_prims.push_back(primitives::Quad(
+	//	texCoordinates,
+	//	glm::vec2(-x * _tileSize, -y * _tileSize),
+	//	glm::vec2(_tileSize, _tileSize),
+ //       _textureId,
+ //       _z));
+ //   
 
 }
 
@@ -209,21 +241,22 @@ void TileMap::addTile(int x, int y, int tile) {
 //    _maxFrameLength = std::max(_maxFrameLength, frameQuads);
 //}
 //
-std::shared_ptr<IRenderer> TileMap::getRenderer(int) {
-    return std::make_shared<Renderer<Model<primitives::Quad>>>(this, _batchId);
+//std::shared_ptr<IRenderer> TileMap::getRenderer(int) {
+//    return std::make_shared<Renderer<Model<primitives::Quad>>>(this, _batchId);
+//
+//}
 
-}
 
-
-//void TileMapRenderer::updateGeometry() {
+void TileMapRenderer::updateGeometry() {
 //    const auto& frameInfo = _model->getFrameInfo(_frame);
 //
 //    auto worldTransform = _node->getWorldMatrix();
 //    for (auto i = 0; i < frameInfo.length; ++i) {
 //        _model->get(frameInfo.offset + i).transform(_vertices[i], worldTransform, _multiplyColor);
 //    }
-//}
-//void TileMapRenderer::update() {
+}
+void TileMapRenderer::update() {
+    std::cout << "qui\n";
 //    if (!_started) {
 //        return;
 //    }
@@ -244,7 +277,7 @@ std::shared_ptr<IRenderer> TileMap::getRenderer(int) {
 //    if (_dirty) {
 //        updateGeometry();
 //        _dirty = false;
-//    }
+}
 
 
 //}

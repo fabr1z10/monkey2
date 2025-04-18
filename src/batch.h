@@ -29,6 +29,8 @@ public:
 
     int getId() const;
 
+	int getCameraId() const;
+
 	static void resetId() { _gId=0;}
 protected:
     // this is the batch unique id
@@ -48,6 +50,9 @@ inline int IBatch::getId() const {
     return _id;
 }
 
+inline int IBatch::getCameraId() const {
+	return _camId;
+}
 inline int IBatch::getShaderType() const {
 	return _shaderType;
 }

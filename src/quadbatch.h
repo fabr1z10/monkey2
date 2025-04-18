@@ -20,13 +20,13 @@ public:
 
     float getTextureHeight() const;
 
-    glm::vec2 getTextureSize() const;
+    glm::ivec2 getTextureSize() const;
 
 
 private:
     GLuint _textureArray;
-    float _texWidth;
-    float _texHeight;
+    int _texWidth;
+    int _texHeight;
     int _maxTextures;
     int _texCount;
     std::unordered_map<std::string, int> _texId;
@@ -40,6 +40,6 @@ inline float QuadBatch::getTextureHeight() const {
     return _texHeight;
 }
 
-inline glm::vec2 QuadBatch::getTextureSize() const {
+inline glm::ivec2 QuadBatch::getTextureSize() const {
     return {_texWidth, _texHeight};
 }
