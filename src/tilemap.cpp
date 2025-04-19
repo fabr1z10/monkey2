@@ -5,7 +5,7 @@
 #include "model.h"
 #include "util.h"
 
-TileMap::TileMap(int width, int height, int tileSize, int batchId) : Node(), camX(0.f), camY(0.f)
+TileMap::TileMap(int width, int height, int tileSize, int batchId) : Node(), camX(0.f), camY(0.f), _batchId(batchId)
 {
     M_Assert(tileSize > 0 && (tileSize & (tileSize - 1)) == 0, " [TileMap]: tile size must be a power of 2");
     _n = std::log2(tileSize);
@@ -22,6 +22,8 @@ TileMap::TileMap(int width, int height, int tileSize, int batchId) : Node(), cam
     _screenTilesPerCol = viewport[3] / _tileSize;
     _atlasTilesPerRow = atlasSize.x >> _n;
     _atlasTilesPerCol = atlasSize.y >> _n;
+	_shiftAtlas = (int) std::log2(_atlasTilesPerRow);
+	_tileNormalizedLength = glm::vec2(1.f / _atlasTilesPerRow, 1.f / _atlasTilesPerCol);
 
     int gridWidth = _screenTilesPerRow + 2;
     int gridHeight = _screenTilesPerCol + 2;
@@ -36,6 +38,7 @@ TileMap::TileMap(int width, int height, int tileSize, int batchId) : Node(), cam
     // create renderer!
     _renderer = std::make_shared<TileMapRenderer>(this, model.get(), _batchId);
 
+	_opcodes["tle"] = &TileMap::tle;
   //  
   //  _batchId = data[0];
   //  _textureId = data[1];
@@ -164,10 +167,112 @@ TileMap::TileMap(int width, int height, int tileSize, int batchId) : Node(), cam
 }
 
 TileMapRenderer::TileMapRenderer(TileMap* map, Model<primitives::Quad>* model, int batch) : 
-    Renderer<Model<primitives::Quad>>(model, batch) {
+    Renderer<Model<primitives::Quad>>(model, batch), _map(map) {
     setNode(map);
 }
 
+void TileMap::tle(const std::vector<std::string>& args) {
+	for (const auto& arg : args) {
+		std::cout << " adding tile: " << arg << " at " << _cx << ", " << _cy << "\n";
+		_tiles[{_cx, _cy}] = Tile{static_cast<uint16_t>(std::stoul(arg)), _fx};
+		_cx++;
+	}
+}
+std::vector<std::string> TileMap::splitByNewline(const std::string& input) {
+	std::vector<std::string> lines;
+	std::stringstream ss(input);
+	std::string line;
+	while (std::getline(ss, line)) {
+		lines.push_back(line);
+	}
+	return lines;
+}
+
+void TileMap::removeSpacesAndTabs(std::string& str) {
+	str.erase(std::remove_if(str.begin(), str.end(),
+							 [](unsigned char c) { return c == ' ' || c == '\t'; }),
+			  str.end());
+}
+
+std::vector<std::string> TileMap::splitArgs(const std::string& argStr) {
+	std::vector<std::string> result;
+	std::stringstream ss(argStr);
+	std::string token;
+	while (std::getline(ss, token, ',')) {
+		if (!token.empty())
+			result.push_back(token);
+	}
+	return result;
+}
+
+void TileMap::define(const std::string & data) {
+	// reset pointers @ bottom left
+	_cx = 0;
+	_cy = 0;
+	_fx = 0;
+	auto nn = splitByNewline(data);
+	for (auto& line : nn) {
+
+		size_t semicolonPos = line.find(';');
+		if (semicolonPos != std::string::npos) {
+			line = line.substr(0, semicolonPos);
+		}
+		removeSpacesAndTabs(line);
+		if (line.empty()) continue;
+		if (line.length() < 3) {
+			GLIB_FAIL("[TileMap] Syntax error in tile definition - line with less than 3 characters: " + line);
+		}
+
+		std::string opcode = line.substr(0, 3);
+
+		auto args = splitArgs(line.substr(3));
+
+		auto it = _opcodes.find(opcode);
+		if (it == _opcodes.end()) {
+			GLIB_FAIL("[TileMap] Unknown opcode: " + opcode);
+		}
+		(this->*it->second)(args);
+
+		//std::cout << line << "\n";
+	}
+}
+
+void TileMapRenderer::start() {
+	Renderer<Model<primitives::Quad>>::start();
+	int k=0;
+	auto* v = _vertices[k++];
+	auto ts = 1.f / 64.f;
+	auto tc = _map->getScreenTileCount();
+	auto tileSize = 8.f;
+	for (int i = 0; i< tc.y; ++i) {
+		float y = tileSize*i;
+		for (int j = 0; j < tc.x; j++) {
+			float x = tileSize * j;
+			v->position = glm::vec3(x, y, 0.f);
+			v->color = glm::vec4(1.f);
+			v->texIndex = 0;
+			v->texCoord = glm::vec2(0.f, 0.f);
+
+			(v+1)->position = glm::vec3(x+tileSize, y, 0.f);
+			(v+1)->color = glm::vec4(1.f);
+			(v+1)->texIndex = 0;
+			(v+1)->texCoord = glm::vec2(0.f, 0.f);
+
+			(v+2)->position = glm::vec3(x+tileSize, y+tileSize, 0.f);
+			(v+2)->color = glm::vec4(1.f);
+			(v+2)->texIndex = 0;
+			(v+2)->texCoord = glm::vec2(0.f, 0.f);
+
+			(v+3)->position = glm::vec3(x, y+tileSize, 0.f);
+			(v+3)->color = glm::vec4(1.f);
+			(v+3)->texIndex = 0;
+			(v+3)->texCoord = glm::vec2(0.f, 0.f);
+			v= _vertices[k++];
+		}
+
+	}
+
+}
 void TileMap::emitTiles(int tile, int count, int x, int y) {
     for (int i = 0; i < count; ++i) {
         addTile(x + i, y, tile);
@@ -255,8 +360,52 @@ void TileMapRenderer::updateGeometry() {
 //        _model->get(frameInfo.offset + i).transform(_vertices[i], worldTransform, _multiplyColor);
 //    }
 }
+
+glm::vec4 TileMap::getTextureCoordinates(int tileId) {
+	int tileX = tileId & (_atlasTilesPerRow - 1);     // same as u % tilesPerRow
+	int tileY = tileId >> _shiftAtlas;                // same as u / tilesPerRow
+	float tx0 = tileX * _tileNormalizedLength.x;
+	float tx1 = tx0 + _tileNormalizedLength.x;
+	float ty0 = tileY * _tileNormalizedLength.y;
+	float ty1 = ty0 + _tileNormalizedLength.y;
+	return {tx0, tx1, ty0, ty1};
+}
+
 void TileMapRenderer::update() {
-    std::cout << "qui\n";
+    //std::cout << "qui\n";
+	// First, we get the camera position
+	glm::ivec2 bottomLeft;
+	glm::vec2 offset;
+	_map->getIndexOfBottomLeftTile(bottomLeft, offset);
+	auto tc = _map->getScreenTileCount();
+	int ex = offset.x == 0.f ? 0 : 1;
+	int ey = offset.y == 0.f ? 0 : 1;
+	int k = 0;
+	//auto atlasTilesPerRow = _map->getAtlasTilesPerRow();
+	//int shift = std::log2(atlasTilesPerRow);
+	for (int y = 0; y < tc.y + ey; y++) {
+		for (int x = 0; x < tc.x + ex; x++) {
+			int ctx = bottomLeft.x + x;
+			int cty = bottomLeft.y + y;
+			// get tile
+			auto* tile = _map->load(ctx, cty);
+			auto* v = _vertices[k++];
+			if (tile != nullptr) {
+				auto texCoords = _map->getTextureCoordinates(tile->tileId);
+				v->texCoord = glm::vec2(texCoords[0], texCoords[3]);
+				(v+1)->texCoord = glm::vec2(texCoords[1], texCoords[3]);
+				(v+2)->texCoord = glm::vec2(texCoords[1], texCoords[2]);
+				(v+3)->texCoord = glm::vec2(texCoords[0], texCoords[2]);
+			} else {
+				v->texCoord = glm::vec2(0.f);
+				(v+1)->texCoord = glm::vec2(0.f);
+				(v+2)->texCoord = glm::vec2(0.f);
+				(v+3)->texCoord = glm::vec2(0.f);
+
+			}
+		}
+	}
+
 //    if (!_started) {
 //        return;
 //    }
@@ -281,3 +430,10 @@ void TileMapRenderer::update() {
 
 
 //}
+
+void TileMap::getIndexOfBottomLeftTile(glm::ivec2& bottomLeft, glm::vec2& offset) const {
+	bottomLeft.x = (int) camX >> _n;
+	bottomLeft.y = (int) camY >> _n;
+	offset = glm::vec2(camX - (bottomLeft.x << _n), camY - (bottomLeft.y << _n) );
+
+}

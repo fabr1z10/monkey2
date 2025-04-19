@@ -290,7 +290,8 @@ PYBIND11_MODULE(monkey2, m) {
         .def_property("defaultAnimation", &Sprite::getDefaultAnimation, &Sprite::setDefaultAnimation);
 
     py::class_<TileMap, Node, std::shared_ptr<TileMap>>(m, "TileMap")
-        .def(py::init<int, int, int, int>(), py::arg("width"), py::arg("height"), py::arg("tileSize"), py::arg("batchId"));
+        .def(py::init<int, int, int, int>(), py::arg("width"), py::arg("height"), py::arg("tileSize"), py::arg("batchId"))
+		.def("define", &TileMap::define);
 
     //py::class_<TiledSprite, Model<primitives::Quad>, std::shared_ptr<TiledSprite>>(m, "TiledSprite")
     //    .def(py::init<int, int, int>())

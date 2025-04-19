@@ -1,7 +1,7 @@
 #pragma once
 
 #include <pybind11/pybind11.h>
-
+#include <iostream>
 
 template<typename T>
 void addPyRef(std::shared_ptr<T> obj) {

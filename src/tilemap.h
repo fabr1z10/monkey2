@@ -58,13 +58,24 @@ public:
 
     //int getFrameCount() const;
 
+	glm::ivec2 getScreenTileCount() const {
+		return glm::ivec2(_screenTilesPerRow, _screenTilesPerCol);
+	};
+
+	void getIndexOfBottomLeftTile(glm::ivec2&, glm::vec2&) const;
+	//int getAtlasTilesPerR//ow() const;
+
+	glm::vec4 getTextureCoordinates(int tileId);
 private:
+	void tle(const std::vector<std::string>&);
     std::unordered_map<std::pair<int, int>, Tile> _tiles;
     // x, y camera position
     float camX;
     float camY;
     int _n;
+	int _shiftAtlas;
     int _tileSize;
+	glm::vec2 _tileNormalizedLength;
     //void emitTile(int tile, int x, int y);
     void emitTiles(int tile, int count, int x, int y);
     void fillRegion(int tile, int x, int y, int w, int h);
@@ -86,6 +97,15 @@ private:
     float _z;
     float _yMax;
     int _width;
+
+	uint _cx, _cy;		// current pointer
+	uint8_t _fx;
+	std::vector<std::string> splitByNewline(const std::string& input);
+	void removeSpacesAndTabs(std::string& str);
+	std::vector<std::string> splitArgs(const std::string& argStr) ;
+
+	std::unordered_map<std::string, void (TileMap::*)(const std::vector<std::string>&)> _opcodes;
+
 };
 
 
@@ -106,7 +126,10 @@ public:
     TileMapRenderer(TileMap* node, Model<primitives::Quad>* model, int batch);
 //        _frame(0), _tickCount(0) {}
     void update() override;
+	void start() override;
     void updateGeometry() override;
+private:
+	TileMap* _map;
 //private:
 //    int _frame;
 //    int _tickCount;
