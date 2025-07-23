@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 #include <yaml-cpp/yaml.h>
-#include "quadbatch.h"
+#include "batch.h"
 
 struct CharInfo {
     // texture top left
@@ -19,7 +19,7 @@ struct CharInfo {
 class Font {
 
 public:
-    Font(const YAML::Node& node, QuadBatch*, int);
+    Font(const YAML::Node& node, int width, int height);
     const CharInfo& getCharInfo(char32_t c);
     float getLineHeight() const;
     int getBatchId() const;

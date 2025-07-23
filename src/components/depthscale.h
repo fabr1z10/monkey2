@@ -2,7 +2,7 @@
 
 #include "../component.h"
 #include "../collisionengine.h"
-
+#include "../shapes/line.h"
 
 class DepthScale : public Component {
 public:
@@ -18,5 +18,6 @@ private:
     glm::vec2 _lastPos;
     float _y0, _y1, k;
     Collider* _collider;
+	shapes::PolyLine* _poly;
     bool _valid;
 };

@@ -9,7 +9,7 @@ static void resetConsoleColor() {
     std::cerr << "\033[0m";
 }      // Reset color
 
-void __M_Assert(const char* expr_str, bool expr, const char* file, int line, const char* msg) {
+void __M_Assert(const char* expr_str, bool expr, const char* file, int line, const std::string& msg) {
 	if (!expr)
 	{
         setConsoleColorRed();

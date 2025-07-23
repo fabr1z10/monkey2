@@ -3,18 +3,21 @@
 #include "../component.h"
 #include "../shape.h"
 #include "../bounds.h"
+#include "../vec.h"
 
 class Collider : public Component {
 
 public:
-    Collider(std::shared_ptr<Shape>, int flag, int mask, const std::string& tag);
+	/*
+	 * Provide batchId != 1 if you want to plot the collider shape (mostly for debug reasons)
+	 */
+    Collider(std::shared_ptr<Shape>, int flag, int mask, const std::string& tag, int batchId = -1);
 
     virtual ~Collider();
 
     void start() override;
 
     Shape* getShape();
-
 
 	// returns collider bounds (AABB) in world coordinates
 	Bounds getBounds();
@@ -29,6 +32,7 @@ private:
 	int _mask;
 	std::string _tag;
     std::shared_ptr<Shape> _shape;
+	int _batchId;
 };
 
 inline Shape *Collider::getShape() {
@@ -46,3 +50,16 @@ inline int Collider::getCollisionMask() const {
 inline std::string Collider::getTag() const {
 	return _tag;
 }
+
+class AABBCollider : public Component {
+public:
+	AABBCollider(int flag, int mask, int tag, float width, float height, Vec2 anchor = Vec2(), int batch=-1);
+	void start() override;
+
+private:
+	int _batchId;
+	int _flag;
+	int _mask;
+	int _tag;
+	Bounds _aabb;
+};

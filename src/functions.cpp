@@ -27,8 +27,10 @@ void loadAsset(const std::string& id, const std::string& file, int camera, const
 }
 
 
-std::shared_ptr<IModel> getModel(const std::string& id) {
-    return AssetManager::instance().getModel(id);
+std::shared_ptr<IModel> getModel(int batch, const std::string& id) {
+    auto* bp = dynamic_cast<QuadBatchPalette*>(Game::instance().getRoom()->getBatch(batch));
+	auto model = bp->getSpriteSheet()->makeSprite(batch, id);
+	return model;
 }
 
 Node* getNode(int id) {

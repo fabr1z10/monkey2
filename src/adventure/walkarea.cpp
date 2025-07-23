@@ -4,6 +4,7 @@
 
 
 #include "../model.h"
+#include "../models/linemodel.h"
 #include <queue>
 
 
@@ -61,7 +62,7 @@ void WalkArea::recalculatePoints() {
 
     // go through all points one by one
     auto n = _polygon.size();
-    std::vector<float> debugModelData;
+    //std::vector<float> debugModelData;
 
     //_nodeWalls.insert({0, n-1});
     //_walls.emplace_back(_polygon.front(), _polygon.back());
@@ -105,7 +106,7 @@ void WalkArea::recalculatePoints() {
                         _vertices.push_back(Pc);
                     }
                     auto f = {Pc.x, Pc.y, 10.f, Pn.x, Pn.y, 10.f};
-                    debugModelData.insert(debugModelData.end(), f.begin(), f.end());
+                    //debugModelData.insert(debugModelData.end(), f.begin(), f.end());
                     _nodeWalls.insert({iCurr, iNext});
                     
                     //_nodeWalls.insert({iNext, iCurr});
@@ -121,7 +122,7 @@ void WalkArea::recalculatePoints() {
                     auto Pc = _polygon[s+i];
                     auto Pn = _polygon[s+i+1];
                     auto f = {Pc.x, Pc.y, 0.f, Pn.x, Pn.y, 0.f};
-                    debugModelData.insert(debugModelData.end(), f.begin(), f.end());
+                    //debugModelData.insert(debugModelData.end(), f.begin(), f.end());
                     _nodeWalls.insert({s+i, s+i+1});
                     _nodeWalls.insert({s+i+1, s+i});
 
@@ -132,8 +133,24 @@ void WalkArea::recalculatePoints() {
     }
 
     if (_batchId != -1) {
-        auto model = std::make_shared<Model<primitives::Line>>(debugModelData);
-        setModel(model, _batchId);
+		for (const auto& p : _polyInfo) {
+			if (p.active) {
+				auto node = std::make_shared<Node>();
+				std::vector<float> dd;
+				for (int i = 0; i < p.length; ++i) {
+					dd.push_back(_polygon[p.offset+i].x);
+					dd.push_back(_polygon[p.offset+i].y);
+				}
+				if (p.type == PolyType::AREA) {
+					dd.push_back(_polygon[p.offset].x);
+					dd.push_back(_polygon[p.offset].y);
+				}
+				auto model = std::make_shared<models::LineModel>(_batchId, dd, Color(1.f, 1.f, 1.f, 1.f));
+				node->setModel(model);
+				node->setPosition(Vec3(0.f, 0.f, 5.f));
+				this->add(node);
+			}
+		}
     //    this->setMultiplyColor(_color);
     }
 

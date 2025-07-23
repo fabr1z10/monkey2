@@ -60,14 +60,15 @@ glm::vec3 Camera::getFwd() const {
 
 
 
-void Camera::move(glm::vec3 delta) {
-	_eye += delta;
+void Camera::move(Vec3 delta) {
+	_eye += delta.toGlm();
 	_eye.x = std::clamp(_eye.x, _xBounds[0], _xBounds[1]);
 	_eye.y = std::clamp(_eye.y, _yBounds[0], _yBounds[1]);
 	_eye.z = std::clamp(_eye.z, _zBounds[0], _zBounds[1]);
 	_viewMatrix = glm::lookAt(_eye, _eye + _fwd, _up);
 }
 
+OrthoCamera::OrthoCamera(float width, float height) : OrthoCamera(width, height, Vec4()) {}
 
 OrthoCamera::OrthoCamera(float width, float height, Vec4 viewport) : Camera(viewport), _orthoWidth(width), _orthoHeight(height) {
 	float hw = _orthoWidth / 2.0f;
@@ -82,6 +83,7 @@ glm::vec2 OrthoCamera::getWorldCoordinates(glm::vec2 deviceCoordinates) const {
     return glm::vec2(xw, yw);
 }
 
+PerspectiveCamera::PerspectiveCamera() : PerspectiveCamera(Vec4(), 45.0f, 0.1f, 100.0f) {}
 
 PerspectiveCamera::PerspectiveCamera(Vec4 viewport, float fov, float near, float far) : Camera(viewport), _fov(fov), _near(near), _far(far) {
 	_projectionMatrix = glm::perspective (_fov, _viewport[2]/_viewport[3], _near, _far);

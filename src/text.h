@@ -2,6 +2,7 @@
 
 #include "node.h"
 #include "font.h"
+#include "linebatch.h"
 
 
 // align each row left (default), center, or right w.r.t. box
@@ -16,10 +17,13 @@ enum class HAlign {
 
 class Text : public Node {
 public:
-    Text(const std::string& font, const std::string& text, Color color,
-         HAlign align = HAlign::LEFT, float width = 0.f, Vec2 anchor = Vec2());
+    //Text(const std::string& font, const std::string& text, Color color,
+    //     HAlign align = HAlign::LEFT, float width = 0.f, Vec2 anchor = Vec2());
 
-    void updateText(const std::string&);
+	Text(int batchId, const std::string& font, const std::string& text, int palette,
+		 HAlign align, float width, Vec2 anchor);
+
+	void updateText(const std::string&);
 
     std::string getText() const;
 
@@ -34,6 +38,7 @@ private:
     float _width;
     float _lineHeight;
     Font* _font;
+	int _palette;
     std::string _palId;
     glm::vec2 _size;
     glm::vec3 _offset;
@@ -44,6 +49,7 @@ private:
     //std::string _sheetId;
     std::string _text;
     Color _color;
+	QuadBatchPalette* _batch;
 
 
 };

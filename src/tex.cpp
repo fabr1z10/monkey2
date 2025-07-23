@@ -1,4 +1,5 @@
 #include "tex.h"
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include "error.h"
 #include <iostream>

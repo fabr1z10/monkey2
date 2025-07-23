@@ -8,30 +8,30 @@ Point::Point() : Shape() {
 	_type = ShapeType::POINT;
 }
 
-bool Point::raycastY(glm::vec2 origin, int dir) const {
+RaycastResult Point::raycastX(glm::vec2 origin, float length) const {
+	return {};
+}
 
-	if (fabs(origin.x) < EPSILON) {
-		return (dir > 0 && origin.y <=0) || (dir < 0 && origin.y >=0);
-	}
-	return false;
+RaycastResult Point::raycastY(glm::vec2 origin, float length) const {
+	return {};
 }
 
 bool Point::isInside(glm::vec2 P) const {
 	return glm::length(P) < EPSILON;
 }
 
-std::shared_ptr<IModel> Point::makeModel(ModelType) {
-
-	std::vector<float> data {
-        -1, -1, 0.f, 1, -1, 0.f,
-        1, -1, 0.f, 1, 1, 0.f,
-        1, 1, 0.f, -1, 1, 0.f,
-        -1, 1, 0.f, -1, -1, 0.f
-
-	};
-
-	auto model = std::make_shared<Model<primitives::Line>>(data);
-
-	return model;
-
+std::shared_ptr<IModel> Point::makeModel(int, ModelType) {
+//
+//	std::vector<float> data {
+//        -1, -1, 0.f, 1, -1, 0.f,
+//        1, -1, 0.f, 1, 1, 0.f,
+//        1, 1, 0.f, -1, 1, 0.f,
+//        -1, 1, 0.f, -1, -1, 0.f
+//
+//	};
+//
+//	auto model = std::make_shared<RModel<primitives::Line, PaletteRenderer<primitives::Line>>>(data);
+//
+//	return model;
+//
 }

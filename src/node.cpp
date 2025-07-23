@@ -7,7 +7,7 @@ int Node::_nextId = 0;
 
 std::unordered_map<int, Node*> Node::_nodes;
 
-Node::Node() : _id(Node::_nextId++), _renderer(nullptr), _parent(nullptr), _active(true),
+Node::Node() : _id(Node::_nextId++), _parent(nullptr), _active(true),
 	_show(true), _toBeRemoved(false), _inRoom(false) {
 	_modelMatrix = glm::mat4(1.f);
 	_worldMatrix = glm::mat4(1.f);
@@ -25,9 +25,9 @@ Node::~Node() {
 
 void Node::dispose() {
 	std::cout << "DISPOSE " << this->id() << "\n";
-	if (_renderer != nullptr) {
-		_renderer->dispose();
-	}
+//	if (_renderer != nullptr) {
+//		_renderer->dispose();
+//	}
     for (auto& c : _components) c->dispose();
 	for (auto& c : _children) c->dispose();
 }
@@ -37,13 +37,17 @@ void Node::start() {
 	for (auto& c : _components) {
 	    c->start();
 	}
-    if (_renderer != nullptr) {
-		_renderer->start();
-	}
+//    if (_renderer != nullptr) {
+//		_renderer->start();
+//	}
 
 	// start children
 	for (auto& c : _children) {
 		c->start();
+	}
+
+	if (_model != nullptr) {
+		_model->draw();
 	}
 
 }
@@ -59,9 +63,9 @@ void Node::notifyMove() {
     } else {
         _worldMatrix = _modelMatrix;
     }
-    if (_renderer) {
-        _renderer->updateGeometry();
-    }
+//    if (_renderer) {
+//        _renderer->updateGeometry();
+//    }
     for (auto& child : _children) {
         child->notifyMove();
     }
@@ -97,10 +101,12 @@ void Node::update(double dt) {
 }
 
 void Node::render() {
-	if (_renderer != nullptr) {
-		_renderer->update();
+//	if (_renderer != nullptr) {
+//		_renderer->update();
+//	}
+	if (_model != nullptr) {
+		_model->update();
 	}
-
 }
 
 glm::mat4 Node::getWorldMatrix() const {
@@ -115,13 +121,14 @@ glm::vec3 Node::getPosition() const {
     return glm::vec3(_worldMatrix[3]);
 }
 
-void Node::setModel(std::shared_ptr<IModel> model, int batchId = -1) {
+void Node::setModel(std::shared_ptr<IModel> model) {
 	_model = model;
-	_renderer = model->getRenderer(batchId);
-	_renderer->setNode(this);
-    if (_inRoom && Game::instance().started()) {
-        _renderer->start();
-    }
+	model->setNode(this);
+//	_renderer = model->getRenderer(batchId);
+//	_renderer->setNode(this);
+//    if (_inRoom && Game::instance().started()) {
+//        _renderer->start();
+//    }
 
 }
 
@@ -192,6 +199,10 @@ void Node::flipHorizontal(bool value) {
     notifyMove();
 }
 
+bool Node::getFlipHorizontal() const {
+	return _modelMatrix[0][0] < 0;
+}
+
 Node* Node::getNode(int id) {
     auto it = _nodes.find(id);
     if (it == _nodes.end()) {
@@ -215,16 +226,20 @@ void Node::unregisterObserver(NodeObserver * observer) {
 }
 
 void Node::setAnimation(const std::string & anim) {
-	_renderer->setAnimation(anim);
+	if (_model != nullptr) {
+		_model->setAnimation(anim);
+	}
+	//_renderer->setAnimation(anim);
 }
 
 std::string Node::getAnimation() const {
-    return _renderer->getAnimation();
+	return _model->getAnimation();
+    //return _renderer->getAnimation();
 }
 
 void Node::setMultiplyColor(Color color) {
-    _renderer->setMultiplyColor(color.toGlm());
-    _renderer->updateGeometry();
+    //_renderer->setMultiplyColor(color.toGlm());
+    //_renderer->updateGeometry();
 }
 
 float Node::x() const {
@@ -249,4 +264,11 @@ void Node::clear() {
 		c->remove();
 	}
 	//_children.clear();
+}
+
+void Node::setActive(bool value) {
+	_active = value;
+	for (auto& c : _components) c->setActive(value);
+	if (_model) _model->setVisible(value);
+	for (auto& c : _children) c->setActive(value);
 }

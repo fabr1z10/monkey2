@@ -7,7 +7,7 @@
 namespace actions {
     class MoveTo : public Action {
     public:
-        MoveTo(Node* node, glm::vec2 position, float speed);
+        MoveTo(Node* node, Vec2, float speed);
 
         void start() override;
 

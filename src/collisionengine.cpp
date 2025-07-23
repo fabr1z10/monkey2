@@ -39,77 +39,115 @@ void ICollisionEngine::onEnd(Collider* c1, Collider* c2) {
 	}
 }
 
-BasicCollisionEngine::BasicCollisionEngine() : ICollisionEngine() {}
+//BasicCollisionEngine::BasicCollisionEngine() : ICollisionEngine() {}
+//
 
+//
+//void BasicCollisionEngine::addCollider(Collider * c) {
+//    _colliders.insert(c);
+//}
+//
+//void BasicCollisionEngine::rmCollider(Collider * c) {
+//    _colliders.erase(c);
+//}
+//
+//
+//std::vector<Collider*> BasicCollisionEngine::raycastY(glm::vec2 origin, int direction, int mask, Node*, bool) {
+//    std::vector<Collider*> out;
+//    // origin is provided in world coordinates
+//    for (const auto& c : _colliders) {
+//
+//        // this is the matrix to convert world to local (to the collider) coordinate system
+//        auto m = glm::inverse(c->getNode()->getWorldMatrix());
+//
+//        // origin in local coordinates
+//        glm::vec2 Ol = m * glm::vec4(origin, 0.f, 1.f);
+//
+//        if (c->getShape()->raycastY(Ol, direction)) {
+//            out.push_back(c);
+//        }
+//    }
+//    return out;
+//}
 SpatialHashingCollisionEngine::SpatialHashingCollisionEngine(float width, float height) : ICollisionEngine(),
 	_cellWidth(width), _cellHeight(height) {
 	_intersector = std::make_unique<Intersection>();
 }
 
-void BasicCollisionEngine::addCollider(Collider * c) {
-    _colliders.insert(c);
-}
-
-void BasicCollisionEngine::rmCollider(Collider * c) {
-    _colliders.erase(c);
-}
-
-
-std::vector<Collider*> BasicCollisionEngine::raycastY(glm::vec2 origin, int direction, int mask, Node*, bool) {
-    std::vector<Collider*> out;
-    // origin is provided in world coordinates
-    for (const auto& c : _colliders) {
-
-        // this is the matrix to convert world to local (to the collider) coordinate system
-        auto m = glm::inverse(c->getNode()->getWorldMatrix());
-
-        // origin in local coordinates
-        glm::vec2 Ol = m * glm::vec4(origin, 0.f, 1.f);
-
-        if (c->getShape()->raycastY(Ol, direction)) {
-            out.push_back(c);
-        }
-    }
-    return out;
-}
-
-std::vector<Collider *> SpatialHashingCollisionEngine::raycastY(glm::vec2 origin, int direction, int mask,
+RaycastCollision SpatialHashingCollisionEngine::raycastY(glm::vec2 origin, float length, int mask,
     Node* self, bool stopAtFirst) {
 	auto hp = hashPosition(origin);
+
+	int ix = floor(origin.x / _cellWidth);
+	int iy0 = floor(origin.y / _cellHeight);
+	int iy1 = floor((origin.y + length) / _cellHeight);
+	//std::cout << origin.y << ", " << length <<", " << iy0 << ", " << iy1 << "\n";
+	int cellsToCheck = 1 + std::abs(iy1-iy0);
+	std::vector<Collider*> out;
+	std::unordered_set<Collider*> checked;
+	int inc = length > 0 ? 1 : -1;
+	//int iy = iy0;
+    for (int i = 0, iy= iy0; i < cellsToCheck; ++i, iy += inc) {
+		// checking cell (ix, iy)
+		auto it = _colliders.find({ix, iy});
+		if (it != _colliders.end()) {
+			//auto colliders = _colliders.at({ix, iy});
+			for (auto &c: it->second) {
+				if ((c->getCollisionFlag() & mask) == 0) continue;
+				if (self == c->getNode() || checked.count(c) > 0) continue;
+				checked.insert(c);
+				// this is the matrix to convert world to local (to the collider) coordinate system
+				auto m = glm::inverse(c->getNode()->getWorldMatrix());
+				// origin in local coordinates
+				glm::vec2 Ol = m * glm::vec4(origin, 0.f, 1.f);
+
+				if (auto result = c->getShape()->raycastY(Ol, length)) {
+					return {c, result.hit, result.distance};
+				}
+			}
+		}
+    }
+
+	return {};
+}
+
+RaycastCollision SpatialHashingCollisionEngine::raycastX(glm::vec2 origin, float length, int mask,
+																Node* self, bool stopAtFirst) {
+	auto hp = hashPosition(origin);
+
+	int iy = floor(origin.y / _cellHeight);
+	int ix0 = floor(origin.x / _cellWidth);
+	int ix1 = floor((origin.x + length) / _cellWidth);
+	int cellsToCheck = 1 + std::abs(ix1 - ix0);
+	int inc = length > 0 ? 1 : -1;
+	//int iy = iy0;
+
+
 	std::vector<Collider*> out;
 	std::unordered_set<Collider*> checked;
 
-    // find iy to test
-    std::vector<int> iys;
-    for (const auto& [coords, colliders] : _colliders) {
-        if (coords.x == hp.x && (coords.y - hp.y) * direction >= 0) {
-            iys.push_back(coords.y);
-        }
-    }
-    std::sort(iys.begin(), iys.end());
+	for (int i = 0, ix= ix0; i < cellsToCheck; ++i, ix += inc) {
+		// checking cell (ix, iy)
+		auto it = _colliders.find({ix, iy});
+		if (it != _colliders.end()) {
+			for (auto &c: it->second) {
+				if ((c->getCollisionFlag() & mask) == 0) continue;
+				if (self == c->getNode() || checked.count(c) > 0) continue;
+				checked.insert(c);
+				// this is the matrix to convert world to local (to the collider) coordinate system
+				auto m = glm::inverse(c->getNode()->getWorldMatrix());
+				// origin in local coordinates
+				glm::vec2 Ol = m * glm::vec4(origin, 0.f, 1.f);
 
+				if (auto result = c->getShape()->raycastX(Ol, length)) {
+					return {c, result.hit, result.distance};
 
-    for (auto& iy : iys) {
-        auto colliders = _colliders.at({hp.x, iy});
-        for (auto& c : colliders) {
-            if ((c->getCollisionFlag() & mask) == 0) continue;
-            if (self == c->getNode() || checked.count(c) > 0) continue;
-            checked.insert(c);
-            // this is the matrix to convert world to local (to the collider) coordinate system
-            auto m = glm::inverse(c->getNode()->getWorldMatrix());
-            // origin in local coordinates
-            glm::vec2 Ol = m * glm::vec4(origin, 0.f, 1.f);
+				}
+			}
+		}
+	}
 
-            if (c->getShape()->raycastY(Ol, direction)) {
-                out.push_back(c);
-                if (stopAtFirst) {
-                    return out;
-                }
-            }
-        }
-    }
-
-	return out;
+	return {};
 }
 
 void SpatialHashingCollisionEngine::addCollider(Collider * collider) {
@@ -117,7 +155,7 @@ void SpatialHashingCollisionEngine::addCollider(Collider * collider) {
 	auto im = hashPosition({b.xm, b.ym});
 	auto iM = hashPosition({b.xM, b.yM});
 	_colliderLocations.insert(std::make_pair(collider, ColliderLocation(im.x, iM.x, im.y, iM.y)));
-	std::cout << " ** Added collider at (" << b.xm << ", " << b.ym << ") -> (" << b.xM << ", " << b.yM<< ")\n";
+	std::cout << " ** Added collider at (" << im.x << ", " << im.y << ") -> (" << iM.x << ", " << iM.y << ")\n";
 	for (int i = im.x; i <= iM.x; ++i) {
 		for (int j = im.y; j <= iM.y; ++j) {
 			_colliders[{i, j}].insert(collider);
@@ -141,7 +179,7 @@ void SpatialHashingCollisionEngine::rmCollider(Collider * c) {
 }
 
 glm::ivec2 SpatialHashingCollisionEngine::hashPosition(glm::vec2 P) {
-	return glm::ivec2(floor(P.x / _cellWidth), floor(P.y / _cellHeight));
+	return {floor(P.x / _cellWidth), floor(P.y / _cellHeight)};
 }
 
 void SpatialHashingCollisionEngine::onRemove(Node * node) {
@@ -182,7 +220,7 @@ void SpatialHashingCollisionEngine::checkCollisions() {
 	int cc = 0;
 	std::unordered_set<UPair<Collider*>> _currentCollidingPairs;
 	std::unordered_set<Collider*> checked;
-	for (auto &[collider, location]: _colliderLocations) {
+		for (auto &[collider, location]: _colliderLocations) {
 		// just check collision only if this collider moved with respect to previous position
 		if (!location.dirty || !collider->isActive()) continue;
 		checked.insert(collider);
@@ -202,14 +240,20 @@ void SpatialHashingCollisionEngine::checkCollisions() {
 					auto c1b = collider->getBounds();
 					auto c2b = current->getBounds();
 					if (c1b.testAABB(c2b)) {
-						//std::cout << "AABB collide\n";
-						// aabb collide -> perform check
-						auto *c1s = collider->getShape();
-						auto c1t = collider->getNode()->getWorldMatrix();
-						auto *c2s = current->getShape();
-						auto c2t = current->getNode()->getWorldMatrix();
-						if (_intersector->test(*c1s, c1t, *c2s, c2t)) {
-							//std::cout << "collision found\n";
+						bool collide = false;
+						if (collider->getShape()->getType() == ShapeType::AABB &&
+							current->getShape()->getType() == ShapeType::AABB) {
+							// no need to do further checks
+							collide = true;
+						} else {
+							auto *c1s = collider->getShape();
+							auto c1t = collider->getNode()->getWorldMatrix();
+							auto *c2s = current->getShape();
+							auto c2t = current->getNode()->getWorldMatrix();
+							collide = _intersector->test(*c1s, c1t, *c2s, c2t);
+						}
+						if (collide) {
+							// proper collision. Handle.
 							UPair<Collider*> p(collider, current);
 							if (_previouslyCollidingPairs.count(p) == 0) {
 								// callback
@@ -245,16 +289,16 @@ void SpatialHashingCollisionEngine::checkCollisions() {
 }
 
 
-std::vector<Collider*> BasicCollisionEngine::getColliders(int mask) const {
-
-    std::vector<Collider*> result;
-    for (auto& c : _colliders) {
-        if ((c->getCollisionFlag() & mask) != 0) {
-            result.push_back(c);
-        }
-    }
-    return result;
-}
+//std::vector<Collider*> BasicCollisionEngine::getColliders(int mask) const {
+//
+//    std::vector<Collider*> result;
+//    for (auto& c : _colliders) {
+//        if ((c->getCollisionFlag() & mask) != 0) {
+//            result.push_back(c);
+//        }
+//    }
+//    return result;
+//}
 
 std::vector<Collider*> SpatialHashingCollisionEngine::getColliders(int mask) const {
 

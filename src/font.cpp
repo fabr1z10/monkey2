@@ -1,11 +1,11 @@
 #include "font.h"
 #include "util.h"
 
-Font::Font(const YAML::Node &node, QuadBatch* b, int texId) : _texId(texId), _batchId(b->getId())
+Font::Font(const YAML::Node &node, int width, int height)
 {    
     // need to get shader tex id from this
-    float tw = b->getTextureWidth();
-    float th = b->getTextureHeight();
+    auto tw = (float) width;
+    auto th = (float) height;
     _lineHeight = node["height"].as<float>();
     for (const auto& n : node["chars"]) {
         auto chars = n.first.as<std::string>();

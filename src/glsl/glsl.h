@@ -31,7 +31,9 @@ const std::string tex_vs =
 const std::string tex_fs =
 #include "tex.fs"
 ;
-
+const std::string tex_fs_pal =
+#include "texpal.fs"
+;
 const std::string skeletal_vs =
 #include "skeletal.vs"
 ;

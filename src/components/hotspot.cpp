@@ -39,9 +39,10 @@ void HotSpot::redraw() {
             _debugDrawNode->remove();
         }
         auto node = std::make_shared<Node>();
-        auto model = _shape->makeModel(ModelType::WIREFRAME);
-        node->setModel(model, _batchId);
+        auto model = _shape->makeModel(_batchId, ModelType::WIREFRAME);
+        node->setModel(model);
         getNode()->add(node);
+		node->setPosition(Vec3(0,0,5.f));
         _debugDrawNode = node.get();
     }
 }

@@ -1,20 +1,35 @@
+#include <numeric>
 #include "text.h"
 #include "assetmanager.h"
 #include "util.h"
 #include "model.h"
+#include "models/linemodel.h"
+#include "models/tilemodel.h"
 
-Text::Text(const std::string& font, const std::string &text, Color color, HAlign align, float width, Vec2 anchor) : Node(),
-    _color(color), _hAlign(align), _width(width), _anchor(anchor.x, anchor.y) {
+//Text::Text(const std::string& font, const std::string &text, Color color, HAlign align, float width, Vec2 anchor) : Node(),
+//    _color(color), _hAlign(align), _width(width), _anchor(anchor.x, anchor.y), _palette(-1) {
+//
+//    //_font = AssetManager::instance().getFont(font).get();
+//
+//    _lineHeight = _font->getLineHeight();
+//    //_width = 0.f;
+//
+//    updateText(text);
+//
+//}
+Text::Text(int batchId, const std::string& font, const std::string &text, int palette,
+		   HAlign align, float width, Vec2 anchor) : Node(),
+	_palette(palette), _hAlign(align), _width(width), _anchor(anchor.x, anchor.y), _color(), _font(nullptr) {
 
-    _font = AssetManager::instance().getFont(font).get();
-
-    _lineHeight = _font->getLineHeight();
-    //_width = 0.f;
-
-    updateText(text);
+	_batch = dynamic_cast<QuadBatchPalette*>(Game::instance().getRoom()->getBatch(batchId));
+	if (_batch == nullptr) {
+		GLIB_FAIL("Text objects require a Quad Batch Palette!");
+	}
+	_font = _batch->getSpriteSheet()->getFont(font);
+	_lineHeight = _font->getLineHeight();
+	updateText(text);
 
 }
-
 
 void Text::updateText(const std::string & text) {
     _text = text;
@@ -80,7 +95,7 @@ void Text::updateText(const std::string & text) {
 
     // now that we have defined the rows we can create the quads
 
-    std::vector<float> modelRaw;
+    std::vector<models::TileMap::QuadInfo> modelRaw;
 
     float y = -_lineHeight;
 	float wd{0.f};
@@ -104,9 +119,16 @@ void Text::updateText(const std::string & text) {
                 const auto &c = _font->getCharInfo(s32[i]);
                 glm::vec3 p(x, y, 0.f);
                 //auto kwargs = pybind11::dict("pos"_a=glm::vec3(x,y,0.f),  "size"_a=glm::vec2(c.w,c.h), "normalized"_a=true, "pal"_a=_paletteIndex);
-                std::vector<float> charData{c.tx, c.ty, c.tw, c.th,
-                    offset.x - x, offset.y -y, _lineHeight * (c.tw/c.th), _lineHeight, (float)_font->getTexId()};
-                modelRaw.insert(modelRaw.end(), charData.begin(), charData.end());
+                int tid = (_palette == -1) ? _font->getTexId() : _palette;
+				models::TileMap::QuadInfo quad {c.tx, c.tx + c.tw, c.ty, c.ty + c.th, _lineHeight * (c.w/c.h), _lineHeight,
+										offset.x + x, offset.y + y, _palette};
+//				std::vector<float> charData{
+//					c.tx, c.ty, c.tw, c.th,						// tex coords
+//                    offset.x - x, offset.y - y,					// anchor
+//					_lineHeight * (c.tw/c.th), _lineHeight, 	// size
+//					(float)tid									// tex id or palette id
+//				};
+                modelRaw.push_back(quad); //modelRaw.end(), charData.begin(), charData.end());
 
                 x += c.advance;
             }
@@ -130,10 +152,29 @@ void Text::updateText(const std::string & text) {
         }
     }
     std::cout << "n rows = " << rowCount << "\n";
-    auto model = std::make_shared<Model<primitives::Quad>>(modelRaw);
+	auto model = std::make_shared<models::TileMap>(_batch->getId(), modelRaw.size());
+	for (const auto& q : modelRaw) {
+		model->addQuad(q);
+	}
+	//model->addQuad(0, 0, 8, 8, 0);
+	std::vector<int> v(modelRaw.size());
+	std::iota(v.begin(), v.end(), 0); // fill with 0, 1, ..., n
+	models::Animation anim;
+	models::Frame frame;
+	for (int & i : v) {
+		frame.quads.emplace_back(i);
+	}
+	anim.addFrame(frame);
+	model->addAnimation("default", anim);
+//	if (_palette != -1) {
+//		//model = std::make_shared<Model<primitives::QuadPalette>>(modelRaw);
+//	} else {
+//		//model = std::make_shared<Model<primitives::Quad>>(modelRaw);
+//	}
 
-    this->setModel(model, _font->getBatchId());
-    this->setMultiplyColor(_color);
+    this->setModel(model); //, _font->getBatchId());
+    //this->setMultiplyColor(_color);
+	_model->draw();
 
 
 

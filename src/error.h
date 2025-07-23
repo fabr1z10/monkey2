@@ -22,11 +22,11 @@ private:
 
 #define GLIB_FAIL(message) { \
 	std::ostringstream _glib_msg_stream; \
-	_glib_msg_stream << "\033[1;31m" << message; \
+	_glib_msg_stream << "\033[1;31m" << message << std::endl; \
 	throw Error(__FILE__, __LINE__, _glib_msg_stream.str()); \
 }
 
 #define M_Assert(Expr, Msg) \
     __M_Assert(#Expr, Expr, __FILE__, __LINE__, Msg)
 
-void __M_Assert(const char* expr_str, bool expr, const char* file, int line, const char* msg) ;
+void __M_Assert(const char* expr_str, bool expr, const char* file, int line, const std::string& msg) ;

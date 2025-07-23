@@ -13,7 +13,7 @@ extern GLFWwindow * window;
 
 // mouse controller first checks on which camera we are on
 MouseController::MouseController(float zCursor) :
-    Node(), MouseListener(), _zCursor(zCursor), _previous(nullptr) {
+    Node(), MouseListener(), _zCursor(zCursor), _previous(nullptr), _cursor(nullptr) {
 
 }
 
@@ -55,7 +55,7 @@ void MouseController::cursorPosCallback(GLFWwindow*, double x, double y) {
 		//std::cout << //" camera = " << cam << "\n";
 		for (const auto&[priority, s] : _hotSpots.at(cam)) {
 			for (const auto& h : s) {
-				if (h->isInside(_worldCoords)) {
+				if (h->isActive() && h->isInside(_worldCoords)) {
 					// if I'm here --> we can break and handle the enter
 					if (_previous != h) {
 						if (_previous != nullptr) {
@@ -116,7 +116,8 @@ int MouseController::mouseButtonCallback(GLFWwindow*, int button, int action, in
                 _cursorType = 0;
             }
             if (!seq[_cursorType].empty()) {
-                _cursor->getRenderer()->setAnimation(seq[_cursorType]);
+				// TODO restore set animation
+                //_cursor->getRenderer()->setAnimation(seq[_cursorType]);
                 if (_onRightClick) {
                     _onRightClick(seq[_cursorType]);
                 }
@@ -139,8 +140,8 @@ int MouseController::mouseButtonCallback(GLFWwindow*, int button, int action, in
 				glfwGetCursorPos(window, &xpos, &ypos);
 				glm::vec2 worldCoords;
 				if (int camId = screenCoordsToWorldCoords({xpos, ypos}, worldCoords); camId != -1) {
-                    _onClick(camId, Vec2(worldCoords.x, worldCoords.y), _cursorSequences[_cursorSeq][_cursorType]);
-					//std::cout << "Clicked at " << worldCoords << "\//n";
+					std::cout << "Clicked at " << worldCoords << "\n";
+                    _onClick(camId, Vec2(worldCoords.x, worldCoords.y));//, _cursorSequences[_cursorSeq][_cursorType]);
 					//auto script = std::make_shared<Script>("__PLAYER");
 					//script->addAction(std::make_shared<actions::WalkTo>(_player, _walkarea, worldCoords, _speed));
 					//_scheduler->play(script);
@@ -170,7 +171,7 @@ void MouseController::setCursorAction(int seq, int index, const std::string& act
 void MouseController::setSequence(int seq, int index) {
     _cursorSeq = seq;
     _cursorType = index;
-    _cursor->getRenderer()->setAnimation(_cursorSequences[seq][_cursorType]);
+    //_cursor->getRenderer()->setAnimation(_cursorSequences[seq][_cursorType]);
 
 }
 

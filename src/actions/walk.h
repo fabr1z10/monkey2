@@ -3,6 +3,7 @@
 #include "../script.h"
 #include "../node.h"
 #include "../adventure/walkarea.h"
+#include "../adventure/walkablecharacter.h"
 #include "glm/glm.hpp"
 
 namespace actions {
@@ -19,18 +20,19 @@ namespace actions {
             glm::vec2 direction;
             float length;
             glm::vec2 targetPosition;
-            bool flip;
+            //bool flip;
             std::string anim;
+			adventure::CharacterDirection d;
         };
         // input
-        Node* _node;
+        adventure::WalkableCharacter* _node;
         adventure::WalkArea* _walkArea;
         glm::vec2 _targetPosition;
         float _speed;
 
         // internal
         float _distanceTraversed;
-        std::string _lastDirection;
+		adventure::CharacterDirection _lastDirection;
         int _segmentId;
         std::vector<WalkSegment> _segments;
     };

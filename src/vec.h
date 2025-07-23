@@ -104,6 +104,41 @@ public:
     float z;
 };
 
+class IVec3 {
+public:
+	IVec3() : x(0), y(0), z(0) {}
+
+	IVec3(int x, int y, int z) : x(x), y(y), z(z) {}
+
+	IVec3(const std::vector<int>& data);
+
+	IVec3(glm::ivec3 v) : x(v.x), y(v.y), z(v.z) {}
+
+	IVec3 operator+(const IVec3& other) const {
+		return IVec3(x + other.x, y + other.y, z + other.z);
+	}
+
+	IVec3 operator*(float scalar) const {
+		return IVec3(x * scalar, y * scalar, z*scalar);
+	}
+
+	// Return the length of the vector
+	float length() const {
+		return std::sqrt(x * x + y * y + z*z);
+	}
+
+	bool isZero() {
+		return (x == 0 && y == 0 && z == 0);
+	}
+
+	glm::ivec3 toGlm() const {
+		return glm::ivec3(x, y, z);
+	}
+	int x;
+	int y;
+	int z;
+};
+
 
 class Vec4 {
 public:
@@ -139,8 +174,47 @@ public:
     float w;
 };
 
+class IVec4 {
+public:
+	IVec4() : x(0), y(0), z(0), w(0) {}
+
+	IVec4(int x, int y, int z, int w) : x(x), y(y), z(z), w(w) {}
+
+	IVec4(const std::vector<int>& data);
+
+	IVec4 operator+(const IVec4& other) const {
+		return IVec4(x + other.x, y + other.y, z + other.z, w + other.w);
+	}
+
+	IVec4 operator*(float scalar) const {
+		return IVec4(x * scalar, y * scalar, z*scalar, w*scalar);
+	}
+
+	// Return the length of the vector
+	float length() const {
+		return std::sqrt(x * x + y * y + z*z + w*w);
+	}
+
+	bool isZero() {
+		return (x == 0.f && y == 0.f && z == 0.f && w == 0.f);
+	}
+
+	glm::ivec4 toGlm() const {
+		return glm::ivec4(x, y, z, w);
+	}
+
+	int x;
+	int y;
+	int z;
+	int w;
+};
+
+
+
 class Color {
 public:
+	Color() : r(0.f), g(0.f), b(0.f), a(0.f) {}
+
     Color(float red, float green, float blue, float alpha) : r(red), g(green), b(blue), a(alpha) {}
 
     Color(const std::string& hex);
@@ -152,4 +226,6 @@ public:
     float g;
     float b;
     float a;
+
+
 };

@@ -14,7 +14,7 @@ public:
     Camera(Vec4 viewport = Vec4());
 	virtual ~Camera() =default;
     void setPosition(Vec3 eye, Vec3 direction, Vec3 up = Vec3(0, 1, 0));
-	void move(glm::vec3);
+	void move(Vec3);
 	void setFwd(glm::vec3);
 	void setBounds(float xMin, float xMax, 
 		float yMin, float yMax, 
@@ -63,7 +63,10 @@ inline const glm::mat4 & Camera::getProjectionMatrix() const {
 
 class OrthoCamera : public Camera {
 public:
-    OrthoCamera(float width, float height, Vec4 viewport = Vec4());
+	OrthoCamera(float width, float height);
+
+    OrthoCamera(float width, float height, Vec4 viewport);
+
 	glm::vec2 getSize() const;
 
     /* Transform device coordinates into world coordinates
@@ -82,7 +85,8 @@ inline glm::vec2 OrthoCamera::getSize() const {
 
 class PerspectiveCamera : public Camera {
 public:
-    explicit PerspectiveCamera(Vec4 viewport = Vec4(), float fov = 45, float near = 0.1f, float far = 100.f);
+	PerspectiveCamera();
+    explicit PerspectiveCamera(Vec4 viewport, float fov, float near, float far);
 private:
 	float _fov;
 	float _near;

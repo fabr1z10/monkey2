@@ -55,12 +55,34 @@ public:
 //	bool _flip;
 //};
 
+struct RaycastCollision {
+	Collider* collider = nullptr;
+	bool hit = false;
+	float length = 0.f;
+
+
+
+};
+
+
 // don't need to expose CollisionResponse class
 class ICollisionEngine : public NodeObserver {
 public:
     virtual ~ICollisionEngine() = default;
 
-    virtual std::vector<Collider*> raycastY(glm::vec2 origin, int direction, int mask, Node* self=nullptr, bool stopAtFirst = false) = 0;
+	virtual RaycastCollision raycastX(
+			glm::vec2 origin,
+			float length,
+			int mask,
+			Node* self=nullptr,
+			bool stopAtFirst = false) = 0;
+
+    virtual RaycastCollision raycastY(
+			glm::vec2 origin,
+			float length,
+			int mask,
+			Node* self=nullptr,
+			bool stopAtFirst = false) = 0;
 
 	virtual void addCollider(Collider*) = 0;
 
@@ -75,36 +97,40 @@ public:
 	void addResponse(const std::string& tag1, const std::string& tag2, std::shared_ptr<CollisionResponse>);
 
 	void onStart(Collider*, Collider*);
+
 	void onEnd(Collider*, Collider*);
 
 protected:
 	std::unordered_map<std::pair<std::string, std::string>, std::shared_ptr<CollisionResponse>> _response;
 };
 
-class BasicCollisionEngine : public ICollisionEngine {
-public:
-	BasicCollisionEngine();
-
-    std::vector<Collider*> raycastY(
-        glm::vec2 origin, int direction, int mask,
-        Node* self=nullptr, bool stopAtFirst = false) override;
-
-    void rmCollider(Collider*) override;
-
-    void addCollider (Collider*) override;
-
-	virtual void checkCollisions () override {};
-
-    std::vector<Collider*> getColliders(int mask) const override;
-private:
-    std::unordered_set<Collider*> _colliders;
-};
+//class BasicCollisionEngine : public ICollisionEngine {
+//public:
+//	BasicCollisionEngine();
+//
+//    std::vector<Collider*> raycastY(
+//        glm::vec2 origin, int direction, int mask,
+//        Node* self=nullptr, bool stopAtFirst = false) override;
+//
+//    void rmCollider(Collider*) override;
+//
+//    void addCollider (Collider*) override;
+//
+//	virtual void checkCollisions () override {};
+//
+//    std::vector<Collider*> getColliders(int mask) const override;
+//private:
+//    std::unordered_set<Collider*> _colliders;
+//};
 
 class SpatialHashingCollisionEngine : public ICollisionEngine {
 public:
 	SpatialHashingCollisionEngine(float width, float height);
 
-    std::vector<Collider*> raycastY(glm::vec2 origin, int direction, int mask, Node* self=nullptr, bool stopAtFirst = false) override;
+	RaycastCollision raycastX(glm::vec2 origin, float length, int mask, Node* self=nullptr, bool stopAtFirst = false) override;
+
+
+	RaycastCollision raycastY(glm::vec2 origin, float length, int mask, Node* self=nullptr, bool stopAtFirst = false) override;
 
 	void rmCollider(Collider*) override;
 
@@ -116,6 +142,7 @@ public:
 
 	void onRemove(Node*) override;
 
+	//void update(double) override;
     std::vector<Collider*> getColliders(int mask) const override;
 private:
 	struct ColliderLocation {

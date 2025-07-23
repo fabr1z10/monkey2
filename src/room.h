@@ -34,7 +34,7 @@ public:
 
 	int getCameraCount() const;
 
-	void setClearColor(glm::vec3);
+	void setClearColor(Vec3);
 
     void addShader(Shader*);
 

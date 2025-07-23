@@ -155,6 +155,9 @@ void Room::draw() {
 
 void Room::addBatch(std::shared_ptr<IBatch> b) {
 	auto shaderType = b->getShaderType();
+	if (shaderType == -1) {
+		GLIB_FAIL("Batch doesn't define a shader type!");
+	}
     _refBatch[b->getId()] = b.get();
 
 	// check if we already have this shader - otherwise add it!
@@ -213,7 +216,7 @@ void Room::start() {
         _startUpFunction();
     }
 
-    AssetManager::instance().startUp();
+    //AssetManager::instance().startUp();
 
 
 	for (const auto& b : _refBatch) {
@@ -234,8 +237,8 @@ void Room::start() {
 }
 
 
-void Room::setClearColor(glm::vec3 color) {
-    _clearColor = color;
+void Room::setClearColor(Vec3 color) {
+    _clearColor = color.toGlm();
 }
 
 void Room::setCollisionEngine(std::shared_ptr<ICollisionEngine> e) {

@@ -22,3 +22,19 @@ bool seg2seg(glm::vec2 A, glm::vec2 B, glm::vec2 C, glm::vec2 D, glm::vec2 &P);
 bool pointInSegment(glm::vec2 A, glm::vec2 B, glm::vec2 P);
 
 bool isApproxEqual(glm::vec2 A, glm::vec2 B);
+
+struct RaycastResult {
+	bool hit = false;
+	float distance = 0.f;
+
+	// Allow `if (result)` to work
+	explicit operator bool() const noexcept {
+		return hit;
+	}
+};
+
+RaycastResult rayCastX(glm::vec2 A, glm::vec2 B, glm::vec2 P, float length);
+
+RaycastResult rayCastY(glm::vec2 A, glm::vec2 B, glm::vec2 P, float length);
+
+float decrementTowardZero(float, float);

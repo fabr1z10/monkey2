@@ -3,6 +3,7 @@
 Intersection::Intersection() {
 	_map[{ShapeType::POINT, ShapeType::POLYGON}] = PointVsShape;
 
+
 }
 
 bool Intersection::test(const Shape& s1, const glm::mat4 & t1, const Shape& s2, const glm::mat4 & t2) {

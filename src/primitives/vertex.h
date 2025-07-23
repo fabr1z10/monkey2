@@ -3,8 +3,10 @@
 #include <GL/glew.h>
 
 struct VertexColor {
-	glm::vec3 A;
+	glm::vec3 position;
 	glm::vec4 color;
+	int hide = 0;
+
 
 	static void setupVertices() {
 
@@ -15,14 +17,21 @@ struct VertexColor {
 
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, stride, (const void *) offsetof(VertexColor, color));
+
+		glEnableVertexAttribArray(2);
+		glVertexAttribIPointer(2, 1, GL_INT, stride, (const void *) offsetof(VertexColor, hide));
+
 	}
-};
+
+	void show(bool value) {
+		hide = value ? 0 : 1;
+	}};
 
 struct VertexColorNormal {
     glm::vec3 A;
     glm::vec4 color;
     glm::vec3 normal;
-
+	void show(bool) {}
     static void setupVertices() {
 
         auto stride = sizeof(VertexColorNormal);
@@ -38,6 +47,37 @@ struct VertexColorNormal {
     }
 };
 
+struct VertexPalette {
+public:
+	glm::vec3 position;
+	glm::vec2 texCoord;
+	int paletteId;
+	int hide = 0;
+
+	//glm::vec4 color;
+	void show(bool value) {
+		hide = value ? 0 : 1;
+	}
+
+	static void setupVertices() {
+
+		auto stride = sizeof(VertexPalette);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, 0);
+
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (const void *) offsetof(VertexPalette, texCoord));
+
+		glEnableVertexAttribArray(2);
+		glVertexAttribIPointer(2, 1, GL_INT, stride, (const void *) offsetof(VertexPalette, paletteId));
+
+		glEnableVertexAttribArray(3);
+		glVertexAttribIPointer(3, 1, GL_INT, stride, (const void *) offsetof(VertexPalette, hide));
+
+	}
+};
+
 struct VertexTexture {
 public:
     glm::vec3 position;
@@ -45,7 +85,7 @@ public:
     // Each quad (sprite) needs to know which texture to use, so we add an integer texIndex to the vertex attributes:
     int texIndex;
 	glm::vec4 color;
-
+	void show(bool) {}
     static void setupVertices() {
 
         auto stride = sizeof(VertexTexture);

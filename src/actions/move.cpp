@@ -11,7 +11,7 @@ using namespace actions;
 //     _completed = true;
 // }
 
-MoveTo::MoveTo(Node* node, glm::vec2 position, float speed) : Action(), _node(node), _targetPosition(position),
+MoveTo::MoveTo(Node* node, Vec2 position, float speed) : Action(), _node(node), _targetPosition(position.toGlm()),
     _speed(speed) {}
 
 

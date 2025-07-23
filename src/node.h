@@ -8,7 +8,7 @@
 
 class IModel;
 
-class IRenderer;
+//class IRenderer;
 
 class Node {
 public:
@@ -49,13 +49,17 @@ public:
 
     void flipHorizontal(bool);
 
-	void setModel(std::shared_ptr<IModel>, int batchId);
+	bool getFlipHorizontal() const;
+
+	IModel* getModel();
+
+	void setModel(std::shared_ptr<IModel>);
 
 	void addComponent(std::shared_ptr<Component>);
 
 	void setTransform(glm::mat4 t);
 
-    IRenderer* getRenderer();
+    //IRenderer* getRenderer();
 
     static Node* getNode(int);
 
@@ -89,6 +93,7 @@ public:
 
     float y() const;
 
+
     template<typename T>
     T* getComponent() {
         for (auto& c : _components) {
@@ -108,7 +113,7 @@ public:
 protected:
 	std::vector<std::shared_ptr<Node>> _children;
 	std::shared_ptr<IModel> _model;
-	std::shared_ptr<IRenderer> _renderer;
+	//std::shared_ptr<IRenderer> _renderer;
 
 private:
     
@@ -133,9 +138,12 @@ inline const std::vector<std::shared_ptr<Node>> & Node::getChildren() const {
 	return _children;
 }
 
-inline IRenderer *Node::getRenderer() {
-    return _renderer.get();
+inline IModel *Node::getModel() {
+	return _model.get();
 }
+//inline IRenderer *Node::getRenderer() {
+//    return _renderer.get();
+//}
 
 
 inline int Node::id() const {
@@ -159,9 +167,6 @@ inline bool Node::show() const {
 	return _show;
 }
 
-inline void Node::setActive(bool value) {
-	_active = value;
-}
 
 
 inline void Node::setShow(bool value) {

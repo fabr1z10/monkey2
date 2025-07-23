@@ -1,4 +1,5 @@
 #include "geometry.h"
+#include <iostream>
 
 const float EPSILON = 1e-6f;
 const float EPSILON2 = EPSILON * EPSILON;
@@ -89,4 +90,130 @@ bool pointInSegment(glm::vec2 A, glm::vec2 B, glm::vec2 P) {
 	float dot = glm::dot(P-A, B-A);
 	if (dot < EPSILON || dot > glm::dot(B-A, B-A)+EPSILON) return false;
 	return true;
+}
+
+
+RaycastResult rayCastX(glm::vec2 A, glm::vec2 B, glm::vec2 P, float length) {
+	constexpr float EPSILON = 1e-6f;
+
+	// 1. Check if ray and segment Y overlap
+	float ymin = std::min(A.y, B.y);
+	float ymax = std::max(A.y, B.y);
+	if (P.y < ymin - EPSILON || P.y > ymax + EPSILON) {
+		return {};
+	}
+
+	float dy = B.y - A.y;
+	// handle horizontal segment
+	if (std::abs(dy) < EPSILON) {
+		if (std::abs(P.y - A.y) > EPSILON) {
+			return {};
+		}
+		float xm = std::min(A.x, B.x);
+		float xM = std::max(A.x, B.x);
+		float rayEnd = P.x + length;
+		if (length > 0) {
+			if (P.x >= xM) {
+				return {};
+			} else if (P.x <= xm && rayEnd >= xm) {
+				return {true, xm - P.x};
+			} else {
+				return {true, 0.f};
+			}
+		} else {
+			if (P.x <= xm) {
+				return {};
+			} else if (P.x >= xM && rayEnd <= xM) {
+				return {true, xM - P.x};
+			} else {
+				return { true, 0.f};
+			}
+		}
+	}
+	std::cout << P.x << ", " << P.y << ", " << length << "\n";
+	float t = (P.y - A.y) / dy;
+	float xi = A.x + t * (B.x - A.x);
+
+	// 4. Check if intersection point lies along the ray
+	if (length > 0) {
+		if (P.x <= xi && P.x + length >= xi) {
+			return {true, xi - P.x};
+		} else {
+			return {};
+		}
+	}
+	else {
+		if (P.x >= xi && P.x + length <= xi) {
+			return {true, xi - P.x};
+		} else {
+			return {};
+		}
+	}
+	return {};
+}
+
+RaycastResult rayCastY(glm::vec2 A, glm::vec2 B, glm::vec2 P, float length) {
+	constexpr float EPSILON = 1e-6f;
+
+	// 1. Check if ray and segment Y overlap
+	float xmin = std::min(A.x, B.x);
+	float xmax = std::max(A.x, B.x);
+	if (P.x < xmin - EPSILON || P.x > xmax + EPSILON) {
+		return {};
+	}
+
+	float dx = B.x - A.x;
+	// handle horizontal segment
+	if (std::abs(dx) < EPSILON) {
+		if (std::abs(P.x - A.x) > EPSILON) {
+			return {};
+		}
+		float ym = std::min(A.y, B.y);
+		float yM = std::max(A.y, B.y);
+		float rayEnd = P.y + length;
+		if (length > 0) {
+			if (P.y >= yM) {
+				return {};
+			} else if (P.y <= ym && rayEnd >= ym) {
+				return {true, ym - P.y};
+			} else {
+				return {true, 0.f};
+			}
+		} else {
+			if (P.y <= ym) {
+				return {};
+			} else if (P.y >= yM && rayEnd <= yM) {
+				return {true, yM - P.y};
+			} else {
+				return { true, 0.f};
+			}
+		}
+	}
+
+	float t = (P.x - A.x) / dx;
+	float yi = A.y + t * (B.y - A.y);
+
+	// 4. Check if intersection point lies along the ray
+	if (length > 0) {
+		if (P.y <= yi && P.y + length >= yi) {
+			return {true, yi - P.y};
+		} else {
+			return {};
+		}
+	}
+	else {
+		if (P.y >= yi && P.y + length <= yi) {
+			return {true, yi - P.y};
+		} else {
+			return {};
+		}
+	}
+	return {};
+}
+
+
+float decrementTowardZero(float x, float amount) {
+	if (std::abs(x) <= amount)
+		return 0.0f;
+	return x - std::copysign(amount, x);
 }

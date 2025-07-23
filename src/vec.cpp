@@ -1,7 +1,6 @@
 #include "vec.h"
 #include "error.h"
 
-
 Vec2::Vec2(const std::vector<float>& data) {
     M_Assert(data.size() >=2, "Vec2 requires at least 2 components");
     x = data[0];
@@ -36,3 +35,4 @@ Color::Color(const std::string& str) {
     b = blue / 255.f;
     a = 1.f;
 }
+

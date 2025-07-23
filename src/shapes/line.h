@@ -2,17 +2,20 @@
 
 #include "../shape.h"
 #include <vector>
+#include "../vec.h"
 
 
 namespace shapes {
 
     class Line : public Shape {
     public:
-        Line(glm::vec2 A, glm::vec2 B);
+        Line(Vec2 A, Vec2 B);
 
-        bool raycastY(glm::vec2 origin, int dir) const override;
+		RaycastResult raycastX(glm::vec2 origin, float length) const override;
 
-        std::shared_ptr<IModel> makeModel(ModelType type) override;
+		RaycastResult raycastY(glm::vec2 origin, float length) const override;
+
+        std::shared_ptr<IModel> makeModel(int, ModelType type) override;
 
 		bool isInside(glm::vec2) const override;
 
@@ -27,12 +30,15 @@ namespace shapes {
     public:
         PolyLine(const std::vector<float>& data);
 
-        bool raycastY(glm::vec2 origin, int dir) const override;
+		RaycastResult raycastX(glm::vec2 origin, float length) const override;
 
-        std::shared_ptr<IModel> makeModel(ModelType type) override;
+		RaycastResult raycastY(glm::vec2 origin, float length) const override;
+
+        std::shared_ptr<IModel> makeModel(int, ModelType type) override;
 
 		bool isInside(glm::vec2) const override;
 
+		float getY(float x) const;
 	private:
 
         std::vector<float> _x;
