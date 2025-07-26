@@ -67,6 +67,8 @@ public:
 
     OrthoCamera(float width, float height, Vec4 viewport);
 
+	OrthoCamera(float width, float height, Vec4 viewport, float zNear, float zFar);
+
 	glm::vec2 getSize() const;
 
     /* Transform device coordinates into world coordinates

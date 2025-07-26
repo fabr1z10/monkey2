@@ -26,6 +26,8 @@ public:
 
 	std::shared_ptr<models::TileMap> makeSprite(int batch, const std::string& id);
 
+
+
 private:
 	void loadFonts(const YAML::Node&);
 

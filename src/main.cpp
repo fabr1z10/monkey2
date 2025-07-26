@@ -51,6 +51,9 @@
 #include "models/quad.h"
 #include "models/treemodel.h"
 
+#include "agi/agiroom.h"
+#include "agi/agiobject.h"
+
 using namespace adventure;
 using namespace shapes;
 
@@ -61,6 +64,7 @@ PYBIND11_MODULE(monkey2, m) {
     py::module_ mAdv = m.def_submodule("adventure");
     py::module_ mAct = m.def_submodule("actions");
     py::module_ mSha = m.def_submodule("shapes");
+	py::module_ mAGI = m.def_submodule("agi");
 
 	py::enum_<HAlign>(m, "Alignment")
 		.value("LEFT", HAlign::LEFT)
@@ -490,5 +494,15 @@ PYBIND11_MODULE(monkey2, m) {
 
 	py::class_<Point, Shape, std::shared_ptr<Point>>(mSha, "Point")
 			.def(py::init<>());
+
+	/****************
+	 * AGI
+	 */
+	py::class_<agi::AGIRoom, Room, std::shared_ptr<agi::AGIRoom>>(mAGI, "Room")
+		.def(py::init<const std::string&, const std::string&>());
+
+	py::class_<agi::AGIObject, Node, std::shared_ptr<agi::AGIObject>>(mAGI, "Object")
+		.def(py::init<const std::string&, int, int, float>());
+
 
 }

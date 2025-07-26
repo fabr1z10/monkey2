@@ -61,11 +61,13 @@ glm::vec2 TileMap::getBonePosition(int boneId) const {
 void TileMap::update() {
 	auto& anim = _animations.at(_currentAnimation);
 	auto& frame = anim.getFrame(_currentFrame);
+	bool refreshModel = _node->hasMoved();
 	if (frame.ticks != 0) {
 		// if ticks is 0, then no animation!
 		_currentTick++;
 		if (_currentTick > frame.ticks) {
 			// advance frame!
+			refreshModel = true;
 			_currentTick = 0;
 			_currentFrame++;
 			if (_currentFrame >= anim.getFrameCount()) {
@@ -79,10 +81,11 @@ void TileMap::update() {
 					// hide)
 				}
 			}
-			if (_autoDraw) {
-				draw();
-			}
 		}
+	}
+
+	if (refreshModel) {
+		draw();
 	}
 }
 
@@ -108,6 +111,7 @@ void TileMap::draw() {
 	// if flipped, bottomLeft is bottom right
 	auto flipx = _node->getFlipHorizontal();
 	auto bottomLeft = _node->getWorldPosition().toGlm();
+	//std::cout << bottomLeft[0] << "\n";
 	auto& frame = _animations.at(_currentAnimation).getFrame(_currentFrame);
 	int i = 0;
 	//if (_currentFrame >= _frames.size()) {

@@ -93,7 +93,7 @@ public:
 
     float y() const;
 
-
+	bool hasMoved() const {return _hasMoved;}
     template<typename T>
     T* getComponent() {
         for (auto& c : _components) {
@@ -132,6 +132,7 @@ private:
 	// this is true if node is root or descendant of root
 	// It is important because renderer is started when you add a node to a node marked inRoom
 	bool _inRoom;
+	bool _hasMoved;
 };
 
 inline const std::vector<std::shared_ptr<Node>> & Node::getChildren() const {

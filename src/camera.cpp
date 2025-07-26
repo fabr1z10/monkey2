@@ -77,6 +77,17 @@ OrthoCamera::OrthoCamera(float width, float height, Vec4 viewport) : Camera(view
 	_halfSize = glm::vec3(hw, hh, 100.f);
 }
 
+OrthoCamera::OrthoCamera(float width, float height, Vec4 viewport, float zNear, float zFar) : Camera(viewport),
+_orthoWidth(width), _orthoHeight(height) {
+	float hw = _orthoWidth / 2.0f;
+	float hh = _orthoHeight / 2.0f;
+	_projectionMatrix = glm::ortho(-hw, hw, -hh, hh, zNear, zFar);
+	_halfSize = glm::vec3(hw, hh, 100.f);
+
+}
+
+
+
 glm::vec2 OrthoCamera::getWorldCoordinates(glm::vec2 deviceCoordinates) const {
     float xw = -_viewMatrix[3][0] - (_orthoWidth * 0.5f) + (deviceCoordinates.x - _viewport.x) * (_orthoWidth / _viewport[2]);
     float yw = -_viewMatrix[3][1] - (_orthoHeight * 0.5f) + (deviceCoordinates.y - _viewport.y) * (_orthoHeight / _viewport[3]);

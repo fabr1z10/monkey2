@@ -143,6 +143,7 @@ ShaderStore::ShaderStore() {
     _shaderBuilders[2] = [&] () { return std::make_shared<Shader>(2, color_normal_vs, color_normal_fs, "3f4f3f"); };
     _shaderBuilders[3] = [&] () { return std::make_shared<Shader>(3, tex_vs, tex_fs, "3f2f1i"); };
 	_shaderBuilders[4] = [&] () { return std::make_shared<Shader>(3, tex_vs, tex_fs_pal, "3f2f1i"); };
+	_shaderBuilders[5] = [&] () { return std::make_shared<Shader>(5, tex_vs, agi_pic_fs, "3f2f1i"); };
 
     _shaderBuilders[70] = [&] () { return std::make_shared<ShaderVAO>(70, skeletal_vs, skeletal_fs, "3f2f3f"); };
 

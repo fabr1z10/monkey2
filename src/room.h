@@ -12,6 +12,8 @@ class Room {
 public:
 	Room();
 
+	virtual ~Room() = default;
+
 	void initialize();
 
 	void update(double dt);

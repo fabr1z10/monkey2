@@ -41,3 +41,7 @@ const std::string skeletal_vs =
 const std::string skeletal_fs =
 #include "skeletal.fs"
 ;
+
+const std::string agi_pic_fs =
+#include "agi_pic.fs"
+;

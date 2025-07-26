@@ -58,6 +58,7 @@ void Node::setTransform(glm::mat4 m) {
 }
 
 void Node::notifyMove() {
+	_hasMoved = true;
     if (_parent != nullptr) {
         _worldMatrix = _parent->getWorldMatrix() * _modelMatrix;
     } else {
@@ -75,6 +76,7 @@ void Node::notifyMove() {
 }
 
 void Node::update(double dt) {
+	_hasMoved = false;
 	auto shouldRemove = [] (const std::shared_ptr<Node>& node) {
 		if (node->isMarkedForRemoval()) {
 			node->dispose();
