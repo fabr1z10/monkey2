@@ -15,7 +15,7 @@ namespace models {
 
 		//void setY(int id, float);
 
-		void update() override;
+		void updateImpl() override;
 
 		void draw() override;
 

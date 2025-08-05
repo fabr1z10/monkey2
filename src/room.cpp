@@ -212,6 +212,8 @@ void Room::end() {
 
 
 void Room::start() {
+	setup();
+
     if (_startUpFunction) {
         _startUpFunction();
     }

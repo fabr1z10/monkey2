@@ -7,7 +7,7 @@ Quad::Quad(int batchId, int x, int y, int width, int height, int pal) :
 	allocate(1);
 }
 
-void Quad::update() {
+void Quad::updateImpl() {
 	draw();
 }
 

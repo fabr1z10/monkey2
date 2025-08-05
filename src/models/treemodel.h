@@ -15,7 +15,7 @@ namespace models {
 			std::vector<std::shared_ptr<TreeNode>> children;
 		};
 
-		void update() override;
+		void updateImpl() override;
 
 		void draw() override {}
 

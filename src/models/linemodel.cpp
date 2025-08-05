@@ -30,7 +30,7 @@ LineModel::LineModel(int batchId, const std::vector<float> &data, Color color) :
 	allocate(_lineCount);
 }
 
-void LineModel::update() {
+void LineModel::updateImpl() {
 	draw();
 }
 

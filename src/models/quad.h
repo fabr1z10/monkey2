@@ -11,7 +11,7 @@ namespace models {
 	public:
 		Quad(int batch, int x, int y, int width, int height, int pal = 0);
 
-		void update() override;
+		void updateImpl() override;
 
 		void draw() override;
 

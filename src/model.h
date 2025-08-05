@@ -13,10 +13,10 @@ class IRenderer;
 
 class IModel {
 public:
-	IModel() = default;
+	IModel();
     virtual ~IModel() = default;
 	//virtual std::shared_ptr<IRenderer> getRenderer(int batchId) = 0;
-    virtual void update() = 0;
+    void update() ;
 
 	virtual void draw() = 0;
 	virtual void setNode(Node* node) {
@@ -25,12 +25,22 @@ public:
 	//virtual int getPrimitiveCount() const = 0;
 	virtual std::string getAnimation();
 	virtual void setAnimation(const std::string&) {}
+	virtual bool hasAnimation(const std::string&) const { return false; }
+
 	virtual void setVisible(bool) = 0;
 	virtual void setPalette(int) {}
+
+	void setUpdate(bool);
 protected:
+	virtual void updateImpl() = 0;
+
 	Node* _node;
+	bool _update;
 };
 
+inline void IModel::setUpdate(bool value) {
+	_update = value;
+}
 
 template<typename VERTEX>
 class Model : public IModel {
@@ -57,13 +67,13 @@ public:
 	}
 
 	virtual ~Model() {
-		std::cout << "Called dtor\n";
+		//std::cout << "Called dtor\n";
 		for (const auto& i : _primitives) _batch->release(i);
 		if (_vertices != nullptr) {
-			std::cout << "Deleting _vertices:\n";
-			for (int i = 0; i < _primitives.size(); ++i) {
-				std::cout << "  [" << i << "] = " << static_cast<void*>(_vertices[i]) << "\n";
-			}
+			//std::cout << "Deleting _vertices:\n";
+			//for (int i = 0; i < _primitives.size(); ++i) {
+			//	std::cout << "  [" << i << "] = " << static_cast<void*>(_vertices[i]) << "\n";
+			//}
 			delete[] _vertices;
 			_vertices = nullptr;
 		}

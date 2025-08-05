@@ -58,7 +58,7 @@ glm::vec2 TileMap::getBonePosition(int boneId) const {
 	return _quads[frame.quads[0].id].bones[boneId];
 }
 
-void TileMap::update() {
+void TileMap::updateImpl() {
 	auto& anim = _animations.at(_currentAnimation);
 	auto& frame = anim.getFrame(_currentFrame);
 	bool refreshModel = _node->hasMoved();
@@ -162,4 +162,8 @@ void TileMap::draw() {
 		}
 		i++;
 	}
+}
+
+bool TileMap::hasAnimation(const std::string &anim) const {
+	return _animations.count(anim) != 0;
 }

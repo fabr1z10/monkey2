@@ -28,6 +28,8 @@ public:
 
 	IBatch* getBatch(int);
 
+	virtual void setup() {}
+
 	void start();
 
 	void end();

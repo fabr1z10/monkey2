@@ -3,7 +3,7 @@
 
 using namespace models;
 
-void TreeModel::update() {
+void TreeModel::updateImpl() {
 
 
 	std::list<TreeNode*> l{_root.get()};

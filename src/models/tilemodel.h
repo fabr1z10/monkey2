@@ -69,7 +69,9 @@ namespace models {
 
 		void addAnimation(const std::string& id, const Animation& frames);
 
-		void update() override;
+		bool hasAnimation(const std::string& anim) const;
+
+		void updateImpl() override;
 
 		void draw() override;
 

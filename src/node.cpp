@@ -24,7 +24,7 @@ Node::~Node() {
 }
 
 void Node::dispose() {
-	std::cout << "DISPOSE " << this->id() << "\n";
+	//std::cout << "DISPOSE " << this->id() << "\n";
 //	if (_renderer != nullptr) {
 //		_renderer->dispose();
 //	}
@@ -156,6 +156,7 @@ void Node::add(std::shared_ptr<Node> node) {
 }
 
 void Node::remove() {
+	_model = nullptr;
 	_toBeRemoved = true;
 }
 
