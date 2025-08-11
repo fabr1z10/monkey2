@@ -13,6 +13,14 @@ public:
 	}
 };
 
+class TriangleBatch : public Batch<VertexColor> {
+public:
+	TriangleBatch(int triangles, int camera) : Batch<VertexColor>(3, 3, GL_TRIANGLES, triangles, 1, camera) {
+		_indexPattern = {0, 1, 2};
+	}
+};
+
+
 class QuadBatch : public Batch<VertexTexture> {
 public:
 	QuadBatch(int quads, int camera) : Batch<VertexTexture>(4, 6, GL_TRIANGLES, quads, 3, camera) {

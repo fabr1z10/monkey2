@@ -499,7 +499,9 @@ PYBIND11_MODULE(monkey2, m) {
 	 * AGI
 	 */
 	py::class_<agi::AGIRoom, Room, std::shared_ptr<agi::AGIRoom>>(mAGI, "Room")
-		.def(py::init<const std::string&, const std::string&>());
+		.def(py::init<const std::string&, const std::string&>())
+		.def("add", &agi::AGIRoom::add)
+		.def("print", &agi::AGIRoom::print);
 
 	py::class_<agi::AGIObject, Node, std::shared_ptr<agi::AGIObject>>(mAGI, "Object")
 		.def(py::init<const std::string&, int, int, float>());

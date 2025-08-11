@@ -26,5 +26,17 @@ namespace models {
 		glm::vec4 _color;
 	};
 
+	class ColorQuadModel : public Model<VertexColor> {
+	public:
+		ColorQuadModel(int batch, int width, int height, Color color);
+		void updateImpl() override;
+
+		void draw() override;
+	private:
+		glm::vec4 _color;
+		float _width;
+		float _height;
+	};
+
 }
 

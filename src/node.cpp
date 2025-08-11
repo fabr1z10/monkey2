@@ -76,6 +76,10 @@ void Node::notifyMove() {
 }
 
 void Node::update(double dt) {
+	if (!_active) {
+		return;
+	}
+
 	_hasMoved = false;
 	auto shouldRemove = [] (const std::shared_ptr<Node>& node) {
 		if (node->isMarkedForRemoval()) {
@@ -272,6 +276,6 @@ void Node::clear() {
 void Node::setActive(bool value) {
 	_active = value;
 	for (auto& c : _components) c->setActive(value);
-	if (_model) _model->setVisible(value);
+	//if (_model) _model->setVisible(value);
 	for (auto& c : _children) c->setActive(value);
 }

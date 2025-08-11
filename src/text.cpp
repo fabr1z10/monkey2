@@ -147,11 +147,11 @@ void Text::updateText(const std::string & text) {
         int ec = row.indexEnd == -1 ? text.length() : row.indexEnd;
         int len = ec - row.indexStart;
         if (len > 0) {
-            std::cout << text.substr(row.indexStart, len) << "\n";
+            //std::cout << text.substr(row.indexStart, len) << "\n";
             rowCount++;
         }
     }
-    std::cout << "n rows = " << rowCount << "\n";
+    //std::cout << "n rows = " << rowCount << "\n";
 	auto model = std::make_shared<models::TileMap>(_batch->getId(), modelRaw.size());
 	for (const auto& q : modelRaw) {
 		model->addQuad(q);

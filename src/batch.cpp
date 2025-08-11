@@ -33,7 +33,7 @@ int IBatch::getPrimitiveId() {
 
 void IBatch::release(int id) {
 	_deallocated.push_back(id);
-	std::cout << " now deallocated has size " << _deallocated.size() << "\n";
+	//std::cout << " now deallocated has size " << _deallocated.size() << "\n";
 }
 
 glm::vec4 IBatch::pixelToTextureCoords(glm::ivec4 px) {

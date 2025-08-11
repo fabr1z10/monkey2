@@ -7,6 +7,11 @@
 
 using namespace models;
 
+ColorQuadModel::ColorQuadModel(int batch, int width, int height, Color color) : Model<VertexColor>(batch),
+        _color(color.toGlm()), _width(width), _height(height) {
+	allocate(2);
+
+}
 
 LineModel::LineModel(int batchId, const std::vector<float> &data, Color color) : Model<VertexColor>(batchId), _color(color.toGlm()) {
 
@@ -34,13 +39,42 @@ void LineModel::updateImpl() {
 	draw();
 }
 
+void ColorQuadModel::updateImpl() {
+	draw();
+}
+
+void ColorQuadModel::draw() {
+	auto m = _node->getWorldMatrix();
+	glm::vec3 bottomLeft = m[3];
+	float z = m[3][2];
+	_vertices[0]->position = bottomLeft;
+	_vertices[0]->color = _color;
+
+	(_vertices[0]+1)->position = bottomLeft + glm::vec3(_width, 0.f, z);
+	(_vertices[0]+1)->color = _color;
+
+	(_vertices[0]+2)->position = bottomLeft + glm::vec3(0.f, _height, z);
+	(_vertices[0]+2)->color = _color;
+
+	_vertices[1]->position = (_vertices[0]+1)->position;
+	_vertices[1]->color = (_vertices[0]+1)->color;
+
+	(_vertices[1]+1)->position = bottomLeft + glm::vec3(_width, _height, z);
+	(_vertices[1]+1)->color = _color;
+
+	(_vertices[1]+2)->position = (_vertices[0]+2)->position;
+	(_vertices[1]+2)->color = (_vertices[0]+2)->color;
+
+
+}
+
 void LineModel::draw() {
 	auto m = _node->getWorldMatrix();
 
 	std::vector<glm::vec3> wPoints;
 	wPoints.reserve(_points.size());
 	for (const auto& p : _points) {
-		wPoints.emplace_back(m * glm::vec4(p, 0.f, 1.f));
+		wPoints.emplace_back(m * glm::vec4(p, m[3][2], 1.f));
 	}
 	for (size_t i = 0; i < _lineCount; ++i) {
 		_vertices[i]->position = wPoints[i];

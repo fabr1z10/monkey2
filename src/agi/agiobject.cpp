@@ -85,15 +85,35 @@ void AGIObject::customUpdate(double dt) {
 //	}
 
 
-	float timestep = 1.f/60.f;
-	auto test = _room->getPixel(_x + _horizontalMove, _y + _verticalMove);
-	if (test != 0) {
-		_x += _horizontalMove;// * _speed * timestep;
-		_y += _verticalMove;// * _speed * timestep;
+	//float timestep = 1.f/60.f;
+	// try to move character first vertically and then horizontally.
+	// Not sure if this is better than the other way around.
+	bool moved {false};
+	if (_verticalMove != 0.f) {
+		auto testVertical = _room->getPixel(_x, _y + _verticalMove);
+		if (testVertical != 0) {
+			_y += _verticalMove;
+			moved = true;
+		}
 	}
-	if (_horizontalMove != 0 || _verticalMove != 0) {
+	if (_horizontalMove != 0.f) {
+		auto testHorizontal = _room->getPixel(_x + _horizontalMove, _y);
+		if (testHorizontal != 0) {
+			_x += _horizontalMove;
+			moved = true;
+		}
+	}
+//
+//
+//
+//	auto test = _room->getPixel(_x + _horizontalMove, _y + _verticalMove);
+//	if (test != 0) {
+//		_x += _horizontalMove;// * _speed * timestep;
+//		_y += _verticalMove;// * _speed * timestep;
+//	}
+	if (moved) {
 		computePriority();
-		std::cout << _x <<", " << _y << ", " << _priority << "\n";
+		//std::cout << _x <<", " << _y << ", " << _priority << "\n";
 	}
 	// animate
 	auto px = _room->getPixel(1, 1);
