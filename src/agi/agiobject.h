@@ -15,6 +15,14 @@ namespace agi {
 		void computePriority();
 
 		void customUpdate(double) override;
+
+		void setView(const std::string&);
+
+		void stopMotion();
+
+		void startMotion();
+
+		void setEndOfLoop(pybind11::function);
 	private:
 		float _x;
 		float _y;
@@ -35,7 +43,15 @@ namespace agi {
 		const static std::unordered_map<int, int> _keyDir;
 		bool _hasUpDownAnim;
 		bool _hasLeftAnim;
+		bool _motion;
 	};
 
+	inline void AGIObject::startMotion() {
+		_motion = true;
+	}
+
+	inline void AGIObject::stopMotion() {
+		_motion = false;
+	}
 
 }

@@ -17,14 +17,14 @@ void SkeletalModel::setMesh(int jointId, std::shared_ptr<Mesh> mesh) {
     _jointInfos[jointId].mesh = mesh;
 }
 
-int SkeletalModel::addJoint(const std::string& name, int parent, glm::vec2 position) {
+int SkeletalModel::addJoint(const std::string& name, int parent, IVec2 position) {
     JointInfo info;
     info.id = _jointInfos.size();
     info.parent = parent;
     info.mesh = nullptr;
     JointTransform tr;
     tr.scale = glm::vec3(1.f);
-    tr.translation = glm::vec3(position, 0.0f);
+    tr.translation = glm::vec3(position.x, position.y, 0.0f);
     info.restTransform = tr;
     info.weightIndex = glm::ivec3(info.id, parent, 0);
     _jointInfos.push_back(info);
@@ -47,8 +47,10 @@ void SkeletalModel::init() {
     }
 }
 
-SkeletalModel::SkeletalModel() : IModel(), _shaderId(70) {
-    JointInfo info(0, -1, "root", {0,0,0});
+SkeletalModel::SkeletalModel(int camId) : IModel(), _currentAnimation(nullptr), _camId(camId), _animationTime(0.f) {
+	_cam = Game::instance().getRoom()->getCamera(_camId);
+	_shaderId = 70;
+	JointInfo info(0, -1, "root", {0,0,0});
     _jointInfos.push_back(info);
     _jointNameToId["root"] = 0;
     auto& game = Game::instance();
@@ -56,12 +58,20 @@ SkeletalModel::SkeletalModel() : IModel(), _shaderId(70) {
         auto* shader = Game::instance().getShader(_shaderId);
         game.getRoom()->addShader(shader);
     }
+	_shader = Game::instance().getShader(_shaderId);
+	_modelLocation = glGetUniformLocation(_shader->getProgId(), "model");
+	_viewLocation = glGetUniformLocation(_shader->getProgId(), "view");
+	_projLocation = glGetUniformLocation(_shader->getProgId(), "projection");
+	_boneLocation = glGetUniformLocation(_shader->getProgId(), "Bone");
+	_l2mLocation = glGetUniformLocation(_shader->getProgId(), "local_to_model");
+	_weightIndexLocation = glGetUniformLocation(_shader->getProgId(), "weightIndex");
+	_zLocation = glGetUniformLocation(_shader->getProgId(), "z");
 
 }
 
-std::shared_ptr<IRenderer> SkeletalModel::getRenderer(int batchId) {
-    return std::make_shared<SkeletalRenderer>(this);
-}
+//std::shared_ptr<IRenderer> SkeletalModel::getRenderer(int batchId) {
+//    return std::make_shared<SkeletalRenderer>(this);
+//}
 
 
 
@@ -194,3 +204,96 @@ std::pair<int, int> SkeletalModel::getDebugShape(const std::string &anim, int n)
     auto shapeId = it->second[n];
     return m_shapeInfo[shapeId];
 }*/
+
+
+void SkeletalModel::updateImpl() {
+//	if (!_started) {
+//		return;
+//	}
+	auto dt = 1./60.;
+	std::unordered_map<int, JointTransform> pose;
+	if (_currentAnimation != nullptr) {
+		_animationTime += static_cast<float>(dt);
+		if (_animationTime >= _currentAnimation->getLength()) {
+			//m_complete = true;
+			//if (_currentAnimation->loop()) {
+			_animationTime = fmod(_animationTime, _currentAnimation->getLength());
+			//}  else {
+			//    _animationTime = _currentAnimation->getLength() - 0.001f;
+			//}
+		}
+		// compute current pose
+		auto frames = _currentAnimation->getPreviousAndNextKeyFrames(_animationTime);
+		pose = interpolatePoses(std::get<0>(frames), std::get<1>(frames), std::get<2>(frames));
+	}
+
+	_bones = calculateCurrentPose(pose);
+	//draw();
+	// apply offset
+//    const auto& offsetPoints = _skeletalModel->getOffsetPoints();
+//    if (!offsetPoints.empty()) {
+//        glm::vec3 offset(0.0f);
+//        //std::cout << "no of offset points: " << offsetPoints.size() << "\n";
+//        for (const auto &a : offsetPoints) {
+//            // find coordinates of offset pointg
+//            glm::vec4 p = _bones[a.first] * glm::vec4(a.second, 1.0f);
+//            offset.y = std::max(-p.y, offset.y);
+//        }
+//        //std::cerr << offset.y << "\n";
+//        setTransform(glm::translate(offset));
+//    }
+}
+
+
+std::unordered_map<int, JointTransform> SkeletalModel::interpolatePoses(
+		KeyFrame* previousFrame, KeyFrame* nextFrame, float progression) {
+	std::unordered_map<int, JointTransform> currentPose;
+	const auto& nf = nextFrame->getJointKeyFrames();
+	for (const auto& p : previousFrame->getJointKeyFrames()) {
+		// the model might not have this joint ... in this case nothing to do
+		int jointId = getJointId(p.first);
+		if (jointId == -1) {
+			continue;
+		}
+
+		// previousTransform is p.second
+		JointTransform nextTransform = nf.at(p.first);
+		//JointTransform currentTransform = m_model->getRestTransform(p.first);
+		auto localTransform = JointTransform::interpolate(p.second, nextTransform, progression);
+		//currentTransform += JointTransform::interpolate(p.second, nextTransform, progression);
+		//currentTransform.z = 0;
+		//std::cout << m_animationTime << " . " << currentTransform.alpha << "\n";
+		currentPose.insert(std::make_pair(jointId, localTransform));
+	}
+	return currentPose;
+}
+
+void SkeletalModel::draw() {
+	auto w = _node->getWorldMatrix();
+	auto pm = _cam->getProjectionMatrix();
+	auto vm = _cam->getViewMatrix();
+	glUniformMatrix4fv(_modelLocation, 1, false, &w[0][0]);
+	glUniformMatrix4fv(_viewLocation, 1, false, &vm[0][0]);
+	glUniformMatrix4fv(_projLocation, 1, false, &pm[0][0]);
+
+	glUniformMatrix4fv(_boneLocation, _bones.size(), false, &_bones[0][0][0]);
+
+			//for (const auto& model : _skeletalModel->getModels()) {
+	for (size_t n = 0; n < getJointCount(); ++n) {
+		const auto &jinfo = getJointInfo(n);
+		auto restTransform = getRestTransform(n);
+
+		auto weightIndices = jinfo.weightIndex;// m_skeletalModel->getWeightIndex(n++);
+		glUniformMatrix4fv(_l2mLocation, 1, false, &restTransform[0][0]);
+		glUniform3iv(_weightIndexLocation, 1, &weightIndices[0]);
+		glUniform1f(_zLocation, jinfo.z);
+		if (jinfo.mesh != nullptr) {
+			jinfo.mesh->draw(_shader);
+		}
+	}
+
+}
+
+void SkeletalModel::setAnimation(const std::string & id) {
+	_currentAnimation = getAnimation(id);
+}

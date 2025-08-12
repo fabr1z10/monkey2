@@ -7,6 +7,7 @@
 
 class SkeletalAnimation {
 public:
+	SkeletalAnimation(const std::string& file);
     SkeletalAnimation();
 
     /**
@@ -23,6 +24,7 @@ public:
     const std::vector<std::pair<float, float>>& getAttacks() const;
     //std::unordered_map<std::string, glm::mat4> getAnimTransform(float, SkModel*);
 private:
+
     float m_length;
     std::vector<std::shared_ptr<KeyFrame>> _keyFrames;
 };

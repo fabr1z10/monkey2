@@ -13,8 +13,31 @@ const std::unordered_map<int, int> AGIObject::_keyDir = {
 };
 
 
+void AGIObject::setEndOfLoop(pybind11::function f) {
+	auto * tm = dynamic_cast<models::TileMap*>(_model.get());
+	tm->setEndOfLoop(f);
+}
+void AGIObject::setView(const std::string & viewId) {
+	auto* batch = dynamic_cast<QuadBatchPalette*>(_room->getBatch(1));
+	std::string currentAnimation;
+	if (_model) {
+		currentAnimation = _model->getAnimation();
+	}
+
+	auto model = batch->getSpriteSheet()->makeSprite(1, viewId);
+	this->setModel(model);
+
+	if (!currentAnimation.empty() && model->hasAnimation(currentAnimation)) {
+		model->setAnimation(currentAnimation);
+		//model->updateImpl();
+	}
+	model->updateImpl();
+
+
+}
+
 AGIObject::AGIObject(const std::string &viewId, int x, int y, float speed) : Node(), _x(x), _y(y), _horizontalMove(0), _verticalMove(0),
-_refresh(5), _ticks(0), _accumulatedTime(0.), _speed(speed), _dir(0) {
+_refresh(5), _ticks(0), _accumulatedTime(0.), _speed(speed), _dir(0), _motion(true) {
 
 	_room = dynamic_cast<agi::AGIRoom*>(Game::instance().getRoom());
 	auto* batch = dynamic_cast<QuadBatchPalette*>(_room->getBatch(1));
@@ -55,6 +78,8 @@ void AGIObject::computePriority() {
 
 
 void AGIObject::customUpdate(double dt) {
+
+	if (!_motion) return;
 	auto upDown = glfwGetKey(window, GLFW_KEY_UP);
 	auto downDown = glfwGetKey(window, GLFW_KEY_DOWN);
 	auto leftDown = glfwGetKey(window, GLFW_KEY_LEFT);

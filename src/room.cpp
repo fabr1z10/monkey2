@@ -112,24 +112,32 @@ void Room::draw() {
 	for (size_t i = 0; i< _shaders.size(); ++i) {
 		_shaders[i]->use();
         glViewport(0,0,deviceSize.x, deviceSize.y);
-		for (const auto& b : _batches[i]) {
-			b->setupUniforms(_shaders[i]);
-			b->draw();
+		if (_batches[i].size() > 0) {
+			for (const auto &b: _batches[i]) {
+				b->setupUniforms(_shaders[i]);
+				b->draw();
+			}
+		} else {
+
+			// disable this if batch only mode
+			std::list<Node *> li{_root.get()};
+
+			while (!li.empty()) {
+				auto current = li.front();
+				li.pop_front();
+				auto model = current->getModel();
+				if (model != nullptr && model->getShaderId() == _shaders[i]->getId()) {
+					model->draw();
+				}
+
+				//    auto* r = current->getRenderer();
+				//    if (r != nullptr) r->draw(_shaders[i]);
+
+				std::transform(current->getChildren().begin(), current->getChildren().end(), std::back_inserter(li),
+							   [](const std::shared_ptr<Node> &ptr) { return ptr.get(); });
+
+			}
 		}
-
-        // disable this if batch only mode
-        //std::list<Node*> li{_root.get()};
-
-        //while (!li.empty()) {
-        //    auto current = li.front();
-        //    li.pop_front();
-        //    auto* r = current->getRenderer();
-        //    if (r != nullptr) r->draw(_shaders[i]);
-
-        //    std::transform(current->getChildren().begin(), current->getChildren().end(), std::back_inserter(li),
-        //                   [](const std::shared_ptr<Node>& ptr) { return ptr.get(); });
-
-        //}
 
 
 

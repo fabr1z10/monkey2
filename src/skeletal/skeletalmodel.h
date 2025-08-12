@@ -25,8 +25,10 @@ struct JointInfo {
 class SkeletalModel : public IModel  {
 public:
     // every skeletal model has by default a root joint (0)
+	SkeletalModel(int camId);
 
-    int addJoint(const std::string& joint, int parent, glm::vec2 position);
+    int addJoint(const std::string& joint, int parent, IVec2 position);
+	void setAnimation(const std::string&) override;
 
     void setMesh(int jointId, std::shared_ptr<Mesh>);
 
@@ -36,14 +38,14 @@ public:
 
     void setDefaultAnimation(const std::string&);
 
-    SkeletalModel();
-    int getPrimitiveCount() const override {return 0;}
+	void setVisible(bool) override {}
+    //int getPrimitiveCount() const override {return 0;}
 //
     void init();
     std::vector<glm::mat4> calculateCurrentPose(std::unordered_map<int, JointTransform>& pose);
     const std::vector<std::pair<int, glm::vec3>>& getOffsetPoints() const;
     int getJointId(const std::string&);
-    std::shared_ptr<IRenderer> getRenderer(int batchId) override;
+    //std::shared_ptr<IRenderer> getRenderer(int batchId) override;
     //const std::vector<std::shared_ptr<Mesh>>& getModels() const;
     SkeletalAnimation* getAnimation(const std::string& id);
     /**
@@ -68,8 +70,14 @@ public:
     //std::shared_ptr<Model> generateDebugModel();
 
     std::pair<int, int> getDebugShape(const std::string& anim, int attack);
+
+	void draw() override;
 private:
-    //std::shared_ptr<Shape> getRect(int mode, int, int, int, int);
+	void updateImpl() override;
+	std::unordered_map<int, JointTransform> interpolatePoses(
+			KeyFrame* previousFrame, KeyFrame* nextFrame, float progression);
+
+	//std::shared_ptr<Shape> getRect(int mode, int, int, int, int);
 
     void computeOffset();
     std::vector<JointInfo> _jointInfos;
@@ -93,7 +101,24 @@ private:
     //Bounds m_staticBounds;
     std::vector<std::pair<int, int>> m_shapeInfo;
     float m_halfThickness;
-    int _shaderId;
+
+
+
+	// current animation
+	SkeletalAnimation* _currentAnimation;
+	float _animationTime;
+	std::vector<glm::mat4> _bones;
+	Shader* _shader;
+	int _modelLocation;
+	int _viewLocation;
+	int _projLocation;
+	int _boneLocation;
+	int _l2mLocation;
+	int _weightIndexLocation;
+	int _zLocation;
+	Camera* _cam;
+	int _camId;
+
 };
 
 inline int SkeletalModel::getShaderId() const {

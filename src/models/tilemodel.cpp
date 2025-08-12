@@ -17,7 +17,7 @@ void TileMap::setOffset(glm::vec2 offset) {
 	}
 }
 TileMap::TileMap(int batchId, int n) : Model<VertexPalette>(batchId), _currentFrame(0), _currentTick(0),
-	_offset(0.f), _quadCount(n), _autoDraw(true) {
+	_offset(0.f), _quadCount(n), _autoDraw(true), _firstCallToSet(true) {
 	allocate(n);
 	auto batch = dynamic_cast<QuadBatchPalette*>(_batch);
 	if (batch == nullptr) {
@@ -58,10 +58,14 @@ glm::vec2 TileMap::getBonePosition(int boneId) const {
 	return _quads[frame.quads[0].id].bones[boneId];
 }
 
+void TileMap::setEndOfLoop(pybind11::function f) {
+	_endOfLoop = f;
+}
 void TileMap::updateImpl() {
 	auto& anim = _animations.at(_currentAnimation);
 	auto& frame = anim.getFrame(_currentFrame);
 	bool refreshModel = _node->hasMoved();
+	bool eol{false};
 	if (frame.ticks != 0) {
 		// if ticks is 0, then no animation!
 		_currentTick++;
@@ -71,7 +75,8 @@ void TileMap::updateImpl() {
 			_currentTick = 0;
 			_currentFrame++;
 			if (_currentFrame >= anim.getFrameCount()) {
-				_currentFrame = 0;
+				_currentFrame = anim.getLoopFrame();
+				eol = true;
 			}
 			auto& newFrame = anim.getFrame(_currentFrame);
 			for (int i = 0; i < _quadCount; ++i) {
@@ -87,15 +92,21 @@ void TileMap::updateImpl() {
 	if (refreshModel) {
 		draw();
 	}
+	// if end of loop --> callback
+	if (eol && _endOfLoop) {
+		_endOfLoop();
+	}
+
 }
 
 
 void TileMap::setAnimation(const std::string & id) {
-	if (_currentAnimation != id) {
+	if (_currentAnimation != id || _firstCallToSet) {
 		M_Assert(_animations.count(id) > 0, "Animation: " + id + " does not exist!");
 		_currentAnimation = id;
 		_currentTick = 0;
 		_currentFrame = 0;
+		_firstCallToSet = false;
 		draw();
 	}
 }

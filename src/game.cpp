@@ -1,6 +1,5 @@
 #include "game.h"
 #include "error.h"
-#include "pyhelper.h"
 #include "util.h"
 #include <iostream>
 #include <filesystem>

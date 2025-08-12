@@ -19,8 +19,8 @@
 #include "vec.h"
 #include "multisprite.h"
 
-//#include "skeletal/mesh.h"
-//#include "skeletal/skeletalmodel.h"
+#include "skeletal/mesh.h"
+#include "skeletal/skeletalmodel.h"
 
 #include "adventure/walkarea.h"
 #include "adventure/mousecontroller.h"
@@ -146,6 +146,7 @@ PYBIND11_MODULE(monkey2, m) {
 	m.attr("Color").attr("BLACK") = Color(0.0f, 0.0f, 0.0f, 1.0f);
 	m.attr("Color").attr("RED") = Color(1.0f, 0.0f, 0.0f, 1.0f);
 
+	py::class_<models::Frame>(m, "_Frame");
 
 	py::class_<models::Animation>(m, "Animation")
 		.def(py::init<>())
@@ -255,6 +256,7 @@ PYBIND11_MODULE(monkey2, m) {
         .def("addComponent", &Node::addComponent)
         .def("getPosition", &Node::getWorldPosition)
         .def("setPosition", &Node::setPosition)
+		.def("setScale", &Node::setScale)
         .def("setMultiplyColor", &Node::setMultiplyColor)
         .def("flipX", &Node::flipHorizontal)
         .def("clear", &Node::clear);
@@ -381,23 +383,25 @@ PYBIND11_MODULE(monkey2, m) {
 //        .def(py::init<glm::vec3, glm::vec3, float>(), py::arg("direction"), py::arg("color"), py::arg("ambient"));
 
     // ------------ skeletal
-//    py::class_<Mesh, std::shared_ptr<Mesh>>(m, "Mesh")
-//        .def(py::init<const std::vector<float>&, const std::vector<unsigned>&, const std::string&>());
-//
-//    py::class_<SkeletalModel, IModel, std::shared_ptr<SkeletalModel>>(m, "SkeletalModel")
-//        .def(py::init<>())
-//        .def("addJoint", &SkeletalModel::addJoint)
-//        .def("setMesh", &SkeletalModel::setMesh)
-//        .def("setDefaultAnimation", &SkeletalModel::setDefaultAnimation)
-//        .def("addAnimation", &SkeletalModel::addAnimation);
-//
-//    py::class_<KeyFrame, std::shared_ptr<KeyFrame>>(m, "KeyFrame")
-//        .def(py::init<float>())
-//        .def("addJoint", &KeyFrame::addJointInfo);
-//
-//    py::class_<SkeletalAnimation, std::shared_ptr<SkeletalAnimation>>(m, "SkeletalAnimation")
-//        .def(py::init<>())
-//        .def("addKeyFrame", &SkeletalAnimation::addKeyFrame);
+    py::class_<Mesh, std::shared_ptr<Mesh>>(m, "Mesh")
+        .def(py::init<const std::vector<float>&, const std::vector<unsigned>&, const std::string&>());
+
+    py::class_<SkeletalModel, IModel, std::shared_ptr<SkeletalModel>>(m, "SkeletalModel")
+        .def(py::init<int>(), py::arg("camId"))
+        .def("addJoint", &SkeletalModel::addJoint)
+        .def("setMesh", &SkeletalModel::setMesh)
+        .def("setDefaultAnimation", &SkeletalModel::setDefaultAnimation)
+		.def("init", &SkeletalModel::init)
+        .def("addAnimation", &SkeletalModel::addAnimation);
+
+    py::class_<KeyFrame, std::shared_ptr<KeyFrame>>(m, "KeyFrame")
+        .def(py::init<float>())
+        .def("addJoint", &KeyFrame::addJointInfo);
+
+    py::class_<SkeletalAnimation, std::shared_ptr<SkeletalAnimation>>(m, "SkeletalAnimation")
+        .def(py::init<>())
+		.def(py::init<const std::string&>())
+        .def("addKeyFrame", &SkeletalAnimation::addKeyFrame);
 
     py::class_<Action, std::shared_ptr<Action>>(m, "_Action");
 
@@ -499,12 +503,26 @@ PYBIND11_MODULE(monkey2, m) {
 	 * AGI
 	 */
 	py::class_<agi::AGIRoom, Room, std::shared_ptr<agi::AGIRoom>>(mAGI, "Room")
-		.def(py::init<const std::string&, const std::string&>())
+		.def(py::init<int, const std::string&, const std::string&>())
 		.def("add", &agi::AGIRoom::add)
-		.def("print", &agi::AGIRoom::print);
+		.def("addSaid", &agi::AGIRoom::addSaid)
+		.def("print", py::overload_cast<const std::string&>(&agi::AGIRoom::print))
+		.def("print", py::overload_cast<int, int>(&agi::AGIRoom::print))
+		.def("showObject", &agi::AGIRoom::showObject)
+		.def("quit", &agi::AGIRoom::quit)
+		.def("getVar", &agi::AGIRoom::getVar)
+		.def("setVar", &agi::AGIRoom::setVar)
+		.def("isSet", &agi::AGIRoom::isSet)
+		.def("setFlag", &agi::AGIRoom::setFlag)
+		.def("resetFlag", &agi::AGIRoom::resetFlag)
+		.def("toggleFlag", &agi::AGIRoom::toggleFlag);
 
 	py::class_<agi::AGIObject, Node, std::shared_ptr<agi::AGIObject>>(mAGI, "Object")
-		.def(py::init<const std::string&, int, int, float>());
+		.def(py::init<const std::string&, int, int, float>())
+		.def("start_motion", &agi::AGIObject::startMotion)
+		.def("stop_motion", &agi::AGIObject::stopMotion)
+		.def("set_view", &agi::AGIObject::setView)
+		.def("set_end_of_loop", &agi::AGIObject::setEndOfLoop);
 
 
 }

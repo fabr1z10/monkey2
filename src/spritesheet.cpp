@@ -320,6 +320,7 @@ std::shared_ptr<models::TileMap> SpriteSheet::makeSprite(int batch, const std::s
 		for (const auto& a : spriteSource["animations"]) {
 			auto name = a.first.as<std::string>();
 			models::Animation anim;
+			anim.setLoopFrame(a.second["loop"].as<int>(0));
 			for (const auto& frame : a.second["frames"]) {
 				models::Frame f(frame["ticks"].as<int>(_defaultTicks));
 				M_Assert(frame["q"].size() == quadCount, std::string("Sprite " + id + " should have " + std::to_string(quadCount) + " quads per frame."));

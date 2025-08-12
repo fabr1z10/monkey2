@@ -8,6 +8,7 @@
 #include "keylistener.h"
 #include "mouselistener.h"
 #include <pybind11/pybind11.h>
+#include "pyhelper.h"
 
 class Game {
 public:
@@ -56,6 +57,13 @@ public:
     bool started() const;
 
     std::string getWorkingDirectory() const;
+
+	template<typename T>
+	T getValue(const std::string& id) {
+		return py_get<T>(_settings, id);
+	}
+
+	void shutdown();
 private:
     std::string getPythonScriptDirectory();
 	void loadRoom();
@@ -110,4 +118,8 @@ inline bool Game::started() const {
 
 inline std::string Game::getWorkingDirectory() const {
     return _cwd;
+}
+
+inline void Game::shutdown() {
+	_shutdown = true;
 }

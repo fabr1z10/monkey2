@@ -31,9 +31,22 @@ namespace models {
 		int getFrameCount() const;
 
 		const Frame& getFrame(int) const;
+
+		void setLoopFrame(int);
+
+		int getLoopFrame() const;
 	private:
 		std::vector<Frame> _frames;
+		int _loopFrame{};
 	};
+
+	inline void Animation::setLoopFrame(int value) {
+		_loopFrame = value;
+	}
+
+	inline int Animation::getLoopFrame() const {
+		return _loopFrame;
+	}
 
 	inline int Animation::getFrameCount() const {
 		return _frames.size();
@@ -75,6 +88,8 @@ namespace models {
 
 		void draw() override;
 
+		void setEndOfLoop(pybind11::function f);
+
 		std::string getAnimation() override;
 
 		void setAnimation(const std::string&) override;
@@ -94,6 +109,8 @@ namespace models {
 		int _currentTick;
 		glm::vec2 _offset;
 		bool _autoDraw;
+		pybind11::function _endOfLoop;
+		bool _firstCallToSet;
 
 
 

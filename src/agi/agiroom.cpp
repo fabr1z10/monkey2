@@ -6,21 +6,134 @@
 #include "../game.h"
 #include "../models/quad.h"
 #include "../models/linemodel.h"
+#include <filesystem> // C++17
+#include <cctype>
+#include <fstream>
 
+namespace fs = std::filesystem;
 using namespace agi;
+
+extern GLFWwindow * window;
+
+std::shared_ptr<AGIContext> AGIRoom::_agi;
+
+
+AGIContext::AGIContext() {
+	auto dirPath = Game::instance().getWorkingDirectory() + "/assets/messages";
+
+	for (const auto &entry : fs::directory_iterator(dirPath)) {
+		if (!entry.is_regular_file()) continue;
+
+		// filename as int (room number)
+		std::string filename = entry.path().filename().string();
+		// skip files whose names are not numeric
+		if (!std::all_of(filename.begin(), filename.end(), ::isdigit))
+			continue;
+		int roomNumber = std::stoi(filename);
+
+		std::ifstream file(entry.path());
+		if (!file) {
+			std::cerr << "Cannot open file: " << entry.path() << "\n";
+			continue;
+		}
+
+		std::string line;
+		while (std::getline(file, line)) {
+			std::istringstream iss(line);
+			int number;
+			char colon;
+			std::string text;
+
+			if (iss >> number >> colon && colon == ':' && std::getline(iss >> std::ws, text)) {
+				_messages[roomNumber][number] = text;
+			}
+		}
+	}
+
+	// Example: print everything
+	for (auto &[room, innerMap] : _messages) {
+		std::cout << "Room " << room << ":\n";
+		for (auto &[num, str] : innerMap) {
+			std::cout << "  " << num << ": " << str << "\n";
+		}
+	}
+	//exit(1);
+}
+
+bool AGIContext::isSet(int id) const {
+	return _flags[id];
+}
+
+void AGIContext::setFlag(int id) {
+	_flags[id]= true;
+}
+
+void AGIContext::resetFlag(int id) {
+	_flags[id]= false;
+}
+
+void AGIContext::toggleFlag(int id) {
+	_flags[id] = !_flags[id];
+}
+
+int AGIContext::getVar(int id) const {
+	return _variables[id];
+}
+
+void AGIContext::setVar(int id, int value) {
+	_variables[id] = value;
+}
+
+std::string AGIContext::getMessage(int room, int msgId) {
+	return _messages.at(room).at(msgId);
+}
 
 void AGIRoom::pause(bool value) {
 	if (!value && _message != nullptr) {
 		_message->remove();
 		_message = nullptr;
+		if (_objShow != nullptr) {
+			_objShow->remove();
+			_objShow = nullptr;
+		}
 	}
 	_paused = value;
 	_mainNode->setActive(!value);
 }
 
+void AGIRoom::quit() {
+	_quitRequested = true;
+	print(_quitMessage);
+}
 
-AGIRoom::AGIRoom(const std::string &pic, const std::string &spritesheet) : Room(), KeyboardListener(), _cursorChar("_"),
-	_paused(false), _message(nullptr) {
+
+void AGIRoom::addSaid(const std::vector<int> &ids, pybind11::function f) {
+	Trie* current = _parserRoot.get();
+	for (const auto& gid : ids) {
+		// check if we already have it
+		auto iter = current->groupIds.find(gid);
+		if (iter != nullptr) {
+			current = iter->second.get();
+		} else {
+			// create a new one
+			auto tr = std::make_shared<Trie>();
+			current->groupIds[gid] = tr;
+			current = tr.get();
+		}
+	}
+	current->script = f;
+
+}
+
+AGIRoom::AGIRoom(int id, const std::string &pic, const std::string &spritesheet) : Room(), KeyboardListener(), _cursorChar("_"),
+	_paused(false), _message(nullptr), _objShow(nullptr), _quitRequested(false), _textMaxLength(30) {
+
+	if (!_agi) {
+		_agi = std::make_shared<AGIContext>();
+	}
+	_agi->setVar(0, id);
+
+	std::cout << "Room created\n";
 
 	_egaPal[4] = Color("#aa0000");
 
@@ -62,6 +175,8 @@ AGIRoom::AGIRoom(const std::string &pic, const std::string &spritesheet) : Room(
 	_mainNode = main.get();
 	_uiNode = ui.get();
 	_parserRoot = std::make_shared<Trie>();
+
+	_quitMessage = Game::instance().getValue<std::string>("quitMessage");
 }
 
 
@@ -115,6 +230,12 @@ int AGIRoom::keyCallback(GLFWwindow *, int key, int scancode, int action, int mo
 		_txtCommand->updateText(s);
 	} else {
 		if (action == GLFW_PRESS && (key == GLFW_KEY_ENTER || key == GLFW_KEY_ESCAPE)) {
+			if (_quitRequested && key == GLFW_KEY_ENTER) {
+				//Game::instance().shutdown();
+				glfwSetWindowShouldClose(window, GLFW_TRUE);
+				Game::instance().closeRoom();
+			}
+			_quitRequested = false;
 			pause(false);
 		}
 	}
@@ -148,9 +269,11 @@ void AGIRoom::parseCommand(const std::string& command) {
 	while (i < gIds.size()) {
 		auto it = t->groupIds.find(gIds[i]);
 		if (it == t->groupIds.end()) {
-			// not found, exit
-			t = nullptr;
-			break;
+			// not found, try anyword
+			if (t->groupIds.count(1) == 0) {
+				t = nullptr;
+				break;
+			}
 		}
 		// increase i
 		i++;
@@ -160,6 +283,10 @@ void AGIRoom::parseCommand(const std::string& command) {
 		auto culpritWord = words[i];
 		std::cout << "Don't know " + culpritWord << "\n";
 		print("I don't understand \"" + culpritWord + "\".");
+	} else {
+		if (t->script) {
+			t->script(this);
+		}
 	}
 }
 
@@ -174,8 +301,24 @@ std::vector<std::string> AGIRoom::splitBySpace(const std::string &str) {
 	return tokens;
 }
 
+void AGIRoom::print(int room, int msgId) {
+	print(_agi->getMessage(room, msgId));
+}
+
+void AGIRoom::showObject(int objId) {
+	auto* batch = dynamic_cast<QuadBatchPalette*>(getBatch(1));
+	auto model = batch->getSpriteSheet()->makeSprite(1, std::to_string(objId));
+	auto node = std::make_shared<Node>();
+	node->setModel(model);
+	node->setPosition(Vec3(80, 0, 0));
+	_mainNode->add(node);
+	_objShow = node.get();
+	print(65536, objId);
+
+}
+
 void AGIRoom::print(const std::string & pippo) {
-	auto wrappedText = wrapText(pippo, 20);
+	auto wrappedText = wrapText(pippo, _textMaxLength);
 	auto text = std::make_shared<Text>(2, "sierra", wrappedText, 1,
 									   HAlign::LEFT, 0.f, Vec2(-0.5f, -0.5f));
 	text->setPosition(Vec3(160, 100, 0));
@@ -247,4 +390,29 @@ std::string AGIRoom::wrapText(const std::string &text, size_t maxLen) {
 	}
 
 	return result;
+}
+
+
+bool AGIRoom::isSet(int id) const {
+	return _agi->isSet(id);
+}
+
+void AGIRoom::setFlag(int id) {
+	_agi->setFlag(id);
+}
+
+void AGIRoom::resetFlag(int id) {
+	_agi->resetFlag(id);
+}
+
+void AGIRoom::toggleFlag(int id) {
+	_agi->toggleFlag(id);
+}
+
+int AGIRoom::getVar(int id) const {
+	return _agi->getVar(id);
+}
+
+void AGIRoom::setVar(int id, int value) {
+	_agi->setVar(id, value);
 }

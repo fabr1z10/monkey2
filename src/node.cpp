@@ -199,6 +199,13 @@ void Node::setPosition(Vec3 pos) {
     notifyMove();
 }
 
+void Node::setScale(float scale) {
+	_modelMatrix[0][0] = scale;
+	_modelMatrix[1][1] = scale;
+	_modelMatrix[2][2] = scale;
+	notifyMove();
+}
+
 
 
 void Node::flipHorizontal(bool value) {

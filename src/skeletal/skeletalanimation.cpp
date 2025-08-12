@@ -1,4 +1,33 @@
 #include "skeletalanimation.h"
+#include "../game.h"
+#include "../error.h"
+#include <yaml-cpp/yaml.h>
+
+SkeletalAnimation::SkeletalAnimation(const std::string &file) {
+	auto assetPath = Game::instance().getWorkingDirectory() + "/assets/";
+	try {
+		YAML::Node inputData = YAML::LoadFile(assetPath + file);
+		auto duration = inputData["duration"].as<float>();
+		for (const auto& kf : inputData["key_frames"]) {
+			auto pct = kf["pct"].as<float>();
+			auto keyFrame = std::make_shared<KeyFrame>(pct * duration);
+			for (const auto& b : kf["bones"]) {
+				auto boneId = b.first.as<std::string>();
+				auto data = b.second.as<std::vector<float>>();
+				keyFrame->addJointInfo(boneId, Vec3(data[0], data[1], data[2]), data[3]);
+			}
+			this->addKeyFrame(keyFrame);
+		}
+		auto endFrame = std::shared_ptr<KeyFrame>(new KeyFrame(*_keyFrames[0].get()));
+		endFrame->setTimeStamp(duration);
+		this->addKeyFrame(endFrame);
+
+
+
+	} catch (const YAML::BadFile& e) {
+		GLIB_FAIL("Failed to open " + file);
+	}
+}
 
 
 void SkeletalAnimation::addKeyFrame(std::shared_ptr<KeyFrame> keyframe) {

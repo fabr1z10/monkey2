@@ -4,6 +4,18 @@
 #include "error.h"
 #include <iostream>
 
+std::unordered_map<std::string, std::shared_ptr<Tex>> Tex::_textures;
+
+
+GLuint Tex::getTexture(const std::string &file) {
+	auto it = _textures.find(file);
+	if (it == _textures.end()) {
+		auto t = std::shared_ptr<Tex>(new Tex(file));
+		_textures[file] = t;
+		return t->_texId;
+	}
+	return it->second->_texId;
+}
 
 
 Tex::Tex(const std::string &filePath) {

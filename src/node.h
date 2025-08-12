@@ -45,6 +45,8 @@ public:
 
     void setPosition(Vec3);
 
+	void setScale(float);
+
     void move(glm::vec2);
 
     void flipHorizontal(bool);

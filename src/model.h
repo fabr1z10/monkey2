@@ -31,9 +31,11 @@ public:
 	virtual void setPalette(int) {}
 
 	void setUpdate(bool);
+
+	int getShaderId() const {return _shaderId;}
 protected:
 	virtual void updateImpl() = 0;
-
+	int _shaderId;
 	Node* _node;
 	bool _update;
 };
@@ -49,6 +51,7 @@ public:
     Model(int batchId) : IModel(), _vertices(nullptr) {
 		// get the batch
 		_batch = dynamic_cast<Batch<VERTEX>*>(Game::instance().getRoom()->getBatch(batchId));
+		_shaderId = _batch->getShaderType();
 		if (_batch == nullptr) {
 			GLIB_FAIL("[BATCH] Batch does not exist or doesn't match with vertex definition.");
 		}
